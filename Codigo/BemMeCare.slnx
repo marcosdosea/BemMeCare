@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BemMeCareWeb/BemMeCareWeb.csproj" />
+  <Project Path="Core/Core.csproj" />
+</Solution>
