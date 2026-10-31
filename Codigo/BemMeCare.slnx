@@ -1,4 +1,7 @@
 <Solution>
   <Project Path="BemMeCareWeb/BemMeCareWeb.csproj" />
+  <Project Path="BemMeCareWebTests/BemMeCareWebTests.csproj" Id="67bc3124-7028-45b5-aa76-1a48dccc33fa" />
   <Project Path="Core/Core.csproj" />
+  <Project Path="Service/Service.csproj" Id="eeff6696-c8cc-42e7-ae55-90becaa4fc8f" />
+  <Project Path="ServiceTests/ServiceTests.csproj" Id="739219c7-0d66-488c-af86-8f66f1723ee9" />
 </Solution>
