@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BemMeCareWeb.Models;
 
-public class CategoriaModel
+public class CategoriaViewModel
 {
     [Display(Name = "Código")]
     [Required(ErrorMessage = "Código da categoria é obrigatório")]
