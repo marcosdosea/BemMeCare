@@ -4,7 +4,7 @@ using Mapster;
 
 namespace BemMeCareWeb.Mappers;
 
-public static class CategoriaProfile
+public static class CategoriaMapper
 {
     public static CategoriaViewModel ToViewModel(this Categorium categoria)
     {
