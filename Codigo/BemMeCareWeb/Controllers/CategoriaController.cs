@@ -84,7 +84,7 @@ namespace BemMeCareWeb.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(CategoriaViewModel categoriaViewModel)
         {
-            categoriaService.Delete(categoriaViewModel.IdCategoria);
+            categoriaService.Delete(categoriaViewModel.Id);
             return RedirectToAction(nameof(Index));
         }
     }

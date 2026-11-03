@@ -6,7 +6,7 @@ public class CategoriaViewModel
 {
     [Display(Name = "Código")]
     [Required(ErrorMessage = "Código da categoria é obrigatório")]
-    public uint IdCategoria { get; set; }
+    public uint Id { get; set; }
     
     [Display(Name = "Código do estbelecimento")]
     [Required(ErrorMessage = "Código do estabelecimento é obrigatório")]
