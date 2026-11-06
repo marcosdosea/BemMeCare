@@ -6,24 +6,24 @@ namespace BemMeCareWeb.Mappers;
 
 public static class PessoaMapper
 {
-    public static PessoaViewModel ToViewModel(this Pessoa pessoa)
+    public static PessoaViewModel ToViewModel(Pessoa pessoa)
     {
         return pessoa.Adapt<PessoaViewModel>();
     }
 
-    public static Pessoa ToEntity(this PessoaViewModel viewModel)
+    public static Pessoa ToEntity(PessoaViewModel pessoaViewModel)
     {
-        return viewModel.Adapt<Pessoa>();
+        return pessoaViewModel.Adapt<Pessoa>();
     }
 
-    public static IEnumerable<PessoaViewModel> ToViewModel(this IEnumerable<Pessoa> pessoas)
+    public static IEnumerable<PessoaViewModel> ToViewModel(IEnumerable<Pessoa> pessoas)
     {
         return pessoas.Adapt<IEnumerable<PessoaViewModel>>();
     }
 
-    public static IEnumerable<Pessoa> ToEntity(this IEnumerable<PessoaViewModel> viewModels)
+    public static IEnumerable<Pessoa> ToEntity(IEnumerable<PessoaViewModel> pessoaViewModel)
     {
-        return viewModels.Adapt<IEnumerable<Pessoa>>();
+        return pessoaViewModel.Adapt<IEnumerable<Pessoa>>();
     }
 }
 
