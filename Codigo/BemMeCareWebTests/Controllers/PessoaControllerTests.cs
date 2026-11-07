@@ -19,9 +19,9 @@ public class PessoaControllerTests
         mockService = new Mock<IPessoaService>();
 
         mockService.Setup(service => service.GetAll())
-            .Returns(GetTestPessoas());
+            .Returns(ObterPessoasDeTeste());
         mockService.Setup(service => service.Get(1))
-            .Returns(GetTargetPessoa());
+            .Returns(ObterPessoaAlvo());
         mockService.Setup(service => service.Edit(It.IsAny<Pessoa>()))
             .Verifiable();
         mockService.Setup(service => service.Create(It.IsAny<Pessoa>()))
@@ -45,7 +45,7 @@ public class PessoaControllerTests
 
         List<PessoaViewModel> listaPessoas = (List<PessoaViewModel>)viewResult.ViewData.Model;
         Assert.AreEqual(3, listaPessoas.Count);
-        AssertPessoaViewModel(GetTargetPessoaModel(), listaPessoas[0]);
+        AssertPessoaViewModel(CriarModeloDePessoaExistente(), listaPessoas[0]);
     }
 
     [TestMethod]
@@ -78,11 +78,11 @@ public class PessoaControllerTests
         ViewResult viewResult = (ViewResult)result;
         Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(PessoaViewModel));
         PessoaViewModel pessoaModel = (PessoaViewModel)viewResult.ViewData.Model;
-        AssertPessoaViewModel(GetTargetPessoaModel(), pessoaModel);
+        AssertPessoaViewModel(CriarModeloDePessoaExistente(), pessoaModel);
     }
 
     [TestMethod]
-    public void Create_Get_DeveRetornarView()
+    public void Create_QuandoRequisicaoGet_DeveRetornarView()
     {
         // Act
         var result = controller.Create();
@@ -92,10 +92,10 @@ public class PessoaControllerTests
     }
 
     [TestMethod]
-    public void Create_Post_QuandoModeloValido_DeveCriarPessoaERedirecionarParaIndex()
+    public void Create_QuandoModeloValido_DeveCriarPessoaERedirecionarParaIndex()
     {
         // Act
-        var result = controller.Create(GetNewPessoa());
+        var result = controller.Create(CriarModeloDeNovaPessoa());
 
         // Assert
         Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
@@ -106,13 +106,13 @@ public class PessoaControllerTests
     }
 
     [TestMethod]
-    public void Create_Post_QuandoModeloInvalido_NaoDeveChamarCreate()
+    public void Create_QuandoModeloInvalido_NaoDeveChamarCreate()
     {
         // Arrange
         controller.ModelState.AddModelError("Nome", "Nome da pessoa é obrigatório");
 
         // Act
-        var result = controller.Create(GetNewPessoa());
+        var result = controller.Create(CriarModeloDeNovaPessoa());
 
         // Assert
         Assert.AreEqual(1, controller.ModelState.ErrorCount);
@@ -124,7 +124,7 @@ public class PessoaControllerTests
     }
 
     [TestMethod]
-    public void Edit_Get_QuandoPessoaExiste_DeveRetornarViewComPessoa()
+    public void Edit_QuandoRequisicaoGetEPessoaExiste_DeveRetornarViewComPessoa()
     {
         // Act
         var result = controller.Edit(1);
@@ -134,14 +134,14 @@ public class PessoaControllerTests
         ViewResult viewResult = (ViewResult)result;
         Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(PessoaViewModel));
         PessoaViewModel pessoaModel = (PessoaViewModel)viewResult.ViewData.Model;
-        AssertPessoaViewModel(GetTargetPessoaModel(), pessoaModel);
+        AssertPessoaViewModel(CriarModeloDePessoaExistente(), pessoaModel);
     }
 
     [TestMethod]
-    public void Edit_Post_QuandoModeloValido_DeveAtualizarPessoaERedirecionarParaIndex()
+    public void Edit_QuandoModeloValido_DeveAtualizarPessoaERedirecionarParaIndex()
     {
         // Act
-        var result = controller.Edit(GetTargetPessoaModel());
+        var result = controller.Edit(CriarModeloDePessoaExistente());
 
         // Assert
         Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
@@ -152,13 +152,13 @@ public class PessoaControllerTests
     }
 
     [TestMethod]
-    public void Edit_Post_QuandoModeloInvalido_NaoDeveChamarEdit()
+    public void Edit_QuandoModeloInvalido_NaoDeveChamarEdit()
     {
         // Arrange
         controller.ModelState.AddModelError("Nome", "Nome da pessoa é obrigatório");
 
         // Act
-        var result = controller.Edit(GetTargetPessoaModel());
+        var result = controller.Edit(CriarModeloDePessoaExistente());
 
         // Assert
         Assert.AreEqual(1, controller.ModelState.ErrorCount);
@@ -170,7 +170,7 @@ public class PessoaControllerTests
     }
 
     [TestMethod]
-    public void Delete_Get_QuandoPessoaExiste_DeveRetornarViewComPessoa()
+    public void Delete_QuandoRequisicaoGetEPessoaExiste_DeveRetornarViewComPessoa()
     {
         // Act
         var result = controller.Delete(1);
@@ -180,14 +180,14 @@ public class PessoaControllerTests
         ViewResult viewResult = (ViewResult)result;
         Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(PessoaViewModel));
         PessoaViewModel pessoaModel = (PessoaViewModel)viewResult.ViewData.Model;
-        AssertPessoaViewModel(GetTargetPessoaModel(), pessoaModel);
+        AssertPessoaViewModel(CriarModeloDePessoaExistente(), pessoaModel);
     }
 
     [TestMethod]
-    public void Delete_Post_DeveExcluirPessoaERedirecionarParaIndex()
+    public void Delete_QuandoRequisicaoPost_DeveExcluirPessoaERedirecionarParaIndex()
     {
         // Act
-        var result = controller.Delete(GetTargetPessoaModel());
+        var result = controller.Delete(CriarModeloDePessoaExistente());
 
         // Assert
         Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
@@ -219,7 +219,7 @@ public class PessoaControllerTests
         Assert.AreEqual(esperado.Estado, obtido.Estado);
     }
 
-    private PessoaViewModel GetNewPessoa()
+    private static PessoaViewModel CriarModeloDeNovaPessoa()
     {
         return new PessoaViewModel
         {
@@ -244,7 +244,7 @@ public class PessoaControllerTests
         };
     }
 
-    private Pessoa GetTargetPessoa()
+    private static Pessoa ObterPessoaAlvo()
     {
         return new Pessoa
         {
@@ -269,7 +269,7 @@ public class PessoaControllerTests
         };
     }
 
-    private PessoaViewModel GetTargetPessoaModel()
+    private static PessoaViewModel CriarModeloDePessoaExistente()
     {
         return new PessoaViewModel
         {
@@ -294,7 +294,7 @@ public class PessoaControllerTests
         };
     }
 
-    private IEnumerable<Pessoa> GetTestPessoas()
+    private static IEnumerable<Pessoa> ObterPessoasDeTeste()
     {
         return new List<Pessoa>
         {
