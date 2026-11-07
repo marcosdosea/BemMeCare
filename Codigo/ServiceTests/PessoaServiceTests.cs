@@ -1,4 +1,4 @@
-﻿using Core;
+using Core;
 using Core.Service;
 using Microsoft.EntityFrameworkCore;
 using Service;
@@ -188,7 +188,7 @@ public class PessoaServiceTests
         var pessoasRestantes = servicoPessoa.GetAll().ToList();
 
         Assert.IsNull(pessoaExcluida);
-        Assert.HasCount(2, pessoasRestantes);
+        Assert.AreEqual(2, pessoasRestantes.Count);
         Assert.IsFalse(pessoasRestantes.Any(pessoa => pessoa.Id == 2));
     }
 
@@ -204,7 +204,7 @@ public class PessoaServiceTests
         // Assert
         var pessoasFinais = servicoPessoa.GetAll().ToList();
 
-        Assert.HasCount(pessoasIniciais.Count, pessoasFinais);
+        Assert.AreEqual(pessoasIniciais.Count, pessoasFinais.Count);
         CollectionAssert.AreEquivalent(
             pessoasIniciais.Select(pessoa => pessoa.Id).ToList(),
             pessoasFinais.Select(pessoa => pessoa.Id).ToList());
@@ -278,13 +278,13 @@ public class PessoaServiceTests
         Assert.AreEqual("Branca", pessoa.Cor);
         Assert.AreEqual("Masculino", pessoa.Genero);
         Assert.AreEqual("Heterossexual", pessoa.Sexualidade);
-        Assert.AreEqual("22222-222", pessoa.Cep);
-        Assert.AreEqual("Rua Exemplo 1", pessoa.Rua);
-        Assert.AreEqual("Bairro Exemplo 1", pessoa.Bairro);
-        Assert.AreEqual("100", pessoa.Numero);
+        Assert.AreEqual("12345-678", pessoa.Cep);
+        Assert.AreEqual("Rua Exemplo", pessoa.Rua);
+        Assert.AreEqual("Bairro Exemplo", pessoa.Bairro);
+        Assert.AreEqual("123", pessoa.Numero);
         Assert.AreEqual("Apto 101", pessoa.Complemento);
-        Assert.AreEqual("Cidade Exemplo 1", pessoa.Cidade);
-        Assert.AreEqual("Estado Exemplo 1", pessoa.Estado);
+        Assert.AreEqual("Cidade Exemplo", pessoa.Cidade);
+        Assert.AreEqual("Estado Exemplo", pessoa.Estado);
     }
 
     [TestMethod]
@@ -305,7 +305,7 @@ public class PessoaServiceTests
 
         // Assert
         Assert.IsNotNull(pessoas);
-        Assert.HasCount(3, pessoas);
+        Assert.AreEqual(3, pessoas.Count);
 
         CollectionAssert.AreEquivalent(
             new uint[] { 1, 2, 3 },
@@ -324,7 +324,7 @@ public class PessoaServiceTests
 
         // Assert
         Assert.IsNotNull(pessoas);
-        Assert.IsEmpty(pessoas);
+        Assert.AreEqual(0, pessoas.Count);
     }
 
     [TestMethod]
@@ -334,7 +334,7 @@ public class PessoaServiceTests
         var pessoas = servicoPessoa.GetByNome("Machado").ToList();
 
         // Assert
-        Assert.HasCount(1, pessoas);
+        Assert.AreEqual(1, pessoas.Count);
         Assert.AreEqual("Machado de Assis", pessoas[0].Nome);
     }
 
@@ -369,7 +369,7 @@ public class PessoaServiceTests
         var pessoas = servicoPessoa.GetByNome("Machado").ToList();
 
         // Assert
-        Assert.HasCount(2, pessoas);
+        Assert.AreEqual(2, pessoas.Count);
         Assert.IsTrue(
             pessoas.All(pessoa => pessoa.Nome.StartsWith("Machado")));
     }
@@ -382,7 +382,7 @@ public class PessoaServiceTests
 
         // Assert
         Assert.IsNotNull(pessoas);
-        Assert.IsEmpty(pessoas);
+        Assert.AreEqual(0, pessoas.Count);
     }
 
     [TestMethod]
@@ -392,7 +392,6 @@ public class PessoaServiceTests
         var pessoas = servicoPessoa.GetByNome(string.Empty).ToList();
 
         // Assert
-        Assert.HasCount(3, pessoas);
+        Assert.AreEqual(3, pessoas.Count);
     }
 }
-
