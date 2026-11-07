@@ -22,6 +22,8 @@ public class PessoaControllerTests
             .Returns(ObterPessoasDeTeste());
         mockService.Setup(service => service.Get(1))
             .Returns(ObterPessoaAlvo());
+        mockService.Setup(service => service.Get(999))
+            .Returns((Pessoa?)null);
         mockService.Setup(service => service.Edit(It.IsAny<Pessoa>()))
             .Verifiable();
         mockService.Setup(service => service.Create(It.IsAny<Pessoa>()))
@@ -39,13 +41,16 @@ public class PessoaControllerTests
         var result = controller.Index();
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
-        ViewResult viewResult = (ViewResult)result;
-        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(List<PessoaViewModel>));
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
+        var listaPessoas = Assert.IsInstanceOfType<List<PessoaViewModel>>(viewResult.ViewData.Model);
 
-        List<PessoaViewModel> listaPessoas = (List<PessoaViewModel>)viewResult.ViewData.Model;
         Assert.AreEqual(3, listaPessoas.Count);
+
         AssertPessoaViewModel(CriarModeloDePessoaExistente(), listaPessoas[0]);
+
+        mockService.Verify(
+            service => service.GetAll(), 
+            Times.Once);
     }
 
     [TestMethod]
@@ -59,12 +64,14 @@ public class PessoaControllerTests
         var result = controller.Index();
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
-        ViewResult viewResult = (ViewResult)result;
-        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(List<PessoaViewModel>));
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
+        var listaPessoas = Assert.IsInstanceOfType<List<PessoaViewModel>>(viewResult.ViewData.Model);
 
-        List<PessoaViewModel> listaPessoas = (List<PessoaViewModel>)viewResult.ViewData.Model;
         Assert.AreEqual(0, listaPessoas.Count);
+
+        mockService.Verify(
+            service => service.GetAll(), 
+            Times.Once);
     }
 
     [TestMethod]
@@ -74,11 +81,30 @@ public class PessoaControllerTests
         var result = controller.Details(1);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
-        ViewResult viewResult = (ViewResult)result;
-        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(PessoaViewModel));
-        PessoaViewModel pessoaModel = (PessoaViewModel)viewResult.ViewData.Model;
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
+        var pessoaModel = Assert.IsInstanceOfType<PessoaViewModel>(viewResult.ViewData.Model);
+
         AssertPessoaViewModel(CriarModeloDePessoaExistente(), pessoaModel);
+
+        mockService.Verify(
+            service => service.Get(1),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void Details_QuandoPessoaNaoExiste_DeveRetornarViewComModeloVazio()
+    {
+        // Act
+        var result = controller.Details(999);
+
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
+        var pessoaModel = Assert.IsInstanceOfType<PessoaViewModel>(viewResult.ViewData.Model);
+
+        Assert.AreEqual(0U, pessoaModel.Id);
+        Assert.IsTrue(string.IsNullOrEmpty(pessoaModel.Nome));
+
+        mockService.Verify(service => service.Get(999), Times.Once);
     }
 
     [TestMethod]
@@ -88,20 +114,34 @@ public class PessoaControllerTests
         var result = controller.Create();
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
+        Assert.IsInstanceOfType<ViewResult>(result);
     }
 
     [TestMethod]
     public void Create_QuandoModeloValido_DeveCriarPessoaERedirecionarParaIndex()
     {
+        // Arrange
+        var modelo = CriarModeloDeNovaPessoa();
+        Pessoa? pessoaCriada = null;
+
+        mockService
+            .Setup(service => service.Create(It.IsAny<Pessoa>()))
+            .Callback<Pessoa>(p => pessoaCriada = p);
+
         // Act
-        var result = controller.Create(CriarModeloDeNovaPessoa());
+        var result = controller.Create(modelo);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
-        RedirectToActionResult redirectToActionResult = (RedirectToActionResult)result;
+        var redirectToActionResult = Assert.IsInstanceOfType<RedirectToActionResult>(result);
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
+
+        Assert.IsNotNull(pessoaCriada);
+        Assert.AreEqual(modelo.Id, pessoaCriada.Id);
+        Assert.AreEqual(modelo.Nome, pessoaCriada.Nome);
+        Assert.AreEqual(modelo.Email, pessoaCriada.Email);
+        Assert.AreEqual(modelo.DataDeNascimento, pessoaCriada.DataDeNascimento);
+
         mockService.Verify(service => service.Create(It.IsAny<Pessoa>()), Times.Once);
     }
 
@@ -116,10 +156,10 @@ public class PessoaControllerTests
 
         // Assert
         Assert.AreEqual(1, controller.ModelState.ErrorCount);
-        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
-        RedirectToActionResult redirectToActionResult = (RedirectToActionResult)result;
+        var redirectToActionResult = Assert.IsInstanceOfType<RedirectToActionResult>(result);
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
+
         mockService.Verify(service => service.Create(It.IsAny<Pessoa>()), Times.Never);
     }
 
@@ -130,24 +170,56 @@ public class PessoaControllerTests
         var result = controller.Edit(1);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
-        ViewResult viewResult = (ViewResult)result;
-        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(PessoaViewModel));
-        PessoaViewModel pessoaModel = (PessoaViewModel)viewResult.ViewData.Model;
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
+        var pessoaModel = Assert.IsInstanceOfType<PessoaViewModel>(viewResult.ViewData.Model);
+
         AssertPessoaViewModel(CriarModeloDePessoaExistente(), pessoaModel);
+
+        mockService.Verify(
+            service => service.Get(1), 
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void Edit_QuandoRequisicaoGetEPessoaNaoExiste_DeveRetornarViewComModeloVazio()
+    {
+        // Act
+        var result = controller.Edit(999);
+
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
+        var pessoaModel = Assert.IsInstanceOfType<PessoaViewModel>(viewResult.ViewData.Model);
+
+        Assert.AreEqual(0U, pessoaModel.Id);
+        Assert.IsTrue(string.IsNullOrEmpty(pessoaModel.Nome));
+        mockService.Verify(service => service.Get(999), Times.Once);
     }
 
     [TestMethod]
     public void Edit_QuandoModeloValido_DeveAtualizarPessoaERedirecionarParaIndex()
     {
+        // Arrange
+        var modelo = CriarModeloDePessoaExistente();
+        Pessoa? pessoaEditada = null;
+
+        mockService
+            .Setup(service => service.Edit(It.IsAny<Pessoa>()))
+            .Callback<Pessoa>(p => pessoaEditada = p);
+
         // Act
-        var result = controller.Edit(CriarModeloDePessoaExistente());
+        var result = controller.Edit(modelo);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
-        RedirectToActionResult redirectToActionResult = (RedirectToActionResult)result;
+        var redirectToActionResult = Assert.IsInstanceOfType<RedirectToActionResult>(result);
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
+
+        Assert.IsNotNull(pessoaEditada);
+        Assert.AreEqual(modelo.Id, pessoaEditada.Id);
+        Assert.AreEqual(modelo.Nome, pessoaEditada.Nome);
+        Assert.AreEqual(modelo.Email, pessoaEditada.Email);
+        Assert.AreEqual(modelo.DataDeNascimento, pessoaEditada.DataDeNascimento);
+
         mockService.Verify(service => service.Edit(It.IsAny<Pessoa>()), Times.Once);
     }
 
@@ -162,10 +234,10 @@ public class PessoaControllerTests
 
         // Assert
         Assert.AreEqual(1, controller.ModelState.ErrorCount);
-        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
-        RedirectToActionResult redirectToActionResult = (RedirectToActionResult)result;
+        var redirectToActionResult = Assert.IsInstanceOfType<RedirectToActionResult>(result);
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
+
         mockService.Verify(service => service.Edit(It.IsAny<Pessoa>()), Times.Never);
     }
 
@@ -176,25 +248,46 @@ public class PessoaControllerTests
         var result = controller.Delete(1);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
-        ViewResult viewResult = (ViewResult)result;
-        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(PessoaViewModel));
-        PessoaViewModel pessoaModel = (PessoaViewModel)viewResult.ViewData.Model;
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
+        var pessoaModel = Assert.IsInstanceOfType<PessoaViewModel>(viewResult.ViewData.Model);
+
         AssertPessoaViewModel(CriarModeloDePessoaExistente(), pessoaModel);
+
+        mockService.Verify(
+            service => service.Get(1),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void Delete_QuandoRequisicaoGetEPessoaNaoExiste_DeveRetornarViewComModeloVazio()
+    {
+        // Act
+        var result = controller.Delete(999);
+
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
+        var pessoaModel = Assert.IsInstanceOfType<PessoaViewModel>(viewResult.ViewData.Model);
+
+        Assert.AreEqual(0U, pessoaModel.Id);
+        Assert.IsTrue(string.IsNullOrEmpty(pessoaModel.Nome));
+        mockService.Verify(service => service.Get(999), Times.Once);
     }
 
     [TestMethod]
     public void Delete_QuandoRequisicaoPost_DeveExcluirPessoaERedirecionarParaIndex()
     {
+        // Arrange
+        var modelo = CriarModeloDePessoaExistente();
+
         // Act
-        var result = controller.Delete(CriarModeloDePessoaExistente());
+        var result = controller.Delete(modelo);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
-        RedirectToActionResult redirectToActionResult = (RedirectToActionResult)result;
+        var redirectToActionResult = Assert.IsInstanceOfType<RedirectToActionResult>(result);
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
-        mockService.Verify(service => service.Delete(It.IsAny<uint>()), Times.Once);
+
+        mockService.Verify(service => service.Delete(modelo.Id), Times.Once);
     }
 
     private static void AssertPessoaViewModel(PessoaViewModel esperado, PessoaViewModel obtido)

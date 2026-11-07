@@ -26,7 +26,7 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Details(uint id)
         {
             var pessoa = pessoaService.Get(id);
-            var pessoaViewModel = pessoa.ToViewModel();
+            var pessoaViewModel = pessoa != null ? pessoa.ToViewModel() : new PessoaViewModel();
             return View(pessoaViewModel);
         }
 
@@ -54,7 +54,7 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Edit(uint id)
         {
             var pessoa = pessoaService.Get(id);
-            var pessoaViewModel = pessoa.ToViewModel();
+            var pessoaViewModel = pessoa != null ? pessoa.ToViewModel() : new PessoaViewModel();
             return View(pessoaViewModel);
         }
 
@@ -75,7 +75,7 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Delete(uint id)
         {
             var pessoa = pessoaService.Get(id);
-            var pessoaViewModel = pessoa.ToViewModel();
+            var pessoaViewModel = pessoa != null ? pessoa.ToViewModel() : new PessoaViewModel();
             return View(pessoaViewModel);
         }
 
