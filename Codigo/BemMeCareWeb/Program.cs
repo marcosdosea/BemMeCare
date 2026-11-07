@@ -1,5 +1,7 @@
 using Core;
+using Core.Service;
 using Microsoft.EntityFrameworkCore;
+using Service;
 
 namespace BemMeCareWeb
 {
@@ -11,10 +13,12 @@ namespace BemMeCareWeb
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            
+
             builder.Services.AddDbContext<BemMeCareContext>(
                 options => options.UseMySQL(builder.Configuration.GetConnectionString("BemMeCareDatabase")));
-            
+
+            builder.Services.AddTransient<IProfissionalService, ProfissionalService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
