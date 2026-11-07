@@ -1,5 +1,7 @@
 using Core;
+using Core.Service;
 using Microsoft.EntityFrameworkCore;
+using Service;
 
 namespace BemMeCareWeb
 {
@@ -14,7 +16,9 @@ namespace BemMeCareWeb
             
             builder.Services.AddDbContext<BemMeCareContext>(
                 options => options.UseMySQL(builder.Configuration.GetConnectionString("BemMeCareDatabase")));
-            
+
+            builder.Services.AddTransient<IPessoaService, PessoaService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
