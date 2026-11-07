@@ -7,4 +7,5 @@ public interface IPessoaService
     void Delete(uint id);
     Pessoa Get(uint id);
     IEnumerable<Pessoa> GetAll();
+    IEnumerable<Pessoa> GetByNome(string nome);
 }
