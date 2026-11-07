@@ -140,7 +140,19 @@ public class PessoaControllerTests
         Assert.AreEqual(modelo.Id, pessoaCriada.Id);
         Assert.AreEqual(modelo.Nome, pessoaCriada.Nome);
         Assert.AreEqual(modelo.Email, pessoaCriada.Email);
+        Assert.AreEqual(modelo.Senha, pessoaCriada.Senha);
         Assert.AreEqual(modelo.DataDeNascimento, pessoaCriada.DataDeNascimento);
+        Assert.AreEqual(modelo.Cor, pessoaCriada.Cor);
+        Assert.AreEqual(modelo.Genero, pessoaCriada.Genero);
+        Assert.AreEqual(modelo.Sexualidade, pessoaCriada.Sexualidade);
+        Assert.AreEqual(modelo.Cep, pessoaCriada.Cep);
+        Assert.AreEqual(modelo.Rua, pessoaCriada.Rua);
+        Assert.AreEqual(modelo.Bairro, pessoaCriada.Bairro);
+        Assert.AreEqual(modelo.Numero, pessoaCriada.Numero);
+        Assert.AreEqual(modelo.Complemento, pessoaCriada.Complemento);
+        Assert.AreEqual(modelo.Cidade, pessoaCriada.Cidade);
+        Assert.AreEqual(modelo.Estado, pessoaCriada.Estado);
+        Assert.IsNull(pessoaCriada.Foto);
 
         mockService.Verify(service => service.Create(It.IsAny<Pessoa>()), Times.Once);
     }
@@ -218,7 +230,17 @@ public class PessoaControllerTests
         Assert.AreEqual(modelo.Id, pessoaEditada.Id);
         Assert.AreEqual(modelo.Nome, pessoaEditada.Nome);
         Assert.AreEqual(modelo.Email, pessoaEditada.Email);
+        Assert.AreEqual(modelo.Senha, pessoaEditada.Senha);
         Assert.AreEqual(modelo.DataDeNascimento, pessoaEditada.DataDeNascimento);
+        Assert.AreEqual(modelo.Cep, pessoaEditada.Cep);
+        Assert.AreEqual(modelo.Rua, pessoaEditada.Rua);
+        Assert.AreEqual(modelo.Bairro, pessoaEditada.Bairro);
+        Assert.AreEqual(modelo.Numero, pessoaEditada.Numero);
+        Assert.AreEqual(modelo.Complemento, pessoaEditada.Complemento);
+        Assert.AreEqual(modelo.Cidade, pessoaEditada.Cidade);
+        Assert.AreEqual(modelo.Estado, pessoaEditada.Estado);
+        Assert.IsNull(pessoaEditada.Foto);
+
 
         mockService.Verify(service => service.Edit(It.IsAny<Pessoa>()), Times.Once);
     }
