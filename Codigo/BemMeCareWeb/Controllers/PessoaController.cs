@@ -1,9 +1,9 @@
-﻿using BemMeCareWeb.Models;
+using BemMeCareWeb.Models;
 using Core.Service;
 using BemMeCareWeb.Mappers;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BemMeCareWeb.Controllers  
+namespace BemMeCareWeb.Controllers
 {
     public class PessoaController : Controller
     {
@@ -18,7 +18,7 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Index()
         {
             var listaPessoas = pessoaService.GetAll();
-            var listaPessoaViewModel = PessoaMapper.ToViewModel(listaPessoas);
+            var listaPessoaViewModel = listaPessoas.ToViewModel();
             return View(listaPessoaViewModel);
         }
 
@@ -26,7 +26,7 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Details(uint id)
         {
             var pessoa = pessoaService.Get(id);
-            var pessoaViewModel = pessoa != null ? PessoaMapper.ToViewModel(pessoa) : null;
+            var pessoaViewModel = pessoa.ToViewModel();
             return View(pessoaViewModel);
         }
 
@@ -44,7 +44,7 @@ namespace BemMeCareWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                var pessoa = PessoaMapper.ToEntity(pessoaViewModel);
+                var pessoa = pessoaViewModel.ToEntity();
                 pessoaService.Create(pessoa);
             }
             return RedirectToAction(nameof(Index));
@@ -54,7 +54,7 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Edit(uint id)
         {
             var pessoa = pessoaService.Get(id);
-            var pessoaViewModel = pessoa != null ? PessoaMapper.ToViewModel(pessoa) : null;
+            var pessoaViewModel = pessoa.ToViewModel();
             return View(pessoaViewModel);
         }
 
@@ -65,7 +65,7 @@ namespace BemMeCareWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                var pessoa = PessoaMapper.ToEntity(pessoaViewModel);
+                var pessoa = pessoaViewModel.ToEntity();
                 pessoaService.Edit(pessoa);
             }
             return RedirectToAction(nameof(Index));
@@ -75,7 +75,7 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Delete(uint id)
         {
             var pessoa = pessoaService.Get(id);
-            var pessoaViewModel = pessoa != null ? PessoaMapper.ToViewModel(pessoa) : new PessoaViewModel;
+            var pessoaViewModel = pessoa.ToViewModel();
             return View(pessoaViewModel);
         }
 

@@ -39,7 +39,7 @@ public class PessoaViewModel
     [Display(Name = "Data de Nascimento")]
     [DataType(DataType.Date)]
     [Required(ErrorMessage = "A data de nascimento é obrigatória")]
-    public DateTime DataNascimento { get; set; }
+    public DateTime DataDeNascimento { get; set; }
 
     [Display(Name = "Cor")]
     [Required(ErrorMessage = "A cor é obrigatória")]
