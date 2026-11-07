@@ -77,6 +77,7 @@ public class PessoaViewModel
     public string? Numero { get; set; }
 
     [Display(Name = "Complemento")]
+    [Required(ErrorMessage = "O complemento é obrigatório")]
     [StringLength(100, MinimumLength = 3, ErrorMessage = "O complemento deve ter entre 3 e 100 caracteres")]
     public string? Complemento { get; set; }
 

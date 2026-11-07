@@ -11,11 +11,12 @@ namespace BemMeCareWebTests.Controllers;
 public class PessoaControllerTests
 {
     private static PessoaController controller;
+    private static Mock<IPessoaService> mockService;
 
     [TestInitialize]
     public void Initialize()
     {
-        var mockService = new Mock<IPessoaService>();
+        mockService = new Mock<IPessoaService>();
 
         mockService.Setup(service => service.GetAll())
             .Returns(GetTestPessoas());
@@ -27,117 +28,195 @@ public class PessoaControllerTests
             .Returns(4);
         mockService.Setup(service => service.Delete(It.IsAny<uint>()))
             .Verifiable();
+
         controller = new PessoaController(mockService.Object);
     }
 
     [TestMethod]
-    public void IndexTest_Valido()
+    public void Index_QuandoChamado_DeveRetornarViewComListaDePessoas()
     {
+        // Act
         var result = controller.Index();
 
+        // Assert
         Assert.IsInstanceOfType(result, typeof(ViewResult));
         ViewResult viewResult = (ViewResult)result;
         Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(List<PessoaViewModel>));
 
         List<PessoaViewModel> listaPessoas = (List<PessoaViewModel>)viewResult.ViewData.Model;
         Assert.AreEqual(3, listaPessoas.Count);
+        AssertPessoaViewModel(GetTargetPessoaModel(), listaPessoas[0]);
     }
 
     [TestMethod]
-    public void DetailsTest_Valido()
+    public void Index_QuandoNaoExistemPessoas_DeveRetornarViewComListaVazia()
     {
+        // Arrange
+        mockService.Setup(service => service.GetAll())
+            .Returns(new List<Pessoa>());
+
+        // Act
+        var result = controller.Index();
+
+        // Assert
+        Assert.IsInstanceOfType(result, typeof(ViewResult));
+        ViewResult viewResult = (ViewResult)result;
+        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(List<PessoaViewModel>));
+
+        List<PessoaViewModel> listaPessoas = (List<PessoaViewModel>)viewResult.ViewData.Model;
+        Assert.AreEqual(0, listaPessoas.Count);
+    }
+
+    [TestMethod]
+    public void Details_QuandoPessoaExiste_DeveRetornarViewComPessoa()
+    {
+        // Act
         var result = controller.Details(1);
 
+        // Assert
         Assert.IsInstanceOfType(result, typeof(ViewResult));
         ViewResult viewResult = (ViewResult)result;
         Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(PessoaViewModel));
         PessoaViewModel pessoaModel = (PessoaViewModel)viewResult.ViewData.Model;
-        Assert.AreEqual(1U, pessoaModel.Id);
-        Assert.AreEqual("João", pessoaModel.Nome);
-        Assert.AreEqual("joaogomes@email.com", pessoaModel.Email);
+        AssertPessoaViewModel(GetTargetPessoaModel(), pessoaModel);
     }
 
     [TestMethod]
-    public void CreateTest_Get_Valido()
+    public void Create_Get_DeveRetornarView()
     {
+        // Act
         var result = controller.Create();
 
+        // Assert
         Assert.IsInstanceOfType(result, typeof(ViewResult));
     }
 
     [TestMethod]
-    public void CreateTest_Post_Valido()
+    public void Create_Post_QuandoModeloValido_DeveCriarPessoaERedirecionarParaIndex()
     {
+        // Act
         var result = controller.Create(GetNewPessoa());
 
+        // Assert
         Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
         RedirectToActionResult redirectToActionResult = (RedirectToActionResult)result;
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
+        mockService.Verify(service => service.Create(It.IsAny<Pessoa>()), Times.Once);
     }
 
     [TestMethod]
-    public void CreateTest_Post_Invalido()
+    public void Create_Post_QuandoModeloInvalido_NaoDeveChamarCreate()
     {
+        // Arrange
         controller.ModelState.AddModelError("Nome", "Nome da pessoa é obrigatório");
 
+        // Act
         var result = controller.Create(GetNewPessoa());
 
+        // Assert
         Assert.AreEqual(1, controller.ModelState.ErrorCount);
         Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
         RedirectToActionResult redirectToActionResult = (RedirectToActionResult)result;
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
+        mockService.Verify(service => service.Create(It.IsAny<Pessoa>()), Times.Never);
     }
 
     [TestMethod]
-    public void EditTest_Get_Valido()
+    public void Edit_Get_QuandoPessoaExiste_DeveRetornarViewComPessoa()
     {
+        // Act
         var result = controller.Edit(1);
 
+        // Assert
         Assert.IsInstanceOfType(result, typeof(ViewResult));
         ViewResult viewResult = (ViewResult)result;
         Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(PessoaViewModel));
         PessoaViewModel pessoaModel = (PessoaViewModel)viewResult.ViewData.Model;
-        Assert.AreEqual(1U, pessoaModel.Id);
-        Assert.AreEqual("João", pessoaModel.Nome);
-        Assert.AreEqual("joaogomes@email.com", pessoaModel.Email);
+        AssertPessoaViewModel(GetTargetPessoaModel(), pessoaModel);
     }
 
     [TestMethod]
-    public void EditTest_Post_Valido()
+    public void Edit_Post_QuandoModeloValido_DeveAtualizarPessoaERedirecionarParaIndex()
     {
+        // Act
         var result = controller.Edit(GetTargetPessoaModel());
 
+        // Assert
         Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
         RedirectToActionResult redirectToActionResult = (RedirectToActionResult)result;
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
+        mockService.Verify(service => service.Edit(It.IsAny<Pessoa>()), Times.Once);
     }
 
     [TestMethod]
-    public void DeleteTest_Get_Valido()
+    public void Edit_Post_QuandoModeloInvalido_NaoDeveChamarEdit()
     {
+        // Arrange
+        controller.ModelState.AddModelError("Nome", "Nome da pessoa é obrigatório");
+
+        // Act
+        var result = controller.Edit(GetTargetPessoaModel());
+
+        // Assert
+        Assert.AreEqual(1, controller.ModelState.ErrorCount);
+        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+        RedirectToActionResult redirectToActionResult = (RedirectToActionResult)result;
+        Assert.IsNull(redirectToActionResult.ControllerName);
+        Assert.AreEqual("Index", redirectToActionResult.ActionName);
+        mockService.Verify(service => service.Edit(It.IsAny<Pessoa>()), Times.Never);
+    }
+
+    [TestMethod]
+    public void Delete_Get_QuandoPessoaExiste_DeveRetornarViewComPessoa()
+    {
+        // Act
         var result = controller.Delete(1);
 
+        // Assert
         Assert.IsInstanceOfType(result, typeof(ViewResult));
         ViewResult viewResult = (ViewResult)result;
         Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(PessoaViewModel));
         PessoaViewModel pessoaModel = (PessoaViewModel)viewResult.ViewData.Model;
-        Assert.AreEqual(1U, pessoaModel.Id);
-        Assert.AreEqual("João", pessoaModel.Nome);
-        Assert.AreEqual("joaogomes@email.com", pessoaModel.Email);
+        AssertPessoaViewModel(GetTargetPessoaModel(), pessoaModel);
     }
 
     [TestMethod]
-    public void DeleteTest_Post_Valido()
+    public void Delete_Post_DeveExcluirPessoaERedirecionarParaIndex()
     {
+        // Act
         var result = controller.Delete(GetTargetPessoaModel());
 
+        // Assert
         Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
         RedirectToActionResult redirectToActionResult = (RedirectToActionResult)result;
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
+        mockService.Verify(service => service.Delete(It.IsAny<uint>()), Times.Once);
+    }
+
+    private static void AssertPessoaViewModel(PessoaViewModel esperado, PessoaViewModel obtido)
+    {
+        Assert.AreEqual(esperado.Id, obtido.Id);
+        Assert.AreEqual(esperado.Nome, obtido.Nome);
+        Assert.AreEqual(esperado.Email, obtido.Email);
+        Assert.AreEqual(esperado.Senha, obtido.Senha);
+        Assert.AreEqual(esperado.Cpf, obtido.Cpf);
+        Assert.AreEqual(esperado.Telefone, obtido.Telefone);
+        Assert.AreEqual(esperado.DataDeNascimento, obtido.DataDeNascimento);
+        Assert.AreEqual(esperado.Cor, obtido.Cor);
+        Assert.AreEqual(esperado.Genero, obtido.Genero);
+        Assert.AreEqual(esperado.Sexualidade, obtido.Sexualidade);
+        Assert.AreEqual(esperado.Foto, obtido.Foto);
+        Assert.AreEqual(esperado.Cep, obtido.Cep);
+        Assert.AreEqual(esperado.Rua, obtido.Rua);
+        Assert.AreEqual(esperado.Bairro, obtido.Bairro);
+        Assert.AreEqual(esperado.Numero, obtido.Numero);
+        Assert.AreEqual(esperado.Complemento, obtido.Complemento);
+        Assert.AreEqual(esperado.Cidade, obtido.Cidade);
+        Assert.AreEqual(esperado.Estado, obtido.Estado);
     }
 
     private PessoaViewModel GetNewPessoa()
@@ -154,6 +233,7 @@ public class PessoaControllerTests
             Cor = "Branca",
             Genero = "Masculino",
             Sexualidade = "Heterossexual",
+            Foto = null,
             Cep = "12345-678",
             Rua = "Rua A",
             Bairro = "Bairro B",
@@ -178,6 +258,7 @@ public class PessoaControllerTests
             Cor = "Branca",
             Genero = "Masculino",
             Sexualidade = "Heterossexual",
+            Foto = null,
             Cep = "12345-678",
             Rua = "Rua A",
             Bairro = "Bairro B",
@@ -202,6 +283,7 @@ public class PessoaControllerTests
             Cor = "Branca",
             Genero = "Masculino",
             Sexualidade = "Heterossexual",
+            Foto = null,
             Cep = "12345-678",
             Rua = "Rua A",
             Bairro = "Bairro B",
@@ -228,6 +310,7 @@ public class PessoaControllerTests
                 Cor = "Branca",
                 Genero = "Masculino",
                 Sexualidade = "Heterossexual",
+                Foto = null,
                 Cep = "12345-678",
                 Rua = "Rua A",
                 Bairro = "Bairro B",
@@ -248,6 +331,7 @@ public class PessoaControllerTests
                 Cor = "Parda",
                 Genero = "Masculino",
                 Sexualidade = "Heterossexual",
+                Foto = null,
                 Cep = "98765-432",
                 Rua = "Rua B",
                 Bairro = "Bairro C",
@@ -268,6 +352,7 @@ public class PessoaControllerTests
                 Cor = "Parda",
                 Genero = "Masculino",
                 Sexualidade = "Heterossexual",
+                Foto = null,
                 Cep = "98765-432",
                 Rua = "Rua B",
                 Bairro = "Bairro C",
