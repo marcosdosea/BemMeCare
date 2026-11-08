@@ -40,10 +40,10 @@ public class CategoriaControllerTests
         // Assert
         Assert.IsInstanceOfType(result, typeof(ViewResult));
         ViewResult viewResult = (ViewResult) result;
-        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(List<CategoriaViewModel>));
-        
-        List<CategoriaViewModel> listaCategorias = (List<CategoriaViewModel>) viewResult.ViewData.Model;
-        Assert.AreEqual(3, listaCategorias.Count);
+        var listaCategorias = Assert.IsInstanceOfType<IEnumerable<CategoriaViewModel>>(viewResult.ViewData.Model);
+
+
+        Assert.HasCount(3, listaCategorias);
     }
 
     [TestMethod]
@@ -89,7 +89,7 @@ public class CategoriaControllerTests
     public void CreateTest_Post_Invalido()
     {
         // Arrange
-        controller.ModelState.AddModelError("Nome", "Nome da categoria é obrigatório");
+        controller.ModelState.AddModelError(nameof(CategoriaViewModel.Nome), "Nome da categoria é obrigatório");
         
         // Act
         var result = controller.Create(GetNewCategoria());

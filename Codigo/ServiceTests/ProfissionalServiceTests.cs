@@ -101,11 +101,14 @@ public class ProfissionalServiceTests
         Assert.IsNotNull(profissionalCriado);
         Assert.AreEqual(profissionalEsperado.IdPessoa, profissionalCriado.IdPessoa);
         Assert.AreEqual(profissionalEsperado.IdEstabelecimento, profissionalCriado.IdEstabelecimento);
-        Assert.AreEqual(profissionalEsperado.ChavePix, profissionalCriado.ChavePix);
-        Assert.AreEqual(profissionalEsperado.EstaAtivo, profissionalCriado.EstaAtivo);
         Assert.AreEqual(profissionalEsperado.GerirHorario, profissionalCriado.GerirHorario);
+        Assert.AreEqual(profissionalEsperado.EstaAtivo, profissionalCriado.EstaAtivo);
         Assert.AreEqual(profissionalEsperado.GerirServico, profissionalCriado.GerirServico);
         Assert.AreEqual(profissionalEsperado.ReceberPagamentoDireto, profissionalCriado.ReceberPagamentoDireto);
+        Assert.AreEqual(profissionalEsperado.ChavePix, profissionalCriado.ChavePix);
+        Assert.AreEqual(profissionalEsperado.DuracaoIntervaloTempo, profissionalCriado.DuracaoIntervaloTempo);
+        Assert.AreEqual(profissionalEsperado.EProfissional, profissionalCriado.EProfissional);
+        Assert.AreEqual(profissionalEsperado.EAtendente, profissionalCriado.EAtendente);
     }
 
     [TestMethod]
@@ -149,9 +152,14 @@ public class ProfissionalServiceTests
 
         Assert.IsNotNull(profissional);
 
-        profissional!.ChavePix = "novachave@pix.com";
+        profissional!.GerirHorario = 0;
         profissional.EstaAtivo = 1;
+        profissional.GerirServico = 0;
+        profissional.ReceberPagamentoDireto = 0;
+        profissional.ChavePix = "novachave@pix.com";
         profissional.DuracaoIntervaloTempo = 45;
+        profissional.EProfissional = 0;
+        profissional.EAtendente = 0;
 
         // Act
         servicoProfissional.Edit(profissional);
@@ -160,9 +168,16 @@ public class ProfissionalServiceTests
         var profissionalAtualizado = servicoProfissional.Get(3);
 
         Assert.IsNotNull(profissionalAtualizado);
-        Assert.AreEqual("novachave@pix.com", profissionalAtualizado.ChavePix);
+        Assert.AreEqual(3u, profissionalAtualizado.IdPessoa);
+        Assert.AreEqual(1u, profissionalAtualizado.IdEstabelecimento);
+        Assert.AreEqual((sbyte)0, profissionalAtualizado.GerirHorario);
         Assert.AreEqual((sbyte)1, profissionalAtualizado.EstaAtivo);
+        Assert.AreEqual((sbyte)0, profissionalAtualizado.GerirServico);
+        Assert.AreEqual((sbyte)0, profissionalAtualizado.ReceberPagamentoDireto);
+        Assert.AreEqual("novachave@pix.com", profissionalAtualizado.ChavePix);
         Assert.AreEqual(45u, profissionalAtualizado.DuracaoIntervaloTempo);
+        Assert.AreEqual((sbyte?)0, profissionalAtualizado.EProfissional);
+        Assert.AreEqual((sbyte?)0, profissionalAtualizado.EAtendente);
     }
 
     [TestMethod]
@@ -175,8 +190,14 @@ public class ProfissionalServiceTests
         Assert.IsNotNull(profissional);
         Assert.AreEqual(1u, profissional.IdPessoa);
         Assert.AreEqual(1u, profissional.IdEstabelecimento);
-        Assert.AreEqual("prof1@pix.com", profissional.ChavePix);
+        Assert.AreEqual((sbyte)1, profissional.GerirHorario);
         Assert.AreEqual((sbyte)1, profissional.EstaAtivo);
+        Assert.AreEqual((sbyte)1, profissional.GerirServico);
+        Assert.AreEqual((sbyte)0, profissional.ReceberPagamentoDireto);
+        Assert.AreEqual("prof1@pix.com", profissional.ChavePix);
+        Assert.AreEqual(15u, profissional.DuracaoIntervaloTempo);
+        Assert.AreEqual((sbyte?)1, profissional.EProfissional);
+        Assert.AreEqual((sbyte?)0, profissional.EAtendente);
     }
 
     [TestMethod]
