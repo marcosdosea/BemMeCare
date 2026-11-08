@@ -27,7 +27,7 @@ public class EstabelecimentoViewModel
     [Display(Name = "CEP")]
     [Required(ErrorMessage = "CEP do estabelecimento é obrigatório")]
     [StringLength(8, MinimumLength = 8, ErrorMessage = "CEP do estabelecimento deve ter 8 caracteres")]
-    public string? CEP { get; set; }
+    public string? Cep { get; set; }
 
     [Display(Name = "Rua")]
     [Required(ErrorMessage = "Rua do estabelecimento é obrigatório")]
@@ -69,7 +69,7 @@ public class EstabelecimentoViewModel
     public string? ChavePix { get; set; }
 
     [Display(Name = "Foto")]
-    public byte[]? Foto { get; set; }
+    public byte[]? foto { get; set; }
 
     [Display(Name = "Código da pessoa")]
     [Required(ErrorMessage = "Código da pessoa é obrigatório")]
