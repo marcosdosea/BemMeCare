@@ -19,6 +19,7 @@ namespace BemMeCareWeb
 
             builder.Services.AddTransient<IProfissionalService, ProfissionalService>();
             builder.Services.AddTransient<IPessoaService, PessoaService>();
+            builder.Services.AddTransient<IServicoService, ServicoService>();
 
             var app = builder.Build();
 
