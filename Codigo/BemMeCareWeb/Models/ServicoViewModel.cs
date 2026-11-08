@@ -5,6 +5,7 @@ namespace BemMeCareWeb.Models
     public class ServicoViewModel
     {
         [Display(Name = "Código")]
+        [Key]
         [Required(ErrorMessage = "Código do serviço é obrigatório")]
         public uint Id { get; set; }
 
