@@ -49,7 +49,15 @@ public class ProfissionalControllerTests
         var primeiroProfissional = profissionais.First();
 
         Assert.AreEqual(1u, primeiroProfissional.IdPessoa);
+        Assert.AreEqual(1u, primeiroProfissional.IdEstabelecimento);
+        Assert.AreEqual((sbyte)1, primeiroProfissional.GerirHorario);
+        Assert.AreEqual((sbyte)1, primeiroProfissional.EstaAtivo);
+        Assert.AreEqual((sbyte)1, primeiroProfissional.GerirServico);
+        Assert.AreEqual((sbyte)0, primeiroProfissional.ReceberPagamentoDireto);
         Assert.AreEqual("prof1@pix.com", primeiroProfissional.ChavePix);
+        Assert.AreEqual(15u, primeiroProfissional.DuracaoIntervaloTempo);
+        Assert.AreEqual((sbyte?)1, primeiroProfissional.EProfissional);
+        Assert.AreEqual((sbyte?)0, primeiroProfissional.EAtendente);
 
         profissionalServiceMock.Verify(
             service => service.GetAll(),
@@ -92,7 +100,14 @@ public class ProfissionalControllerTests
 
         Assert.AreEqual(1u, profissional.IdPessoa);
         Assert.AreEqual(1u, profissional.IdEstabelecimento);
+        Assert.AreEqual((sbyte)1, profissional.GerirHorario);
+        Assert.AreEqual((sbyte)1, profissional.EstaAtivo);
+        Assert.AreEqual((sbyte)1, profissional.GerirServico);
+        Assert.AreEqual((sbyte)0, profissional.ReceberPagamentoDireto);
         Assert.AreEqual("prof1@pix.com", profissional.ChavePix);
+        Assert.AreEqual(15u, profissional.DuracaoIntervaloTempo);
+        Assert.AreEqual((sbyte?)1, profissional.EProfissional);
+        Assert.AreEqual((sbyte?)0, profissional.EAtendente);
 
         profissionalServiceMock.Verify(
             service => service.Get(1),
@@ -130,6 +145,15 @@ public class ProfissionalControllerTests
             viewResult.ViewData.Model);
 
         Assert.AreEqual(0u, profissional.IdPessoa);
+        Assert.AreEqual(0u, profissional.IdEstabelecimento);
+        Assert.AreEqual((sbyte)0, profissional.GerirHorario);
+        Assert.AreEqual((sbyte)1, profissional.EstaAtivo);
+        Assert.AreEqual((sbyte)0, profissional.GerirServico);
+        Assert.AreEqual((sbyte)0, profissional.ReceberPagamentoDireto);
+        Assert.IsNull(profissional.ChavePix);
+        Assert.AreEqual(0u, profissional.DuracaoIntervaloTempo);
+        Assert.AreEqual((sbyte?)1, profissional.EProfissional);
+        Assert.AreEqual((sbyte?)0, profissional.EAtendente);
     }
 
     [TestMethod]
@@ -152,7 +176,14 @@ public class ProfissionalControllerTests
         Assert.IsNotNull(profissionalCriado);
         Assert.AreEqual(modelo.IdPessoa, profissionalCriado.IdPessoa);
         Assert.AreEqual(modelo.IdEstabelecimento, profissionalCriado.IdEstabelecimento);
+        Assert.AreEqual(modelo.GerirHorario, profissionalCriado.GerirHorario);
+        Assert.AreEqual(modelo.EstaAtivo, profissionalCriado.EstaAtivo);
+        Assert.AreEqual(modelo.GerirServico, profissionalCriado.GerirServico);
+        Assert.AreEqual(modelo.ReceberPagamentoDireto, profissionalCriado.ReceberPagamentoDireto);
         Assert.AreEqual(modelo.ChavePix, profissionalCriado.ChavePix);
+        Assert.AreEqual(modelo.DuracaoIntervaloTempo, profissionalCriado.DuracaoIntervaloTempo);
+        Assert.AreEqual(modelo.EProfissional, profissionalCriado.EProfissional);
+        Assert.AreEqual(modelo.EAtendente, profissionalCriado.EAtendente);
 
         profissionalServiceMock.Verify(
             service => service.Create(It.IsAny<Profissional>()),
@@ -190,7 +221,15 @@ public class ProfissionalControllerTests
             viewResult.ViewData.Model);
 
         Assert.AreEqual(1u, profissional.IdPessoa);
+        Assert.AreEqual(1u, profissional.IdEstabelecimento);
+        Assert.AreEqual((sbyte)1, profissional.GerirHorario);
+        Assert.AreEqual((sbyte)1, profissional.EstaAtivo);
+        Assert.AreEqual((sbyte)1, profissional.GerirServico);
+        Assert.AreEqual((sbyte)0, profissional.ReceberPagamentoDireto);
         Assert.AreEqual("prof1@pix.com", profissional.ChavePix);
+        Assert.AreEqual(15u, profissional.DuracaoIntervaloTempo);
+        Assert.AreEqual((sbyte?)1, profissional.EProfissional);
+        Assert.AreEqual((sbyte?)0, profissional.EAtendente);
 
         profissionalServiceMock.Verify(
             service => service.Get(1),
@@ -235,7 +274,15 @@ public class ProfissionalControllerTests
 
         Assert.IsNotNull(profissionalEditado);
         Assert.AreEqual(modelo.IdPessoa, profissionalEditado.IdPessoa);
+        Assert.AreEqual(modelo.IdEstabelecimento, profissionalEditado.IdEstabelecimento);
+        Assert.AreEqual(modelo.GerirHorario, profissionalEditado.GerirHorario);
+        Assert.AreEqual(modelo.EstaAtivo, profissionalEditado.EstaAtivo);
+        Assert.AreEqual(modelo.GerirServico, profissionalEditado.GerirServico);
+        Assert.AreEqual(modelo.ReceberPagamentoDireto, profissionalEditado.ReceberPagamentoDireto);
         Assert.AreEqual(modelo.ChavePix, profissionalEditado.ChavePix);
+        Assert.AreEqual(modelo.DuracaoIntervaloTempo, profissionalEditado.DuracaoIntervaloTempo);
+        Assert.AreEqual(modelo.EProfissional, profissionalEditado.EProfissional);
+        Assert.AreEqual(modelo.EAtendente, profissionalEditado.EAtendente);
 
         profissionalServiceMock.Verify(
             service => service.Edit(It.IsAny<Profissional>()),
@@ -273,7 +320,15 @@ public class ProfissionalControllerTests
             viewResult.ViewData.Model);
 
         Assert.AreEqual(1u, profissional.IdPessoa);
+        Assert.AreEqual(1u, profissional.IdEstabelecimento);
+        Assert.AreEqual((sbyte)1, profissional.GerirHorario);
+        Assert.AreEqual((sbyte)1, profissional.EstaAtivo);
+        Assert.AreEqual((sbyte)1, profissional.GerirServico);
+        Assert.AreEqual((sbyte)0, profissional.ReceberPagamentoDireto);
         Assert.AreEqual("prof1@pix.com", profissional.ChavePix);
+        Assert.AreEqual(15u, profissional.DuracaoIntervaloTempo);
+        Assert.AreEqual((sbyte?)1, profissional.EProfissional);
+        Assert.AreEqual((sbyte?)0, profissional.EAtendente);
 
         profissionalServiceMock.Verify(
             service => service.Get(1),

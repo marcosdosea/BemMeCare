@@ -33,7 +33,12 @@ namespace BemMeCareWeb.Controllers
         // GET: ProfissionalController/Create
         public ActionResult Create()
         {
-            var profissionalViewModel = new ProfissionalViewModel();
+            var profissionalViewModel = new ProfissionalViewModel
+            {
+                EstaAtivo = 1,
+                EProfissional = 1,
+                EAtendente = 0
+            };
             return View(profissionalViewModel);
         }
 
