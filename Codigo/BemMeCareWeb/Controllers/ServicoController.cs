@@ -26,7 +26,9 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Details(uint id)
         {
             var servico = servicoService.Get(id);
-            var servicoViewModel = servico.ToViewModel();
+            var servicoViewModel = servico != null
+                ? servico.ToViewModel()
+                : new ServicoViewModel();
             return View(servicoViewModel);
         }
 
@@ -55,7 +57,9 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Edit(uint id)
         {
             var servico = servicoService.Get(id);
-            var servicoViewModel = servico.ToViewModel();
+            var servicoViewModel = servico != null
+                ? servico.ToViewModel()
+                : new ServicoViewModel();
             return View(servicoViewModel);
         }
 
@@ -77,7 +81,9 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Delete(uint id)
         {
             var servico = servicoService.Get(id);
-            var servicoViewModel = servico.ToViewModel();
+            var servicoViewModel = servico != null
+                ? servico.ToViewModel()
+                : new ServicoViewModel();
             return View(servicoViewModel);
         }
 

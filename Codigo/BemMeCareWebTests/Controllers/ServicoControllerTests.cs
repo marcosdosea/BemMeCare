@@ -1,4 +1,4 @@
-﻿using BemMeCareWeb.Controllers;
+using BemMeCareWeb.Controllers;
 using BemMeCareWeb.Models;
 using Core;
 using Core.Service;
@@ -10,180 +10,351 @@ namespace BemMeCareWebTests.Controllers;
 [TestClass]
 public class ServicoControllerTests
 {
-    private Mock<IServicoService> mockService = null!;
+    private Mock<IServicoService> servicoServiceMock = null!;
     private ServicoController controller = null!;
 
     [TestInitialize]
-    public void Initialize()
+    public void Inicializar()
     {
-        mockService = new Mock<IServicoService>();
+        servicoServiceMock = new Mock<IServicoService>();
 
-        mockService.Setup(service => service.GetAll())
-            .Returns(GetTestServicos());
+        servicoServiceMock
+            .Setup(service => service.GetAll())
+            .Returns(ObterServicosDeTeste());
 
-        mockService.Setup(service => service.Get(1))
-            .Returns(GetTargetServico());
+        servicoServiceMock
+            .Setup(service => service.Get(1))
+            .Returns(ObterServicoAlvo());
 
-        controller = new ServicoController(mockService.Object);
+        servicoServiceMock
+            .Setup(service => service.Get(999))
+            .Returns((Servico?)null);
+
+        controller = new ServicoController(servicoServiceMock.Object);
     }
 
     [TestMethod]
-    public void IndexTest_Valido()
+    public void Index_QuandoChamado_DeveRetornarViewComTodosOsServicos()
     {
-        var result = controller.Index();
+        // Act
+        var resultado = controller.Index();
 
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servicos = Assert.IsInstanceOfType<IEnumerable<ServicoViewModel>>(
+            viewResult.ViewData.Model);
 
-        var viewResult = (ViewResult)result;
-        Assert.IsInstanceOfType(
-            viewResult.ViewData.Model,
-            typeof(IEnumerable<ServicoViewModel>));
+        Assert.HasCount(3, servicos);
 
-        var lista = ((IEnumerable<ServicoViewModel>)viewResult.ViewData.Model!).ToList();
-        Assert.AreEqual(3, lista.Count);
+        var primeiroServico = servicos.First();
+
+        Assert.AreEqual(1u, primeiroServico.Id);
+        Assert.AreEqual("Corte", primeiroServico.Nome);
+        Assert.AreEqual(1u, primeiroServico.IdCategoria);
+        Assert.AreEqual(1u, primeiroServico.IdEstabelecimento);
+
+        servicoServiceMock.Verify(
+            service => service.GetAll(),
+            Times.Once);
     }
 
     [TestMethod]
-    public void DetailsTest_Valido()
+    public void Index_QuandoNaoExistemServicos_DeveRetornarViewComColecaoVazia()
     {
-        var result = controller.Details(1);
+        // Arrange
+        servicoServiceMock
+            .Setup(service => service.GetAll())
+            .Returns(Array.Empty<Servico>());
 
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
+        // Act
+        var resultado = controller.Index();
 
-        var viewResult = (ViewResult)result;
-        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(ServicoViewModel));
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servicos = Assert.IsInstanceOfType<IEnumerable<ServicoViewModel>>(
+            viewResult.ViewData.Model);
 
-        var servicoModel = (ServicoViewModel)viewResult.ViewData.Model!;
-        Assert.AreEqual(1U, servicoModel.Id);
-        Assert.AreEqual("Corte", servicoModel.Nome);
-        Assert.AreEqual(1U, servicoModel.IdCategoria);
-        Assert.AreEqual(1U, servicoModel.IdEstabelecimento);
+        Assert.IsEmpty(servicos);
+
+        servicoServiceMock.Verify(
+            service => service.GetAll(),
+            Times.Once);
     }
 
     [TestMethod]
-    public void CreateTest_Get_Valido()
+    public void Details_QuandoServicoExiste_DeveRetornarViewComServico()
     {
-        var result = controller.Create();
+        // Act
+        var resultado = controller.Details(1);
 
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servico = Assert.IsInstanceOfType<ServicoViewModel>(
+            viewResult.ViewData.Model);
 
-        var viewResult = (ViewResult)result;
-        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(ServicoViewModel));
+        VerificarServicoAlvo(servico);
+
+        servicoServiceMock.Verify(
+            service => service.Get(1),
+            Times.Once);
     }
 
     [TestMethod]
-    public void CreateTest_Post_Valido()
+    public void Details_QuandoServicoNaoExiste_DeveRetornarViewComModeloVazio()
     {
-        var result = controller.Create(GetNewServicoViewModel());
+        // Act
+        var resultado = controller.Details(999);
 
-        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servico = Assert.IsInstanceOfType<ServicoViewModel>(
+            viewResult.ViewData.Model);
 
-        var redirect = (RedirectToActionResult)result;
-        Assert.IsNull(redirect.ControllerName);
-        Assert.AreEqual("Index", redirect.ActionName);
+        VerificarModeloVazio(servico);
 
-        mockService.Verify(service => service.Create(
-            It.Is<Servico>(s =>
-                s.Nome == "Corte" &&
-                s.IdCategoria == 1 &&
-                s.IdEstabelecimento == 1)), Times.Once);
+        servicoServiceMock.Verify(
+            service => service.Get(999),
+            Times.Once);
     }
 
     [TestMethod]
-    public void CreateTest_Post_Invalido()
+    public void Create_QuandoRequisicaoGet_DeveRetornarViewComModeloInicial()
     {
-        controller.ModelState.AddModelError("Nome", "Nome do serviço é obrigatório");
+        // Act
+        var resultado = controller.Create();
 
-        var result = controller.Create(GetNewServicoViewModel());
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servico = Assert.IsInstanceOfType<ServicoViewModel>(
+            viewResult.ViewData.Model);
 
-        Assert.AreEqual(1, controller.ModelState.ErrorCount);
-        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
-
-        var redirect = (RedirectToActionResult)result;
-        Assert.AreEqual("Index", redirect.ActionName);
-
-        mockService.Verify(service => service.Create(It.IsAny<Servico>()), Times.Never);
+        VerificarModeloVazio(servico);
     }
 
     [TestMethod]
-    public void EditTest_Get_Valido()
+    public void Create_QuandoModeloValido_DeveCriarServicoERedirecionarParaIndex()
     {
-        var result = controller.Edit(1);
+        // Arrange
+        var modelo = CriarModeloDeNovoServico();
+        Servico? servicoCriado = null;
 
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
+        servicoServiceMock
+            .Setup(service => service.Create(It.IsAny<Servico>()))
+            .Callback<Servico>(servico => servicoCriado = servico);
 
-        var viewResult = (ViewResult)result;
-        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(ServicoViewModel));
+        // Act
+        var resultado = controller.Create(modelo);
 
-        var servicoModel = (ServicoViewModel)viewResult.ViewData.Model!;
-        Assert.AreEqual(1U, servicoModel.Id);
-        Assert.AreEqual("Corte", servicoModel.Nome);
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado);
+
+        Assert.IsNotNull(servicoCriado);
+        VerificarConversao(modelo, servicoCriado);
+
+        servicoServiceMock.Verify(
+            service => service.Create(It.IsAny<Servico>()),
+            Times.Once);
     }
 
     [TestMethod]
-    public void EditTest_Post_Valido()
+    public void Create_QuandoModeloInvalido_NaoDeveCriarServico()
     {
-        var result = controller.Edit(GetTargetServicoViewModel());
+        // Arrange
+        controller.ModelState.AddModelError(
+            nameof(ServicoViewModel.Nome),
+            "O nome do serviço é obrigatório.");
 
-        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+        // Act
+        var resultado = controller.Create(CriarModeloDeNovoServico());
 
-        var redirect = (RedirectToActionResult)result;
-        Assert.IsNull(redirect.ControllerName);
-        Assert.AreEqual("Index", redirect.ActionName);
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado);
 
-        mockService.Verify(service => service.Edit(
-            It.Is<Servico>(s =>
-                s.Id == 1 &&
-                s.Nome == "Corte" &&
-                s.IdCategoria == 1 &&
-                s.IdEstabelecimento == 1)), Times.Once);
+        servicoServiceMock.Verify(
+            service => service.Create(It.IsAny<Servico>()),
+            Times.Never);
     }
 
     [TestMethod]
-    public void EditTest_Post_Invalido()
+    public void Edit_QuandoRequisicaoGetEServicoExiste_DeveRetornarViewComServico()
     {
-        controller.ModelState.AddModelError("Nome", "Nome do serviço é obrigatório");
+        // Act
+        var resultado = controller.Edit(1);
 
-        var result = controller.Edit(GetTargetServicoViewModel());
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servico = Assert.IsInstanceOfType<ServicoViewModel>(
+            viewResult.ViewData.Model);
 
-        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+        VerificarServicoAlvo(servico);
 
-        var redirect = (RedirectToActionResult)result;
-        Assert.AreEqual("Index", redirect.ActionName);
-
-        mockService.Verify(service => service.Edit(It.IsAny<Servico>()), Times.Never);
+        servicoServiceMock.Verify(
+            service => service.Get(1),
+            Times.Once);
     }
 
     [TestMethod]
-    public void DeleteTest_Get_Valido()
+    public void Edit_QuandoRequisicaoGetEServicoNaoExiste_DeveRetornarViewComModeloVazio()
     {
-        var result = controller.Delete(1);
+        // Act
+        var resultado = controller.Edit(999);
 
-        Assert.IsInstanceOfType(result, typeof(ViewResult));
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servico = Assert.IsInstanceOfType<ServicoViewModel>(
+            viewResult.ViewData.Model);
 
-        var viewResult = (ViewResult)result;
-        Assert.IsInstanceOfType(viewResult.ViewData.Model, typeof(ServicoViewModel));
+        VerificarModeloVazio(servico);
 
-        var servicoModel = (ServicoViewModel)viewResult.ViewData.Model!;
-        Assert.AreEqual(1U, servicoModel.Id);
-        Assert.AreEqual("Corte", servicoModel.Nome);
+        servicoServiceMock.Verify(
+            service => service.Get(999),
+            Times.Once);
     }
 
     [TestMethod]
-    public void DeleteTest_Post_Valido()
+    public void Edit_QuandoModeloValido_DeveAtualizarServicoERedirecionarParaIndex()
     {
-        var result = controller.Delete(GetTargetServicoViewModel());
+        // Arrange
+        var modelo = CriarModeloDeServicoExistente();
+        Servico? servicoEditado = null;
 
-        Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+        servicoServiceMock
+            .Setup(service => service.Edit(It.IsAny<Servico>()))
+            .Callback<Servico>(servico => servicoEditado = servico);
 
-        var redirect = (RedirectToActionResult)result;
-        Assert.IsNull(redirect.ControllerName);
-        Assert.AreEqual("Index", redirect.ActionName);
+        // Act
+        var resultado = controller.Edit(modelo);
 
-        mockService.Verify(service => service.Delete(1), Times.Once);
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado);
+
+        Assert.IsNotNull(servicoEditado);
+        VerificarConversao(modelo, servicoEditado);
+
+        servicoServiceMock.Verify(
+            service => service.Edit(It.IsAny<Servico>()),
+            Times.Once);
     }
 
-    private static ServicoViewModel GetNewServicoViewModel()
+    [TestMethod]
+    public void Edit_QuandoModeloInvalido_NaoDeveAtualizarServico()
+    {
+        // Arrange
+        controller.ModelState.AddModelError(
+            nameof(ServicoViewModel.Nome),
+            "O nome do serviço é obrigatório.");
+
+        // Act
+        var resultado = controller.Edit(CriarModeloDeServicoExistente());
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado);
+
+        servicoServiceMock.Verify(
+            service => service.Edit(It.IsAny<Servico>()),
+            Times.Never);
+    }
+
+    [TestMethod]
+    public void Delete_QuandoRequisicaoGetEServicoExiste_DeveRetornarViewComServico()
+    {
+        // Act
+        var resultado = controller.Delete(1);
+
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servico = Assert.IsInstanceOfType<ServicoViewModel>(
+            viewResult.ViewData.Model);
+
+        VerificarServicoAlvo(servico);
+
+        servicoServiceMock.Verify(
+            service => service.Get(1),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void Delete_QuandoRequisicaoGetEServicoNaoExiste_DeveRetornarViewComModeloVazio()
+    {
+        // Act
+        var resultado = controller.Delete(999);
+
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servico = Assert.IsInstanceOfType<ServicoViewModel>(
+            viewResult.ViewData.Model);
+
+        VerificarModeloVazio(servico);
+
+        servicoServiceMock.Verify(
+            service => service.Get(999),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void Delete_QuandoRequisicaoPost_DeveExcluirServicoERedirecionarParaIndex()
+    {
+        // Arrange
+        var modelo = CriarModeloDeServicoExistente();
+
+        // Act
+        var resultado = controller.Delete(modelo);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado);
+
+        servicoServiceMock.Verify(
+            service => service.Delete(modelo.Id),
+            Times.Once);
+    }
+
+    private static void VerificarRedirecionamentoParaIndex(ActionResult resultado)
+    {
+        var redirectResult =
+            Assert.IsInstanceOfType<RedirectToActionResult>(resultado);
+
+        Assert.IsNull(redirectResult.ControllerName);
+        Assert.AreEqual(
+            nameof(ServicoController.Index),
+            redirectResult.ActionName);
+    }
+
+    private static void VerificarServicoAlvo(ServicoViewModel servico)
+    {
+        Assert.AreEqual(1u, servico.Id);
+        Assert.AreEqual("Corte", servico.Nome);
+        Assert.AreEqual(1u, servico.IdCategoria);
+        Assert.AreEqual(1u, servico.IdEstabelecimento);
+    }
+
+    private static void VerificarModeloVazio(ServicoViewModel servico)
+    {
+        Assert.AreEqual(0u, servico.Id);
+        Assert.IsTrue(string.IsNullOrEmpty(servico.Nome));
+        Assert.AreEqual(0u, servico.IdCategoria);
+        Assert.AreEqual(0u, servico.IdEstabelecimento);
+    }
+
+    private static void VerificarConversao(ServicoViewModel modelo, Servico servico)
+    {
+        Assert.AreEqual(modelo.Id, servico.Id);
+        Assert.AreEqual(modelo.Nome, servico.Nome);
+        Assert.AreEqual(modelo.IdCategoria, servico.IdCategoria);
+        Assert.AreEqual(modelo.IdEstabelecimento, servico.IdEstabelecimento);
+    }
+
+    private static ServicoViewModel CriarModeloDeNovoServico()
+    {
+        return new ServicoViewModel
+        {
+            Id = 4,
+            Nome = "Massagem",
+            IdCategoria = 2,
+            IdEstabelecimento = 1
+        };
+    }
+
+    private static ServicoViewModel CriarModeloDeServicoExistente()
     {
         return new ServicoViewModel
         {
@@ -194,12 +365,7 @@ public class ServicoControllerTests
         };
     }
 
-    private static ServicoViewModel GetTargetServicoViewModel()
-    {
-        return GetNewServicoViewModel();
-    }
-
-    private static Servico GetTargetServico()
+    private static Servico ObterServicoAlvo()
     {
         return new Servico
         {
@@ -210,11 +376,11 @@ public class ServicoControllerTests
         };
     }
 
-    private static IEnumerable<Servico> GetTestServicos()
+    private static IEnumerable<Servico> ObterServicosDeTeste()
     {
-        return new List<Servico>
-        {
-            GetTargetServico(),
+        return
+        [
+            ObterServicoAlvo(),
             new Servico
             {
                 Id = 2,
@@ -229,6 +395,6 @@ public class ServicoControllerTests
                 IdCategoria = 1,
                 IdEstabelecimento = 2
             }
-        };
+        ];
     }
 }
