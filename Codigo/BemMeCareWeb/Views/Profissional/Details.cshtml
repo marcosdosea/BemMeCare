@@ -1,0 +1,78 @@
+﻿@model BemMeCareWeb.Models.ProfissionalViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>ProfissionalViewModel</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IdPessoa)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.IdPessoa)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IdEstabelecimento)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.IdEstabelecimento)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.GerirHorario)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.GerirHorario)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.EstaAtivo)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.EstaAtivo)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.GerirServico)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.GerirServico)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ReceberPagamentoDireto)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ReceberPagamentoDireto)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ChavePix)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ChavePix)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DuracaoIntervaloTempo)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DuracaoIntervaloTempo)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.EProfissional)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.EProfissional)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.EAtendente)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.EAtendente)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.IdPessoa">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

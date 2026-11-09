@@ -1,0 +1,90 @@
+﻿@model IEnumerable<BemMeCareWeb.Models.ProfissionalViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.IdPessoa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdEstabelecimento)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GerirHorario)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EstaAtivo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GerirServico)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ReceberPagamentoDireto)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ChavePix)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DuracaoIntervaloTempo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EProfissional)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EAtendente)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IdPessoa)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IdEstabelecimento)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.GerirHorario)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EstaAtivo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.GerirServico)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ReceberPagamentoDireto)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ChavePix)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DuracaoIntervaloTempo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EProfissional)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EAtendente)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdPessoa">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.IdPessoa">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdPessoa">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
