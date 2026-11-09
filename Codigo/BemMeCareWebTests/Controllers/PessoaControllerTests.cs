@@ -10,8 +10,8 @@ namespace BemMeCareWebTests.Controllers;
 [TestClass]
 public class PessoaControllerTests
 {
-    private static PessoaController controller;
-    private static Mock<IPessoaService> mockService;
+    private PessoaController controller;
+    private Mock<IPessoaService> mockService;
 
     [TestInitialize]
     public void Initialize()
@@ -35,42 +35,44 @@ public class PessoaControllerTests
     }
 
     [TestMethod]
-    public void Index_QuandoChamado_DeveRetornarViewComListaDePessoas()
+    public void Index_QuandoChamado_DeveRetornarViewComTodasPessoas()
     {
         // Act
         var result = controller.Index();
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
-        var listaPessoas = Assert.IsInstanceOfType<List<PessoaViewModel>>(viewResult.ViewData.Model);
+        var listaPessoas = Assert.IsInstanceOfType<IEnumerable<PessoaViewModel>>(viewResult.ViewData.Model);
 
-        Assert.AreEqual(3, listaPessoas.Count);
+        Assert.AreEqual(3, listaPessoas.Count());
 
-        AssertPessoaViewModel(CriarModeloDePessoaExistente(), listaPessoas[0]);
+        AssertPessoaViewModel(CriarModeloDePessoaExistente(), listaPessoas.First());
 
         mockService.Verify(
-            service => service.GetAll(), 
+            service => service.GetAll(),
             Times.Once);
     }
 
     [TestMethod]
-    public void Index_QuandoNaoExistemPessoas_DeveRetornarViewComListaVazia()
+    public void Index_QuandoNaoExistemPessoas_DeveRetornarViewComColecaoVazia()
     {
         // Arrange
-        mockService.Setup(service => service.GetAll())
-            .Returns(new List<Pessoa>());
+        mockService
+            .Setup(service => service.GetAll())
+            .Returns(Array.Empty<Pessoa>());
 
         // Act
-        var result = controller.Index();
+        var resultado = controller.Index();
 
         // Assert
-        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
-        var listaPessoas = Assert.IsInstanceOfType<List<PessoaViewModel>>(viewResult.ViewData.Model);
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var pessoas = Assert.IsInstanceOfType<IEnumerable<PessoaViewModel>>(
+            viewResult.ViewData.Model);
 
-        Assert.AreEqual(0, listaPessoas.Count);
+        Assert.AreEqual(0, pessoas.Count());
 
         mockService.Verify(
-            service => service.GetAll(), 
+            service => service.GetAll(),
             Times.Once);
     }
 
