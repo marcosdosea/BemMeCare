@@ -1,7 +1,8 @@
-﻿using BemMeCareWeb.Models;
+﻿using BemMeCareWeb.Mappers;
+using BemMeCareWeb.Models;
 using Core.Service;
-using BemMeCareWeb.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace BemMeCareWeb.Controllers
 {
@@ -25,7 +26,7 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Details(uint id)
         {
             var estabelecimento = estabelecimentoService.Get(id);
-            var estabelecimentoViewModel = estabelecimento.ToViewModel();
+            var estabelecimentoViewModel = estabelecimento != null ? EstabelecimentoMapper.ToViewModel(estabelecimento) : new EstabelecimentoViewModel();
             return View(estabelecimentoViewModel);
         }
 
@@ -43,7 +44,7 @@ namespace BemMeCareWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                var estabelecimento = estabelecimentoViewModel.ToEntity();
+                var estabelecimento = EstabelecimentoMapper.ToEntity(estabelecimentoViewModel);
                 estabelecimentoService.Create(estabelecimento);
             }
             return RedirectToAction(nameof(Index));
@@ -52,7 +53,7 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Edit(uint id)
         {
             var estabelecimento = estabelecimentoService.Get(id);
-            var estabelecimentoViewModel = estabelecimento.ToViewModel();
+            var estabelecimentoViewModel = estabelecimento != null ? EstabelecimentoMapper.ToViewModel(estabelecimento) : new EstabelecimentoViewModel();
             return View(estabelecimentoViewModel);
         }
         // POST: EstabelecimentoController/Edit/5
@@ -62,7 +63,7 @@ namespace BemMeCareWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                var estabelecimento = estabelecimentoViewModel.ToEntity();
+                var estabelecimento = EstabelecimentoMapper.ToEntity(estabelecimentoViewModel);
                 estabelecimentoService.Edit(estabelecimento);
             }
             return RedirectToAction(nameof(Index));
@@ -71,7 +72,7 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Delete(uint id)
         {
             var estabelecimento = estabelecimentoService.Get(id);
-            var estabelecimentoViewModel = estabelecimento.ToViewModel();
+            var estabelecimentoViewModel = estabelecimento != null ? EstabelecimentoMapper.ToViewModel(estabelecimento) : new EstabelecimentoViewModel();
             return View(estabelecimentoViewModel);
         }
         // POST: EstabelecimentoController/Delete/5

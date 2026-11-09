@@ -49,18 +49,18 @@ public class EstabelecimentoControllerTests
         var primeiro = estabelecimentos.First();
 
         Assert.AreEqual(1u, primeiro.Id);
-        Assert.AreEqual("Estabelecimento 1", primeiro.Nome);
-        Assert.AreEqual("modalidade-1", primeiro.Modalidade);
+        Assert.AreEqual("Salão Espaço Bella", primeiro.Nome);
+        Assert.AreEqual("Modalidade-1", primeiro.Modalidade);
         Assert.AreEqual("12345678000190", primeiro.Cnpj);
-        Assert.AreEqual("12345678", primeiro.Cep);
-        Assert.AreEqual("Rua 1", primeiro.Rua);
-        Assert.AreEqual("123", primeiro.Numero);
-        Assert.AreEqual("Complemento 1", primeiro.Complemento);
-        Assert.AreEqual("Bairro 1", primeiro.Bairro);
-        Assert.AreEqual("Cidade 1", primeiro.Cidade);
-        Assert.AreEqual("Estado 1", primeiro.Estado);
-        Assert.AreEqual("(79) 91234-5678", primeiro.Contato);
-        Assert.AreEqual("chave-pix-1", primeiro.ChavePix);
+        Assert.AreEqual("49010000", primeiro.Cep);
+        Assert.AreEqual("Rua Laranjeiras", primeiro.Rua);
+        Assert.AreEqual("245", primeiro.Numero);
+        Assert.AreEqual("Loja 2", primeiro.Complemento);
+        Assert.AreEqual("Centro", primeiro.Bairro);
+        Assert.AreEqual("Aracaju", primeiro.Cidade);
+        Assert.AreEqual("Sergipe", primeiro.Estado);
+        Assert.AreEqual("(79) 3211-4455", primeiro.Contato);
+        Assert.AreEqual("contato@espacobella.com.br", primeiro.ChavePix);
         Assert.AreEqual(1u, primeiro.IdPessoa);
 
         estabelecimentoServiceMock.Verify(
@@ -103,15 +103,18 @@ public class EstabelecimentoControllerTests
             viewResult.ViewData.Model);
 
         Assert.AreEqual(1u, estabelecimento.Id);
-        Assert.AreEqual("Estabelecimento Existente", estabelecimento.Nome);
-        Assert.AreEqual("modalidade-existente", estabelecimento.Modalidade);
+        Assert.AreEqual("Barbearia Navalha de Ouro", estabelecimento.Nome);
+        Assert.AreEqual("Modalidade-5", estabelecimento.Modalidade);
         Assert.AreEqual("98765432000110", estabelecimento.Cnpj);
-        Assert.AreEqual("87654321", estabelecimento.Cep);
+        Assert.AreEqual("49015120", estabelecimento.Cep);
         Assert.AreEqual("Rua Alberto", estabelecimento.Rua);
         Assert.AreEqual("456", estabelecimento.Numero);
-        Assert.AreEqual("Bairro Existente", estabelecimento.Bairro);
-        Assert.AreEqual("Cidade Existente", estabelecimento.Cidade);
-        Assert.AreEqual("Estado Existente", estabelecimento.Estado);
+        Assert.AreEqual("Sala 3", estabelecimento.Complemento);
+        Assert.AreEqual("São José", estabelecimento.Bairro);
+        Assert.AreEqual("Aracaju", estabelecimento.Cidade);
+        Assert.AreEqual("Sergipe", estabelecimento.Estado);
+        Assert.AreEqual("(79) 99876-5432", estabelecimento.Contato);
+        Assert.AreEqual("contato@navalhadeouro.com.br", estabelecimento.ChavePix);
         Assert.AreEqual(2u, estabelecimento.IdPessoa);
 
         estabelecimentoServiceMock.Verify(
@@ -224,17 +227,19 @@ public class EstabelecimentoControllerTests
             viewResult.ViewData.Model);
 
         Assert.AreEqual(1u, estabelecimento.Id);
-        Assert.AreEqual("Estabelecimento Existente", estabelecimento.Nome);
-        Assert.AreEqual("Cidade Existente", estabelecimento.Cidade);
+        Assert.AreEqual("Barbearia Navalha de Ouro", estabelecimento.Nome);
+        Assert.AreEqual("Modalidade-5", estabelecimento.Modalidade);
+        Assert.AreEqual("98765432000110", estabelecimento.Cnpj);
+        Assert.AreEqual("Aracaju", estabelecimento.Cidade);
         Assert.AreEqual(2u, estabelecimento.IdPessoa);
-        Assert.AreEqual("Cep Existente", estabelecimento.Cep);
-        Assert.AreEqual("Rua Existente", estabelecimento.Rua);
-        Assert.AreEqual("Numero Existente", estabelecimento.Numero);
-        Assert.AreEqual("Complemento Existente", estabelecimento.Complemento);
-        Assert.AreEqual("Bairro Existente", estabelecimento.Bairro);
-        Assert.AreEqual("Estado Existente", estabelecimento.Estado);
-        Assert.AreEqual("Contato Existente", estabelecimento.Contato);
-        Assert.AreEqual("ChavePix Existente", estabelecimento.ChavePix);
+        Assert.AreEqual("49015120", estabelecimento.Cep);
+        Assert.AreEqual("Rua Alberto", estabelecimento.Rua);
+        Assert.AreEqual("456", estabelecimento.Numero);
+        Assert.AreEqual("Sala 3", estabelecimento.Complemento);
+        Assert.AreEqual("São José", estabelecimento.Bairro);
+        Assert.AreEqual("Sergipe", estabelecimento.Estado);
+        Assert.AreEqual("(79) 99876-5432", estabelecimento.Contato);
+        Assert.AreEqual("contato@navalhadeouro.com.br", estabelecimento.ChavePix);
 
         estabelecimentoServiceMock.Verify(
             service => service.Get(1),
@@ -329,19 +334,19 @@ public class EstabelecimentoControllerTests
             viewResult.ViewData.Model);
 
         Assert.AreEqual(1u, estabelecimento.Id);
-        Assert.AreEqual("Estabelecimento Existente", estabelecimento.Nome);
-        Assert.AreEqual("Modalidade Existente", estabelecimento.Modalidade);
-        Assert.AreEqual("Cnpj Existente", estabelecimento.Cnpj);
-        Assert.AreEqual("Cep Existente", estabelecimento.Cep);
-        Assert.AreEqual("Rua Existente", estabelecimento.Rua);
-        Assert.AreEqual("Numero Existente", estabelecimento.Numero);
-        Assert.AreEqual("Complemento Existente", estabelecimento.Complemento);
-        Assert.AreEqual("Bairro Existente", estabelecimento.Bairro);
-        Assert.AreEqual("Cidade Existente", estabelecimento.Cidade);
-        Assert.AreEqual("Estado Existente", estabelecimento.Estado);
-        Assert.AreEqual("Contato Existente", estabelecimento.Contato);
-        Assert.AreEqual("ChavePix Existente", estabelecimento.ChavePix);
-        Assert.AreEqual(1u, estabelecimento.IdPessoa);
+        Assert.AreEqual("Barbearia Navalha de Ouro", estabelecimento.Nome);
+        Assert.AreEqual("Modalidade-5", estabelecimento.Modalidade);
+        Assert.AreEqual("98765432000110", estabelecimento.Cnpj);
+        Assert.AreEqual("49015120", estabelecimento.Cep);
+        Assert.AreEqual("Rua Alberto", estabelecimento.Rua);
+        Assert.AreEqual("456", estabelecimento.Numero);
+        Assert.AreEqual("Sala 3", estabelecimento.Complemento);
+        Assert.AreEqual("São José", estabelecimento.Bairro);
+        Assert.AreEqual("Aracaju", estabelecimento.Cidade);
+        Assert.AreEqual("Sergipe", estabelecimento.Estado);
+        Assert.AreEqual("(79) 99876-5432", estabelecimento.Contato);
+        Assert.AreEqual("contato@navalhadeouro.com.br", estabelecimento.ChavePix);
+        Assert.AreEqual(2u, estabelecimento.IdPessoa);
 
         estabelecimentoServiceMock.Verify(
             service => service.Get(1),
@@ -421,12 +426,12 @@ public class EstabelecimentoControllerTests
         return new EstabelecimentoViewModel
         {
             Id = 1,
-            Nome = "Estabelecimento Existente",
-            Modalidade = "modalidade-existente",
-            Cnpj = "98765432000110",
-            Cep = "87654321",
-            Rua = "Rua Alberto",
-            Numero = "456",
+            Nome = "Mercado Bom Preço",
+            Modalidade = "Modalidade Existente",
+            Cnpj = "11222333000181",
+            Cep = "49010000",
+            Rua = "Rua Laranjeiras",
+            Numero = "245",
             Complemento = "Complemento Existente",
             Bairro = "Bairro Existente",
             Cidade = "Cidade Existente",
@@ -442,18 +447,18 @@ public class EstabelecimentoControllerTests
         return new Estabelecimento
         {
             Id = 1,
-            Nome = "Estabelecimento Existente",
-            Modalidade = "modalidade-existente",
+            Nome = "Barbearia Navalha de Ouro",
+            Modalidade = "Modalidade-5",
             Cnpj = "98765432000110",
-            Cep = "87654321",
+            Cep = "49015120",
             Rua = "Rua Alberto",
             Numero = "456",
-            Complemento = "Complemento Existente",
-            Bairro = "Bairro Existente",
-            Cidade = "Cidade Existente",
-            Estado = "Estado Existente",
+            Complemento = "Sala 3",
+            Bairro = "São José",
+            Cidade = "Aracaju",
+            Estado = "Sergipe",
             Contato = "(79) 99876-5432",
-            ChavePix = "chave-pix-existente",
+            ChavePix = "contato@navalhadeouro.com.br",
             IdPessoa = 2
         };
     }
@@ -465,52 +470,52 @@ public class EstabelecimentoControllerTests
             new Estabelecimento
             {
                 Id = 1,
-                Nome = "Estabelecimento 1",
-                Modalidade = "modalidade-1",
+                Nome = "Salão Espaço Bella",
+                Modalidade = "Modalidade-1",
                 Cnpj = "12345678000190",
-                Cep = "12345678",
-                Rua = "Rua 1",
-                Numero = "123",
-                Complemento = "Complemento 1",
-                Bairro = "Bairro 1",
-                Cidade = "Cidade 1",
-                Estado = "Estado 1",
-                Contato = "(79) 91234-5678",
-                ChavePix = "chave-pix-1",
+                Cep = "49010000",
+                Rua = "Rua Laranjeiras",
+                Numero = "245",
+                Complemento = "Loja 2",
+                Bairro = "Centro",
+                Cidade = "Aracaju",
+                Estado = "Sergipe",
+                Contato = "(79) 3211-4455",
+                ChavePix = "contato@espacobella.com.br",
                 IdPessoa = 1
             },
             new Estabelecimento
             {
                 Id = 2,
-                Nome = "Estabelecimento 2",
-                Modalidade = "modalidade-2",
+                Nome = "Barbearia Navalha de Ouro",
+                Modalidade = "Modalidade-2",
                 Cnpj = "98765432000110",
-                Cep = "87654321",
-                Rua = "Rua 2",
-                Numero = "456",
-                Complemento = "Complemento 2",
-                Bairro = "Bairro 2",
-                Cidade = "Cidade 2",
-                Estado = "Estado 2",
-                Contato = "(79) 99876-5432",
-                ChavePix = "chave-pix-2",
+                Cep = "40015970",
+                Rua = "Avenida Sete de Setembro",
+                Numero = "1500",
+                Complemento = "Sala 304",
+                Bairro = "Barra",
+                Cidade = "Salvador",
+                Estado = "Bahia",
+                Contato = "(71) 99876-5432",
+                ChavePix = "11222333000181",
                 IdPessoa = 2
             },
             new Estabelecimento
             {
                 Id = 3,
-                Nome = "Estabelecimento 3",
-                Modalidade = "modalidade-3",
+                Nome = "Studio Glamour Nails",
+                Modalidade = "Modalidade-3",
                 Cnpj = "11222333000181",
-                Cep = "49000000",
-                Rua = "Rua 3",
-                Numero = "789",
-                Complemento = "Complemento 3",
-                Bairro = "Bairro 3",
-                Cidade = "Cidade 3",
-                Estado = "Estado 3",
-                Contato = "(79) 98888-7777",
-                ChavePix = "chave-pix-3",
+                Cep = "01310100",
+                Rua = "Avenida Paulista",
+                Numero = "900",
+                Complemento = "Conjunto 12",
+                Bairro = "Bela Vista",
+                Cidade = "São Paulo",
+                Estado = "SP",
+                Contato = "(11) 91234-0000",
+                ChavePix = "+5511912340000",
                 IdPessoa = 3
             }
         ];
