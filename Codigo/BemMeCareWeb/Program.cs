@@ -17,6 +17,7 @@ namespace BemMeCareWeb
             builder.Services.AddDbContext<BemMeCareContext>(
                 options => options.UseMySQL(builder.Configuration.GetConnectionString("BemMeCareDatabase")));
 
+            builder.Services.AddTransient<ICategoriaService, CategoriaService>();
             builder.Services.AddTransient<IProfissionalService, ProfissionalService>();
             builder.Services.AddTransient<IPessoaService, PessoaService>();
 
