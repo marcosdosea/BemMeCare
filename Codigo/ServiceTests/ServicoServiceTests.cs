@@ -36,7 +36,7 @@ public class ServicoServiceTests
     {
         var novoServico = CriarNovoServico();
 
-        var idRetornado = servico.Create(novoServico);
+        var idRetornado = servico.Create(novoServico, 1);
 
         Assert.AreEqual(4u, idRetornado);
     }
@@ -46,37 +46,52 @@ public class ServicoServiceTests
     {
         var servicoEsperado = CriarNovoServico();
 
-        servico.Create(servicoEsperado);
+        servico.Create(servicoEsperado, 1);
 
-        var servicoCriado = servico.Get(4);
+        var servicoCriado = servico.Get(4, 1);
 
         Assert.IsNotNull(servicoCriado);
         VerificarDados(servicoEsperado, servicoCriado);
     }
 
     [TestMethod]
+    public void Create_QuandoEstabelecimentoInformado_DeveUsarEsseEstabelecimento()
+    {
+        var novoServico = CriarNovoServico();
+        novoServico.IdEstabelecimento = 1;
+
+        servico.Create(novoServico, 2);
+
+        var servicoCriado = servico.Get(4, 2);
+
+        Assert.IsNotNull(servicoCriado);
+        Assert.AreEqual(2u, servicoCriado.IdEstabelecimento);
+        Assert.IsNull(servico.Get(4, 1));
+    }
+
+    [TestMethod]
     public void Delete_QuandoServicoExiste_DeveRemoverServico()
     {
-        servico.Delete(2);
+        servico.Delete(2, 1);
 
-        var servicoExcluido = servico.Get(2);
-        var servicosRestantes = servico.GetAll().ToList();
+        var servicoExcluido = servico.Get(2, 1);
+        var servicosRestantes = servico.GetAll(1).ToList();
 
         Assert.IsNull(servicoExcluido);
-        Assert.HasCount(2, servicosRestantes);
+        Assert.HasCount(1, servicosRestantes);
         Assert.IsFalse(servicosRestantes.Any(item => item.Id == 2));
     }
 
     [TestMethod]
     public void Delete_QuandoServicoNaoExiste_NaoDeveAlterarOsDados()
     {
-        var idsIniciais = servico.GetAll()
+        var idsIniciais = servico.GetAll(1)
             .Select(item => item.Id)
             .ToList();
 
-        servico.Delete(999);
+        servico.Delete(999, 1);
 
-        var idsFinais = servico.GetAll()
+        var idsFinais = servico.GetAll(1)
             .Select(item => item.Id)
             .ToList();
 
@@ -84,9 +99,17 @@ public class ServicoServiceTests
     }
 
     [TestMethod]
+    public void Delete_QuandoServicoPertenceAOutroEstabelecimento_NaoDeveRemover()
+    {
+        servico.Delete(3, 1);
+
+        Assert.IsNotNull(servico.Get(3, 2));
+    }
+
+    [TestMethod]
     public void Edit_QuandoServicoExiste_DeveAtualizarSeusDados()
     {
-        var servicoEditado = servico.Get(3);
+        var servicoEditado = servico.Get(3, 2);
 
         Assert.IsNotNull(servicoEditado);
 
@@ -94,20 +117,41 @@ public class ServicoServiceTests
         servicoEditado.IdCategoria = 2;
         servicoEditado.IdEstabelecimento = 1;
 
-        servico.Edit(servicoEditado);
+        servico.Edit(servicoEditado, 2);
 
-        var resultado = servico.Get(3);
+        var resultado = servico.Get(3, 2);
 
         Assert.IsNotNull(resultado);
         Assert.AreEqual("Barba atualizada", resultado.Nome);
         Assert.AreEqual(2u, resultado.IdCategoria);
-        Assert.AreEqual(1u, resultado.IdEstabelecimento);
+        Assert.AreEqual(2u, resultado.IdEstabelecimento);
+    }
+
+    [TestMethod]
+    public void Edit_QuandoServicoPertenceAOutroEstabelecimento_NaoDeveAtualizar()
+    {
+        var alteracao = new Servico
+        {
+            Id = 3,
+            Nome = "Barba alterada",
+            IdCategoria = 2,
+            IdEstabelecimento = 1
+        };
+
+        servico.Edit(alteracao, 1);
+
+        var resultado = servico.Get(3, 2);
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual("Barba", resultado.Nome);
+        Assert.AreEqual(1u, resultado.IdCategoria);
+        Assert.AreEqual(2u, resultado.IdEstabelecimento);
     }
 
     [TestMethod]
     public void Get_QuandoIdExiste_DeveRetornarServicoCorrespondente()
     {
-        var resultado = servico.Get(1);
+        var resultado = servico.Get(1, 1);
 
         Assert.IsNotNull(resultado);
         Assert.AreEqual(1u, resultado.Id);
@@ -119,19 +163,28 @@ public class ServicoServiceTests
     [TestMethod]
     public void Get_QuandoIdNaoExiste_DeveRetornarNulo()
     {
-        var resultado = servico.Get(999);
+        var resultado = servico.Get(999, 1);
 
         Assert.IsNull(resultado);
     }
 
     [TestMethod]
-    public void GetAll_QuandoExistemServicos_DeveRetornarTodosOsServicos()
+    public void Get_QuandoServicoPertenceAOutroEstabelecimento_DeveRetornarNulo()
     {
-        var resultados = servico.GetAll().ToList();
+        var resultado = servico.Get(3, 1);
 
-        Assert.HasCount(3, resultados);
+        Assert.IsNull(resultado);
+    }
+
+    [TestMethod]
+    public void GetAll_QuandoExistemServicos_DeveRetornarSomenteOsDoEstabelecimento()
+    {
+        var resultados = servico.GetAll(1).ToList();
+
+        Assert.HasCount(2, resultados);
+        Assert.IsTrue(resultados.All(item => item.IdEstabelecimento == 1));
         CollectionAssert.AreEquivalent(
-            new uint[] { 1, 2, 3 },
+            new uint[] { 1, 2 },
             resultados.Select(item => item.Id).ToList());
     }
 
@@ -141,7 +194,15 @@ public class ServicoServiceTests
         contexto.Servicos.RemoveRange(contexto.Servicos);
         contexto.SaveChanges();
 
-        var resultados = servico.GetAll().ToList();
+        var resultados = servico.GetAll(1).ToList();
+
+        Assert.IsEmpty(resultados);
+    }
+
+    [TestMethod]
+    public void GetAll_QuandoEstabelecimentoNaoPossuiServicos_DeveRetornarColecaoVazia()
+    {
+        var resultados = servico.GetAll(999).ToList();
 
         Assert.IsEmpty(resultados);
     }
@@ -149,7 +210,7 @@ public class ServicoServiceTests
     [TestMethod]
     public void GetByNome_QuandoExisteCorrespondencia_DeveRetornarServicosCorrespondentes()
     {
-        var resultados = servico.GetByNome("Cor").ToList();
+        var resultados = servico.GetByNome("Cor", 1).ToList();
 
         Assert.HasCount(1, resultados);
         Assert.AreEqual("Corte", resultados[0].Nome);
@@ -158,7 +219,7 @@ public class ServicoServiceTests
     [TestMethod]
     public void GetByNome_QuandoNaoExisteCorrespondencia_DeveRetornarColecaoVazia()
     {
-        var resultados = servico.GetByNome("Inexistente").ToList();
+        var resultados = servico.GetByNome("Inexistente", 1).ToList();
 
         Assert.IsEmpty(resultados);
     }
@@ -166,9 +227,10 @@ public class ServicoServiceTests
     [TestMethod]
     public void GetByNome_QuandoNomeEstaVazio_DeveRetornarTodosOsServicos()
     {
-        var resultados = servico.GetByNome(string.Empty).ToList();
+        var resultados = servico.GetByNome(string.Empty, 1).ToList();
 
-        Assert.HasCount(3, resultados);
+        Assert.HasCount(2, resultados);
+        Assert.IsTrue(resultados.All(item => item.IdEstabelecimento == 1));
     }
 
     private static Servico CriarNovoServico()
