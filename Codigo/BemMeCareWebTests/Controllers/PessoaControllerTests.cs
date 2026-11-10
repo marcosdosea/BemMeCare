@@ -35,7 +35,7 @@ public class PessoaControllerTests
     }
 
     [TestMethod]
-    public void Index_QuandoChamado_DeveRetornarViewComListaDePessoas()
+    public void Index_QuandoChamado_DeveRetornarViewComTodasPessoas()
     {
         // Act
         var result = controller.Index();
@@ -49,19 +49,20 @@ public class PessoaControllerTests
         AssertPessoaViewModel(CriarModeloDePessoaExistente(), listaPessoas.First());
 
         mockService.Verify(
-            service => service.GetAll(), 
+            service => service.GetAll(),
             Times.Once);
     }
 
     [TestMethod]
-    public void Index_QuandoNaoExistemPessoas_DeveRetornarViewComListaVazia()
+    public void Index_QuandoNaoExistemPessoas_DeveRetornarViewComColecaoVazia()
     {
         // Arrange
-        mockService.Setup(service => service.GetAll())
-            .Returns(new List<Pessoa>());
+        mockService
+            .Setup(service => service.GetAll())
+            .Returns(Array.Empty<Pessoa>());
 
         // Act
-        var result = controller.Index();
+        var resultado = controller.Index();
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
@@ -70,7 +71,7 @@ public class PessoaControllerTests
         Assert.IsEmpty(listaPessoas);
 
         mockService.Verify(
-            service => service.GetAll(), 
+            service => service.GetAll(),
             Times.Once);
     }
 

@@ -2,11 +2,11 @@
 {
     public interface IServicoService
     {
-        uint Create(Servico servico);
-        void Edit(Servico servico);
-        void Delete(uint id);
-        Servico? Get(uint id);
-        IEnumerable<Servico> GetAll();
-        IEnumerable<Servico> GetByNome(string nome);
+        uint Create(Servico servico, uint idEstabelecimento);
+        void Edit(Servico servico, uint idEstabelecimento);
+        void Delete(uint id, uint idEstabelecimento);
+        Servico? Get(uint id, uint idEstabelecimento);
+        IEnumerable<Servico> GetAll(uint idEstabelecimento);
+        IEnumerable<Servico> GetByNome(string nome, uint idEstabelecimento);
     }
 }

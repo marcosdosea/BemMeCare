@@ -30,9 +30,10 @@ namespace Service
         /// Exclui uma categoria do banco de dados com base no id fornecido. Se a categoria não for encontrado, nenhuma ação será realizada.
         /// </summary>
         /// <param name="id">O id da categoria a ser excluído.</param>
-        public void Delete(uint id)
+        /// <param name="idEstabelecimento">O id do estabelecimento dessa categoria.</param>
+        public void Delete(uint id, uint idEstabelecimento)
         {
-            var categoria = context.Categoria.Find(id);
+            var categoria = context.Categoria.FirstOrDefault(c => c.Id == id && c.IdEstabelecimento == idEstabelecimento);
             if (categoria != null)
             {
                 context.Remove(categoria);
@@ -54,19 +55,24 @@ namespace Service
         /// Obtém uma categoria pelo id.
         /// </summary>
         /// <param name="id">id da categoria</param>
+        /// <param name="idEstabelecimento">O id do estabelecimento dessa categoria.</param>
         /// <returns>Uma categoria ou null, se não existir.</returns>
-        public Categorium? Get(uint id)
+        public Categorium? Get(uint id, uint idEstabelecimento)
         {
-            return context.Categoria.Find(id);
+            return context.Categoria
+                .FirstOrDefault(c => c.Id == id && c.IdEstabelecimento == idEstabelecimento);
         }
 
         /// <summary>
         /// Recupera todos as categorias do banco de dados.
         /// </summary>
-        /// <returns>Uma coleção de categorias</returns>
-        public IEnumerable<Categorium> GetAll()
+        /// <param name="idEstabelecimento">O id do estabelecimento das categorias.</param>
+        /// <returns>Uma coleção de categorias de um estabelecimento.</returns>
+        public IEnumerable<Categorium> GetAll(uint idEstabelecimento)
         {
-            return context.Categoria.AsNoTracking();
+            return context.Categoria
+                .AsNoTracking()
+                .Where(c => c.IdEstabelecimento == idEstabelecimento);
         }
     }
 }

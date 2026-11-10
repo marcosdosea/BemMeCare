@@ -1,0 +1,21 @@
+﻿table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    background-color: #FFF7F0;
+    color: #6B1025;
+    padding: 10px;
+    text-align: left;
+    font: 600 18px "Roboto", sans-serif;
+}
+
+table td {
+
+    background-color: #FFF7F0;
+    color: #6B1025;
+    padding: 10px;
+    text-align: center;
+    font: 400 16px "Roboto", sans-serif;
+}
