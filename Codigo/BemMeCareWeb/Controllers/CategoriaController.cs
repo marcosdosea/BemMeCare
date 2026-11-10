@@ -7,6 +7,8 @@ namespace BemMeCareWeb.Controllers
 {
     public class CategoriaController : Controller
     {
+        // ID provisório que depois será obtido automaticamente pelo usuário logado no sistema
+        private const uint idEstabelecimentoProvisorio = 1;
         private readonly ICategoriaService categoriaService;
 
         public CategoriaController(ICategoriaService categoriaService)
@@ -17,7 +19,8 @@ namespace BemMeCareWeb.Controllers
         // GET: CategoriaController
         public ActionResult Index()
         {
-            var listaCategorias = categoriaService.GetAll();
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+            var listaCategorias = categoriaService.GetAll(idEstabelecimento);
             var listaCategoriaViewModel = listaCategorias.ToViewModel();
             return View(listaCategoriaViewModel);
         }
@@ -25,7 +28,8 @@ namespace BemMeCareWeb.Controllers
         // GET: CategoriaController/Details/5
         public ActionResult Details(uint id)
         {
-            var categoria = categoriaService.Get(id);
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+            var categoria = categoriaService.Get(id, idEstabelecimento);
             var categoriaViewModel = categoria.ToViewModel();
             return View(categoriaViewModel);
         }
@@ -44,6 +48,7 @@ namespace BemMeCareWeb.Controllers
         {
             if (ModelState.IsValid)
             {
+                categoriaViewModel.IdEstabelecimento = idEstabelecimentoProvisorio;
                 var categoria = categoriaViewModel.ToEntity();
                 categoriaService.Create(categoria);
             }
@@ -53,7 +58,8 @@ namespace BemMeCareWeb.Controllers
         // GET: CategoriaController/Edit/5
         public ActionResult Edit(uint id)
         {
-            var categoria = categoriaService.Get(id);
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+            var categoria = categoriaService.Get(id, idEstabelecimento);
             var categoriaViewModel = categoria.ToViewModel();
             return View(categoriaViewModel);
         }
@@ -65,6 +71,7 @@ namespace BemMeCareWeb.Controllers
         {
             if (ModelState.IsValid)
             {
+                categoriaViewModel.IdEstabelecimento = idEstabelecimentoProvisorio;
                 var categoria = categoriaViewModel.ToEntity();
                 categoriaService.Edit(categoria);
             }
@@ -74,7 +81,8 @@ namespace BemMeCareWeb.Controllers
         // GET: CategoriaController/Delete/5
         public ActionResult Delete(uint id)
         {
-            var categoria = categoriaService.Get(id);
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+            var categoria = categoriaService.Get(id, idEstabelecimento);
             var categoriaViewModel = categoria.ToViewModel();
             return View(categoriaViewModel);
         }
@@ -84,7 +92,8 @@ namespace BemMeCareWeb.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(CategoriaViewModel categoriaViewModel)
         {
-            categoriaService.Delete(categoriaViewModel.Id);
+            categoriaViewModel.IdEstabelecimento = idEstabelecimentoProvisorio;
+            categoriaService.Delete(categoriaViewModel.Id, categoriaViewModel.IdEstabelecimento);
             return RedirectToAction(nameof(Index));
         }
     }

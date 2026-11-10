@@ -28,7 +28,7 @@ public class PessoaViewModel
 
     [Display(Name = "CPF")]
     [Required(ErrorMessage = "O CPF é obrigatório")]
-    [StringLength(11, MinimumLength = 11, ErrorMessage = "O CPF deve ter 14 caracteres")]
+    [StringLength(11, MinimumLength = 11, ErrorMessage = "O CPF deve ter 11 caracteres")]
     public string? Cpf { get; set; }
 
     [Display(Name = "Telefone")]

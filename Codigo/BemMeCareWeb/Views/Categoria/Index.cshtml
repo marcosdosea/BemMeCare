@@ -1,0 +1,46 @@
+@model IEnumerable<BemMeCareWeb.Models.CategoriaViewModel>
+
+@{
+    ViewData["Title"] = "Categorias";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/listagem.css" asp-append-version="true" />
+}
+
+<h1>Categorias</h1>
+
+<div style="width: 75%; margin: auto;">
+    <p class="text-end">
+        <a asp-action="Create"
+           class="btn rounded-pill shadow-sm px-4 py-2 btn-bmc-grande">
+            Adicionar Categoria
+        </a>
+    </p>
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Nome)
+                </th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(model => item.Nome)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

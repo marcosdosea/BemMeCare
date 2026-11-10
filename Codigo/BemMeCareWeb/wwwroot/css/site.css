@@ -21,6 +21,11 @@ body {
   margin-bottom: 60px;
 }
 
+h1 {
+    color: #6B1025;
+    font: 600 24px "Roboto", sans-serif;
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
@@ -28,4 +33,44 @@ body {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
+}
+
+.btn-bmc-grande {
+    background-color: #F5D7D1;
+    color: #6B1025;
+    border: none;
+    text-decoration: none;
+    font: 600 24px "Roboto", sans-serif;
+}
+
+.btn-bmc-grande:hover {
+    background-color: #6B1025;
+    color: #F5D7D1;
+}
+
+.btn-bmc-medio {
+    background-color: #F5D7D1;
+    color: #6B1025;
+    border: none;
+    text-decoration: none;
+    font: 600 20px "Roboto", sans-serif;
+}
+
+.btn-bmc-medio:hover {
+    background-color: #6B1025;
+    color: #F5D7D1;
+}
+
+label {
+    color: #6B1025;
+    font: 600 18px "Roboto", sans-serif;
+}
+
+input[type="text"] {
+    background-color: #FFF7F0;
+    font: 500 18px "Roboto", sans-serif;
+}
+
+input[type="text"]:focus {
+    background-color: #FFF7F0;
 }

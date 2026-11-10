@@ -7,6 +7,7 @@ namespace BemMeCareWeb.Controllers
 {
     public class ServicoController : Controller
     {
+        private const uint IdEstabelecimentoProvisorio = 1;
         private readonly IServicoService servicoService;
 
         public ServicoController(IServicoService servicoService)
@@ -17,7 +18,7 @@ namespace BemMeCareWeb.Controllers
         // GET: ServicoController
         public ActionResult Index()
         {
-            var listaServicos = servicoService.GetAll();
+            var listaServicos = servicoService.GetAll(IdEstabelecimentoProvisorio);
             var listaServicoViewModel = listaServicos.ToViewModel();
             return View(listaServicoViewModel);
         }
@@ -25,7 +26,7 @@ namespace BemMeCareWeb.Controllers
         // GET: ServicoController/Details/5
         public ActionResult Details(uint id)
         {
-            var servico = servicoService.Get(id);
+            var servico = servicoService.Get(id, IdEstabelecimentoProvisorio);
             var servicoViewModel = servico != null
                 ? servico.ToViewModel()
                 : new ServicoViewModel();
@@ -47,7 +48,7 @@ namespace BemMeCareWeb.Controllers
             if (ModelState.IsValid)
             {
                 var servico = servicoViewModel.ToEntity();
-                servicoService.Create(servico);
+                servicoService.Create(servico, IdEstabelecimentoProvisorio);
             }
 
             return RedirectToAction(nameof(Index));
@@ -56,7 +57,7 @@ namespace BemMeCareWeb.Controllers
         // GET: ServicoController/Edit/5
         public ActionResult Edit(uint id)
         {
-            var servico = servicoService.Get(id);
+            var servico = servicoService.Get(id, IdEstabelecimentoProvisorio);
             var servicoViewModel = servico != null
                 ? servico.ToViewModel()
                 : new ServicoViewModel();
@@ -71,7 +72,7 @@ namespace BemMeCareWeb.Controllers
             if (ModelState.IsValid)
             {
                 var servico = servicoViewModel.ToEntity();
-                servicoService.Edit(servico);
+                servicoService.Edit(servico, IdEstabelecimentoProvisorio);
             }
 
             return RedirectToAction(nameof(Index));
@@ -80,7 +81,7 @@ namespace BemMeCareWeb.Controllers
         // GET: ServicoController/Delete/5
         public ActionResult Delete(uint id)
         {
-            var servico = servicoService.Get(id);
+            var servico = servicoService.Get(id, IdEstabelecimentoProvisorio);
             var servicoViewModel = servico != null
                 ? servico.ToViewModel()
                 : new ServicoViewModel();
@@ -92,7 +93,7 @@ namespace BemMeCareWeb.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(ServicoViewModel servicoViewModel)
         {
-            servicoService.Delete(servicoViewModel.Id);
+            servicoService.Delete(servicoViewModel.Id, IdEstabelecimentoProvisorio);
             return RedirectToAction(nameof(Index));
         }
     }
