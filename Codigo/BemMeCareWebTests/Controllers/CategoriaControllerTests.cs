@@ -18,15 +18,15 @@ public class CategoriaControllerTests
         // Arrange
         var mockService = new Mock<ICategoriaService>();
 
-        mockService.Setup(service => service.GetAll())
+        mockService.Setup(service => service.GetAll(It.IsAny<uint>()))
             .Returns(GetTestCategorias());
-        mockService.Setup(service => service.Get(1))
+        mockService.Setup(service => service.Get(1, It.IsAny<uint>()))
             .Returns(GetTargetCategoria());
         mockService.Setup(service => service.Edit(It.IsAny<Categorium>()))
             .Verifiable();
         mockService.Setup(service => service.Create(It.IsAny<Categorium>()))
             .Returns(4);
-        mockService.Setup(service => service.Delete(It.IsAny<uint>()))
+        mockService.Setup(service => service.Delete(It.IsAny<uint>(), It.IsAny<uint>()))
             .Verifiable();
         controller = new CategoriaController(mockService.Object);
     }

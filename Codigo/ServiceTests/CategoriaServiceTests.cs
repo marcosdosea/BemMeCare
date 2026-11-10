@@ -86,7 +86,7 @@ public class CategoriaServiceTests
         servicoCategoria.Create(categoriaEsperada);
 
         // Assert
-        var categoriaCriada = servicoCategoria.Get(4);
+        var categoriaCriada = servicoCategoria.Get(4, 2);
 
         Assert.IsNotNull(categoriaCriada);
         Assert.AreEqual(categoriaEsperada.Id, categoriaCriada.Id);
@@ -98,14 +98,14 @@ public class CategoriaServiceTests
     public void Delete_QuandoCategoriaExiste_DeveRemoverCategoria()
     {
         // Act
-        servicoCategoria.Delete(2);
+        servicoCategoria.Delete(2, 1);
 
         // Assert
-        var categoriaExcluida = servicoCategoria.Get(2);
-        var categoriasRestantes = servicoCategoria.GetAll().ToList();
+        var categoriaExcluida = servicoCategoria.Get(2, 1);
+        var categoriasRestantes = servicoCategoria.GetAll(1).ToList();
 
         Assert.IsNull(categoriaExcluida);
-        Assert.HasCount(2, categoriasRestantes);
+        Assert.HasCount(1, categoriasRestantes);
         Assert.IsFalse(categoriasRestantes.Any(categoria => categoria.Id == 2));
     }
 
@@ -113,13 +113,13 @@ public class CategoriaServiceTests
     public void Delete_QuandoCategoriaNaoExiste_NaoDeveAlterarOsDados()
     {
         // Arrange
-        var categoriasIniciais = servicoCategoria.GetAll().ToList();
+        var categoriasIniciais = servicoCategoria.GetAll(1).ToList();
 
         // Act
-        servicoCategoria.Delete(999);
+        servicoCategoria.Delete(999, 1);
 
         // Assert
-        var categoriasFinais = servicoCategoria.GetAll().ToList();
+        var categoriasFinais = servicoCategoria.GetAll(1).ToList();
 
         Assert.HasCount(categoriasIniciais.Count, categoriasFinais);
         CollectionAssert.AreEquivalent(
@@ -131,7 +131,7 @@ public class CategoriaServiceTests
     public void Edit_QuandoCategoriaExiste_DeveAtualizarSeusDados()
     {
         // Arrange
-        var categoria = servicoCategoria.Get(3);
+        var categoria = servicoCategoria.Get(3, 2);
 
         Assert.IsNotNull(categoria);
 
@@ -141,7 +141,7 @@ public class CategoriaServiceTests
         servicoCategoria.Edit(categoria);
 
         // Assert
-        var categoriaAtualizado = servicoCategoria.Get(3);
+        var categoriaAtualizado = servicoCategoria.Get(3, 2);
 
         Assert.IsNotNull(categoriaAtualizado);
         Assert.AreEqual("Barbeiro", categoriaAtualizado.Nome);
@@ -151,7 +151,7 @@ public class CategoriaServiceTests
     public void Get_QuandoIdExiste_DeveRetornarCategoriaCorrespondente()
     {
         // Act
-        var categoria = servicoCategoria.Get(1);
+        var categoria = servicoCategoria.Get(1, 1);
 
         // Assert
         Assert.IsNotNull(categoria);
@@ -165,7 +165,7 @@ public class CategoriaServiceTests
     public void Get_QuandoIdNaoExiste_DeveRetornarNulo()
     {
         // Act
-        var categoria = servicoCategoria.Get(999);
+        var categoria = servicoCategoria.Get(999, 1);
 
         // Assert
         Assert.IsNull(categoria);
@@ -175,14 +175,14 @@ public class CategoriaServiceTests
     public void GetAll_QuandoExistemCategorias_DeveRetornarTodosAsCategorias()
     {
         // Act
-        var categorias = servicoCategoria.GetAll().ToList();
+        var categorias = servicoCategoria.GetAll(1).ToList();
 
         // Assert
         Assert.IsNotNull(categorias);
-        Assert.HasCount(3, categorias);
+        Assert.HasCount(2, categorias);
 
         CollectionAssert.AreEquivalent(
-            new uint[] { 1, 2, 3 },
+            new uint[] { 1, 2 },
             categorias.Select(categoria => categoria.Id).ToList());
     }
 
@@ -194,7 +194,7 @@ public class CategoriaServiceTests
         contexto.SaveChanges();
 
         // Act
-        var categorias = servicoCategoria.GetAll().ToList();
+        var categorias = servicoCategoria.GetAll(1).ToList();
 
         // Assert
         Assert.IsNotNull(categorias);
