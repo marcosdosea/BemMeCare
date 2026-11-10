@@ -30,7 +30,7 @@ namespace BemMeCareWeb.Controllers
         {
             var idEstabelecimento = idEstabelecimentoProvisorio;
             var categoria = categoriaService.Get(id, idEstabelecimento);
-            var categoriaViewModel = categoria.ToViewModel();
+            var categoriaViewModel = categoria != null ? categoria.ToViewModel() : new CategoriaViewModel();
             return View(categoriaViewModel);
         }
         
@@ -60,7 +60,7 @@ namespace BemMeCareWeb.Controllers
         {
             var idEstabelecimento = idEstabelecimentoProvisorio;
             var categoria = categoriaService.Get(id, idEstabelecimento);
-            var categoriaViewModel = categoria.ToViewModel();
+            var categoriaViewModel = categoria != null ? categoria.ToViewModel() : new CategoriaViewModel();
             return View(categoriaViewModel);
         }
         
@@ -83,7 +83,7 @@ namespace BemMeCareWeb.Controllers
         {
             var idEstabelecimento = idEstabelecimentoProvisorio;
             var categoria = categoriaService.Get(id, idEstabelecimento);
-            var categoriaViewModel = categoria.ToViewModel();
+            var categoriaViewModel = categoria != null ? categoria.ToViewModel() : new CategoriaViewModel();
             return View(categoriaViewModel);
         }
         
