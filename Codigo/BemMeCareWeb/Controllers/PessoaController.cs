@@ -46,8 +46,9 @@ namespace BemMeCareWeb.Controllers
             {
                 var pessoa = pessoaViewModel.ToEntity();
                 pessoaService.Create(pessoa);
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            return View(pessoaViewModel);
         }
 
         // GET: PessoaController/Edit/5

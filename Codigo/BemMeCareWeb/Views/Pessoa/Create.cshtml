@@ -1,0 +1,220 @@
+@model BemMeCareWeb.Models.PessoaViewModel
+
+@{
+    ViewData["Title"] = "Criar pessoa";
+}
+
+<h1>Criar pessoa</h1>
+
+<h4>Pessoa</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div id="passo1">
+
+                <div class="form-group">
+                    <label asp-for="Email" class="control-label"></label>
+                    <input asp-for="Email" id="campoEmail" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Senha" class="control-label"></label>
+                    <input asp-for="Senha" id="campoSenha" class="form-control" />
+                    <span asp-validation-for="Senha" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="control-label">Confirme sua senha</label>
+                    <input type="password" id="campoConfirmarSenha" class="form-control" />
+                    <span id="erroSenha" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-3">
+                    <button type="button" id="btnContinuar" class="btn btn-primary">Continuar</button>
+                </div>
+
+            </div>
+
+            <div id="passo2" style="display: none;">
+
+                <div class="form-group">
+                    <label asp-for="Nome" class="control-label"></label>
+                    <input asp-for="Nome" class="form-control" />
+                    <span asp-validation-for="Nome" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Cpf" class="control-label"></label>
+                    <input asp-for="Cpf" class="form-control" />
+                    <span asp-validation-for="Cpf" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Telefone" class="control-label"></label>
+                    <input asp-for="Telefone" class="form-control" />
+                    <span asp-validation-for="Telefone" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="DataDeNascimento" class="control-label"></label>
+                    <input asp-for="DataDeNascimento" class="form-control" />
+                    <span asp-validation-for="DataDeNascimento" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Cor" class="control-label"></label>
+                    <select asp-for="Cor" class="form-select">
+                        <option value="">Selecione...</option>
+                        <option value="Branca">Branca</option>
+                        <option value="Preta">Preta</option>
+                        <option value="Parda">Parda</option>
+                        <option value="Amarela">Amarela</option>
+                        <option value="Indígena">Indígena</option>
+                    </select>
+                    <span asp-validation-for="Cor" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Sexualidade" class="control-label"></label>
+                    <select asp-for="Sexualidade" class="form-select">
+                        <option value="">Selecione...</option>
+                        <option value="Heterossexual">Heterossexual</option>
+                        <option value="Homossexual">Homossexual</option>
+                        <option value="Bissexual">Bissexual</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                    <span asp-validation-for="Sexualidade" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Genero" class="control-label"></label>
+                    <select asp-for="Genero" class="form-select">
+                        <option value="">Selecione...</option>
+                        <option value="Feminino">Feminino</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Não-binário">Não-binário</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                    <span asp-validation-for="Genero" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Cep" class="control-label"></label>
+                    <input asp-for="Cep" class="form-control" />
+                    <span asp-validation-for="Cep" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Rua" class="control-label"></label>
+                    <input asp-for="Rua" class="form-control" />
+                    <span asp-validation-for="Rua" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Numero" class="control-label"></label>
+                    <input asp-for="Numero" class="form-control" />
+                    <span asp-validation-for="Numero" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Complemento" class="control-label"></label>
+                    <input asp-for="Complemento" class="form-control" />
+                    <span asp-validation-for="Complemento" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Bairro" class="control-label"></label>
+                    <input asp-for="Bairro" class="form-control" />
+                    <span asp-validation-for="Bairro" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Cidade" class="control-label"></label>
+                    <input asp-for="Cidade" class="form-control" />
+                    <span asp-validation-for="Cidade" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Estado" class="control-label"></label>
+                    <select asp-for="Estado" class="form-select">
+                        <option value="Sergipe" selected>Sergipe</option>
+                        <option value="Acre">Acre</option>
+                        <option value="Alagoas">Alagoas</option>
+                        <option value="Amapá">Amapá</option>
+                        <option value="Amazonas">Amazonas</option>
+                        <option value="Bahia">Bahia</option>
+                        <option value="Ceará">Ceará</option>
+                        <option value="Distrito Federal">Distrito Federal</option>
+                        <option value="Espírito Santo">Espírito Santo</option>
+                        <option value="Goiás">Goiás</option>
+                        <option value="Maranhão">Maranhão</option>
+                        <option value="Mato Grosso">Mato Grosso</option>
+                        <option value="Mato Grosso do Sul">Mato Grosso do Sul</option>
+                        <option value="Minas Gerais">Minas Gerais</option>
+                        <option value="Pará">Pará</option>
+                        <option value="Paraíba">Paraíba</option>
+                        <option value="Paraná">Paraná</option>
+                        <option value="Pernambuco">Pernambuco</option>
+                        <option value="Piauí">Piauí</option>
+                        <option value="Rio de Janeiro">Rio de Janeiro</option>
+                        <option value="Rio Grande do Norte">Rio Grande do Norte</option>
+                        <option value="Rio Grande do Sul">Rio Grande do Sul</option>
+                        <option value="Rondônia">Rondônia</option>
+                        <option value="Roraima">Roraima</option>
+                        <option value="Santa Catarina">Santa Catarina</option>
+                        <option value="São Paulo">São Paulo</option>
+                        <option value="Tocantins">Tocantins</option>
+                    </select>
+                    <span asp-validation-for="Estado" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="checkTermos" required />
+                    <label class="form-check-label" for="checkTermos">Aceito os termos de uso e privacidade</label>
+                </div>
+
+                <div class="form-group mt-3">
+                    <button type="button" id="btnVoltar" class="btn btn-secondary me-2">Voltar</button>
+                    <input type="submit" value="Criar conta" class="btn btn-primary" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Voltar para a lista</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.getElementById("btnContinuar").addEventListener("click", function () {
+            var email = document.getElementById("campoEmail").value;
+            var senha = document.getElementById("campoSenha").value;
+            var confirmar = document.getElementById("campoConfirmarSenha").value;
+            var erro = document.getElementById("erroSenha");
+            erro.innerText = "";
+            if (!email || !senha) {
+                erro.innerText = "Preencha o e-mail e a senha para continuar.";
+                return;
+            }
+            if (senha !== confirmar) {
+                erro.innerText = "As senhas não conferem.";
+                return;
+            }
+            // Esconde o passo 1 e exibe o passo 2
+            document.getElementById("passo1").style.display = "none";
+            document.getElementById("passo2").style.display = "block";
+        });
+        document.getElementById("btnVoltar").addEventListener("click", function () {
+            // Volta para o passo 1
+            document.getElementById("passo2").style.display = "none";
+            document.getElementById("passo1").style.display = "block";
+        });
+    </script>
+}
