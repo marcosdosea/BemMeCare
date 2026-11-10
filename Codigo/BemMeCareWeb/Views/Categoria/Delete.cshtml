@@ -1,26 +1,25 @@
 @model BemMeCareWeb.Models.CategoriaViewModel
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Deletar categoria";
 }
 
-<h1>Delete</h1>
+<h1>Deletar categoria</h1>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>Tem certeza que quer deletar essa categoria?</h3>
 <div>
-    <h4>BemMeCareWeb.Models.CategoriaViewModel</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-    </dl>
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label asp-for="Nome" class="control-label"></label>
+            <input asp-for="Nome" class="form-control" size="45" disabled />
+            <span asp-validation-for="Nome" class="text-danger"></span>
+        </div>
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px">
+                <a asp-action="Index" class="btn btn-bmc-medio">Cancelar</a>
+                <input type="submit" value="Deletar" class="btn btn-bmc-medio" />
+            </div>
+        </form>
+    </div>
 </div>
