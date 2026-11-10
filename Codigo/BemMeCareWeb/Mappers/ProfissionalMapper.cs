@@ -2,35 +2,38 @@
 using Core;
 using Mapster;
 
-namespace BemMeCareWeb.Mappers
+namespace BemMeCareWeb.Mappers;
+
+public static class ProfissionalMapper
 {
-    public static class ProfissionalMapper
+    public static ProfissionalViewModel ToViewModel(this Profissional profissional)
     {
-        public static ProfissionalViewModel? ToViewModel(this Profissional? entity)
-        {
-            if (entity == null) return null;
-            var viewModel = entity.Adapt<ProfissionalViewModel>();
-            viewModel.Nome = entity.IdPessoaNavigation?.Nome;
-            viewModel.Cpf = entity.IdPessoaNavigation?.Cpf;
-            viewModel.Categorias = entity.IdCategoria != null && entity.IdCategoria.Any()
-                ? string.Join(", ", entity.IdCategoria.Select(c => c.Nome))
-                : null;
-            viewModel.Servicos = entity.Servicoprofissionals != null && entity.Servicoprofissionals.Any()
-                ? string.Join(", ", entity.Servicoprofissionals
-                    .Where(sp => sp.IdServicoNavigation != null)
-                    .Select(sp => sp.IdServicoNavigation.Nome))
-                : null;
-            return viewModel;
-        }
+        var viewModel = profissional.Adapt<ProfissionalViewModel>();
 
-        public static List<ProfissionalViewModel> ToViewModel(this IEnumerable<Profissional> entities)
-        {
-            return entities.Select(e => e.ToViewModel()!).ToList();
-        }
+        viewModel.Nome = profissional.IdPessoaNavigation?.Nome;
+        viewModel.Cpf = profissional.IdPessoaNavigation?.Cpf;
+        viewModel.Categorias = profissional.IdCategoria;
+        viewModel.Servicos = profissional.Servicoprofissionals
+            .Where(sp => sp.IdServicoNavigation != null)
+            .Select(sp => sp.IdServicoNavigation);
+        viewModel.IdCategoriaSelecionada = profissional.IdCategoria.FirstOrDefault()?.Id;
+        viewModel.IdServicosSelecionados = profissional.Servicoprofissionals.Select(sp => sp.IdServico);
 
-        public static Profissional ToEntity(this ProfissionalViewModel viewModel)
-        {
-            return viewModel.Adapt<Profissional>();
-        }
+        return viewModel;
+    }
+
+    public static Profissional ToEntity(this ProfissionalViewModel viewModel)
+    {
+        return viewModel.Adapt<Profissional>();
+    }
+
+    public static IEnumerable<ProfissionalViewModel> ToViewModel(this IEnumerable<Profissional> profissionais)
+    {
+        return profissionais.Select(profissional => profissional.ToViewModel());
+    }
+
+    public static IEnumerable<Profissional> ToEntity(this IEnumerable<ProfissionalViewModel> viewModels)
+    {
+        return viewModels.Adapt<IEnumerable<Profissional>>();
     }
 }

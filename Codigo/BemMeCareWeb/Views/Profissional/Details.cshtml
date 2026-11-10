@@ -1,75 +1,50 @@
 ﻿@model BemMeCareWeb.Models.ProfissionalViewModel
 
 @{
-    ViewData["Title"] = "Profissionais";
+    ViewData["Title"] = "Visualizar profissional";
 }
 
-<h1>Profissionais</h1>
+<h1>@Model.Nome</h1>
 
-<div>
-    <h4>@Html.DisplayFor(model => model.Nome)</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.EstaAtivo)
-        </dt>
-        <dd class="col-sm-10">
-            @(Model?.EstaAtivo == 1 ? "Ativo" : "Inativo")
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Cpf)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Cpf)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ChavePix)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ChavePix)
-        </dd>
-        <dt class="col-sm-2">
-            Expediente
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.DuracaoIntervaloTempo)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Categorias)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Categorias)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Servicos)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Servicos)
-        </dd>
-    </dl>
+<div class="col-md-4">
+    <div class="form-group">
+        <label asp-for="EstaAtivo" class="control-label"></label>
+        <input type="text" class="form-control" value="@(Model.EstaAtivo == 1 ? "Ativo" : "Inativo")" disabled />
+    </div>
+    <div class="form-group">
+        <label asp-for="Cpf" class="control-label"></label>
+        <input asp-for="Cpf" class="form-control" disabled />
+    </div>
+    <div class="form-group">
+        <label asp-for="ChavePix" class="control-label"></label>
+        <input asp-for="ChavePix" class="form-control" disabled />
+    </div>
+    <div class="form-group">
+        <label asp-for="Categorias" class="control-label"></label>
+        <input type="text" class="form-control" value="@string.Join(", ", Model.Categorias.Select(c => c.Nome))" disabled />
+    </div>
+    <div class="form-group">
+        <label asp-for="Servicos" class="control-label"></label>
+        <input type="text" class="form-control" value="@string.Join(", ", Model.Servicos.Select(s => s.Nome))" disabled />
+    </div>
 
-    <h4>Configurações adicionais</h4>
+    <label class="control-label">Configurações adicionais</label>
     <div class="form-group form-check">
-        <input type="checkbox" class="form-check-input" id="chkDetHorario" onclick="return false;" @(Model?.GerirHorario == 1 ? "checked" : "") />
-        <label class="form-check-label" for="chkDetHorario">Profissional pode gerir o seu horário</label>
+        <input class="form-check-input" type="checkbox" checked="@(Model.GerirHorario == 1)" disabled />
+        <label class="form-check-label">@Html.DisplayNameFor(model => model.GerirHorario)</label>
     </div>
     <div class="form-group form-check">
-        <input type="checkbox" class="form-check-input" id="chkDetServico" onclick="return false;" @(Model?.GerirServico == 1 ? "checked" : "") />
-        <label class="form-check-label" for="chkDetServico">Profissional pode gerir seus serviços</label>
+        <input class="form-check-input" type="checkbox" checked="@(Model.GerirServico == 1)" disabled />
+        <label class="form-check-label">@Html.DisplayNameFor(model => model.GerirServico)</label>
     </div>
     <div class="form-group form-check">
-        <input type="checkbox" class="form-check-input" id="chkDetPagamento" onclick="return false;" @(Model?.ReceberPagamentoDireto == 1 ? "checked" : "") />
-        <label class="form-check-label" for="chkDetPagamento">Profissional recebe o pagamento do sinal</label>
+        <input class="form-check-input" type="checkbox" checked="@(Model.ReceberPagamentoDireto == 1)" disabled />
+        <label class="form-check-label">@Html.DisplayNameFor(model => model.ReceberPagamentoDireto)</label>
     </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdPessoa">Editar dados</a> |
-    <a asp-action="Delete" asp-route-id="@Model?.IdPessoa">Excluir dados</a> |
-    <a asp-action="Index">Voltar</a>
+
+<div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+    <a asp-action="Index" class="btn btn-bmc-medio">Voltar</a>
+    <a asp-action="Edit" asp-route-id="@Model.IdPessoa" class="btn btn-bmc-medio">Editar dados</a>
+    <a asp-action="Delete" asp-route-id="@Model.IdPessoa" class="btn btn-bmc-medio">Excluir dados</a>
 </div>
