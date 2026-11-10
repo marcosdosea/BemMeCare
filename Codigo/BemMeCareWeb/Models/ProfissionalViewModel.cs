@@ -42,5 +42,17 @@ namespace BemMeCareWeb.Models
 
         [Display(Name = "É Atendente")]
         public sbyte? EAtendente { get; set; }
+
+        [Display(Name = "Nome")]
+        public string? Nome { get; set; }
+
+        [Display(Name = "CPF")]
+        public string? Cpf { get; set; }
+
+        [Display(Name = "Categoria(s)")]
+        public string? Categorias { get; set; }
+
+        [Display(Name = "Serviços")]
+        public string? Servicos { get; set; }
     }
 }

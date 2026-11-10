@@ -1,50 +1,32 @@
 ﻿@model BemMeCareWeb.Models.ProfissionalViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Profissionais";
 }
 
-<h1>Details</h1>
+<h1>Profissionais</h1>
 
 <div>
-    <h4>ProfissionalViewModel</h4>
+    <h4>@Html.DisplayFor(model => model.Nome)</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.IdPessoa)
+            @Html.DisplayNameFor(model => model.Nome)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.IdPessoa)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.IdEstabelecimento)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.IdEstabelecimento)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.GerirHorario)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.GerirHorario)
+            @Html.DisplayFor(model => model.Nome)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.EstaAtivo)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.EstaAtivo)
+            @(Model?.EstaAtivo == 1 ? "Ativo" : "Inativo")
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.GerirServico)
+            @Html.DisplayNameFor(model => model.Cpf)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.GerirServico)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ReceberPagamentoDireto)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ReceberPagamentoDireto)
+            @Html.DisplayFor(model => model.Cpf)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.ChavePix)
@@ -53,26 +35,41 @@
             @Html.DisplayFor(model => model.ChavePix)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.DuracaoIntervaloTempo)
+            Expediente
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DuracaoIntervaloTempo)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.EProfissional)
+            @Html.DisplayNameFor(model => model.Categorias)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.EProfissional)
+            @Html.DisplayFor(model => model.Categorias)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.EAtendente)
+            @Html.DisplayNameFor(model => model.Servicos)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.EAtendente)
+            @Html.DisplayFor(model => model.Servicos)
         </dd>
     </dl>
+
+    <h4>Configurações adicionais</h4>
+    <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" id="chkDetHorario" onclick="return false;" @(Model?.GerirHorario == 1 ? "checked" : "") />
+        <label class="form-check-label" for="chkDetHorario">Profissional pode gerir o seu horário</label>
+    </div>
+    <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" id="chkDetServico" onclick="return false;" @(Model?.GerirServico == 1 ? "checked" : "") />
+        <label class="form-check-label" for="chkDetServico">Profissional pode gerir seus serviços</label>
+    </div>
+    <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" id="chkDetPagamento" onclick="return false;" @(Model?.ReceberPagamentoDireto == 1 ? "checked" : "") />
+        <label class="form-check-label" for="chkDetPagamento">Profissional recebe o pagamento do sinal</label>
+    </div>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdPessoa">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.IdPessoa">Editar dados</a> |
+    <a asp-action="Delete" asp-route-id="@Model?.IdPessoa">Excluir dados</a> |
+    <a asp-action="Index">Voltar</a>
 </div>

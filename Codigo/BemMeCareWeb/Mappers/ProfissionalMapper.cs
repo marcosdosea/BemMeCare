@@ -4,26 +4,33 @@ using Mapster;
 
 namespace BemMeCareWeb.Mappers
 {
-    public class ProfissionalMapper
+    public static class ProfissionalMapper
     {
-        public static ProfissionalViewModel ToViewModel(Profissional profissional)
+        public static ProfissionalViewModel? ToViewModel(this Profissional? entity)
         {
-            return profissional.Adapt<ProfissionalViewModel>();
+            if (entity == null) return null;
+            var viewModel = entity.Adapt<ProfissionalViewModel>();
+            viewModel.Nome = entity.IdPessoaNavigation?.Nome;
+            viewModel.Cpf = entity.IdPessoaNavigation?.Cpf;
+            viewModel.Categorias = entity.IdCategoria != null && entity.IdCategoria.Any()
+                ? string.Join(", ", entity.IdCategoria.Select(c => c.Nome))
+                : null;
+            viewModel.Servicos = entity.Servicoprofissionals != null && entity.Servicoprofissionals.Any()
+                ? string.Join(", ", entity.Servicoprofissionals
+                    .Where(sp => sp.IdServicoNavigation != null)
+                    .Select(sp => sp.IdServicoNavigation.Nome))
+                : null;
+            return viewModel;
         }
 
-        public static Profissional ToEntity(ProfissionalViewModel profissionalViewModel)
+        public static List<ProfissionalViewModel> ToViewModel(this IEnumerable<Profissional> entities)
         {
-            return profissionalViewModel.Adapt<Profissional>();
+            return entities.Select(e => e.ToViewModel()!).ToList();
         }
 
-        public static IEnumerable<ProfissionalViewModel> ToViewModel(IEnumerable<Profissional> profissionais)
+        public static Profissional ToEntity(this ProfissionalViewModel viewModel)
         {
-            return profissionais.Adapt<IEnumerable<ProfissionalViewModel>>();
-        }
-
-        public static IEnumerable<Profissional> ToEntity(IEnumerable<ProfissionalViewModel> profissionaisViewModel)
-        {
-            return profissionaisViewModel.Adapt<IEnumerable<Profissional>>();
+            return viewModel.Adapt<Profissional>();
         }
     }
 }

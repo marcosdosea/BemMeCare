@@ -1,76 +1,95 @@
 ﻿@model BemMeCareWeb.Models.ProfissionalViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Adicionar Profissionais";
 }
 
-<h1>Create</h1>
+<h1>Adicionar Profissionais</h1>
 
-<h4>ProfissionalViewModel</h4>
+<h4>Profissional</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="IdPessoa" />
+            <input type="hidden" asp-for="IdEstabelecimento" />
+            <input type="hidden" asp-for="DuracaoIntervaloTempo" />
+            <input type="hidden" asp-for="EstaAtivo" />
+            <input type="hidden" asp-for="EProfissional" />
+            <input type="hidden" asp-for="EAtendente" />
+
             <div class="form-group">
-                <label asp-for="IdPessoa" class="control-label"></label>
-                <input asp-for="IdPessoa" class="form-control" />
-                <span asp-validation-for="IdPessoa" class="text-danger"></span>
+                <label asp-for="Cpf" class="control-label"></label>
+                <input asp-for="Cpf" class="form-control" placeholder="000.000.000-00" />
+                <span asp-validation-for="Cpf" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="IdEstabelecimento" class="control-label"></label>
-                <input asp-for="IdEstabelecimento" class="form-control" />
-                <span asp-validation-for="IdEstabelecimento" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="GerirHorario" class="control-label"></label>
-                <input asp-for="GerirHorario" class="form-control" />
-                <span asp-validation-for="GerirHorario" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EstaAtivo" class="control-label"></label>
-                <input asp-for="EstaAtivo" class="form-control" />
-                <span asp-validation-for="EstaAtivo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="GerirServico" class="control-label"></label>
-                <input asp-for="GerirServico" class="form-control" />
-                <span asp-validation-for="GerirServico" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ReceberPagamentoDireto" class="control-label"></label>
-                <input asp-for="ReceberPagamentoDireto" class="form-control" />
-                <span asp-validation-for="ReceberPagamentoDireto" class="text-danger"></span>
-            </div>
+
             <div class="form-group">
                 <label asp-for="ChavePix" class="control-label"></label>
-                <input asp-for="ChavePix" class="form-control" />
+                <input asp-for="ChavePix" class="form-control" placeholder="emailpix@exemplo.com" />
                 <span asp-validation-for="ChavePix" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="DuracaoIntervaloTempo" class="control-label"></label>
-                <input asp-for="DuracaoIntervaloTempo" class="form-control" />
-                <span asp-validation-for="DuracaoIntervaloTempo" class="text-danger"></span>
+                <label class="control-label">Categoria</label>
+                <select class="form-control">
+                    <option value="">Selecione...</option>
+                </select>
             </div>
+
             <div class="form-group">
-                <label asp-for="EProfissional" class="control-label"></label>
-                <input asp-for="EProfissional" class="form-control" />
-                <span asp-validation-for="EProfissional" class="text-danger"></span>
+                <label class="control-label">Serviços</label>
+                <select class="form-control">
+                    <option value="">Selecione...</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label asp-for="EAtendente" class="control-label"></label>
-                <input asp-for="EAtendente" class="form-control" />
-                <span asp-validation-for="EAtendente" class="text-danger"></span>
+
+            <h4>Configurações Adicionais</h4>
+
+            <div class="form-group form-check">
+                <input type="hidden" asp-for="GerirHorario" id="GerirHorario" />
+                <input type="checkbox" class="form-check-input" id="chkGerirHorario"
+                       @(Model?.GerirHorario == 1 ? "checked" : "")
+                       onchange="document.getElementById('GerirHorario').value = this.checked ? 1 : 0" />
+                <label class="form-check-label" for="chkGerirHorario">
+                    Profissional pode sugerir seu horário
+                </label>
+                <span asp-validation-for="GerirHorario" class="text-danger"></span>
             </div>
+
+            <div class="form-group form-check">
+                <input type="hidden" asp-for="GerirServico" id="GerirServico" />
+                <input type="checkbox" class="form-check-input" id="chkGerirServico"
+                       @(Model?.GerirServico == 1 ? "checked" : "")
+                       onchange="document.getElementById('GerirServico').value = this.checked ? 1 : 0" />
+                <label class="form-check-label" for="chkGerirServico">
+                    Profissional pode gerir seus serviços
+                </label>
+                <span asp-validation-for="GerirServico" class="text-danger"></span>
+            </div>
+
+            <div class="form-group form-check">
+                <input type="hidden" asp-for="ReceberPagamentoDireto" id="ReceberPagamentoDireto" />
+                <input type="checkbox" class="form-check-input" id="chkReceberPagamento"
+                       @(Model?.ReceberPagamentoDireto == 1 ? "checked" : "")
+                       onchange="document.getElementById('ReceberPagamentoDireto').value = this.checked ? 1 : 0" />
+                <label class="form-check-label" for="chkReceberPagamento">
+                    Profissional recebe o pagamento do sinal
+                </label>
+                <span asp-validation-for="ReceberPagamentoDireto" class="text-danger"></span>
+            </div>
+
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Adicionar" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Cancelar</a>
 </div>
 
 @section Scripts {

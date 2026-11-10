@@ -1,90 +1,68 @@
 ﻿@model IEnumerable<BemMeCareWeb.Models.ProfissionalViewModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Profissionais";
 }
 
-<h1>Index</h1>
+<h1>Profissionais</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Adicionar profissional</a>
 </p>
-<table class="table">
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Filtro rápido</label>
+            <input type="text" id="filtroRapido" class="form-control" onkeyup="filtrarTabela()" />
+        </div>
+    </div>
+</div>
+
+<table class="table" id="tabelaProfissionais">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.IdPessoa)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdEstabelecimento)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GerirHorario)
-            </th>
             <th>
                 @Html.DisplayNameFor(model => model.EstaAtivo)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.GerirServico)
+                @Html.DisplayNameFor(model => model.Nome)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ReceberPagamentoDireto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ChavePix)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DuracaoIntervaloTempo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EProfissional)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EAtendente)
+                @Html.DisplayNameFor(model => model.Servicos)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.IdPessoa)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.IdEstabelecimento)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.GerirHorario)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.EstaAtivo)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.GerirServico)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ReceberPagamentoDireto)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ChavePix)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DuracaoIntervaloTempo)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.EProfissional)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.EAtendente)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdPessoa">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdPessoa">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdPessoa">Delete</a>
-                </td>
-            </tr>
-        }
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @(item.EstaAtivo == 1 ? "Ativo" : "Inativo")
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nome)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Servicos)
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.IdPessoa">Acessar</a>
+            </td>
+        </tr>
+}
     </tbody>
 </table>
+
+@section Scripts {
+    <script>
+        function filtrarTabela() {
+            var filtro = document.getElementById("filtroRapido").value.toLowerCase();
+            var linhas = document.querySelectorAll("#tabelaProfissionais tbody tr");
+            linhas.forEach(function (linha) {
+                var texto = linha.innerText.toLowerCase();
+                linha.style.display = texto.indexOf(filtro) > -1 ? "" : "none";
+            });
+        }
+    </script>
+}
