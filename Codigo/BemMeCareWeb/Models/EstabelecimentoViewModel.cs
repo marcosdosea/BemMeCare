@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace BemMeCareWeb.Models;
 
@@ -71,8 +71,6 @@ public class EstabelecimentoViewModel
     [Display(Name = "Foto")]
     public byte[]? foto { get; set; }
 
-    [Display(Name = "Código da pessoa")]
-    [Required(ErrorMessage = "Código da pessoa é obrigatório")]
     public uint IdPessoa { get; set; }
 
 }
