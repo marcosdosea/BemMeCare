@@ -10,8 +10,8 @@ namespace BemMeCareWebTests.Controllers;
 [TestClass]
 public class PessoaControllerTests
 {
-    private static PessoaController controller;
-    private static Mock<IPessoaService> mockService;
+    private PessoaController controller = null!;
+    private Mock<IPessoaService> mockService = null!;
 
     [TestInitialize]
     public void Initialize()
