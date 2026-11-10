@@ -13,7 +13,12 @@ public static class PessoaMapper
 
     public static Pessoa ToEntity(this PessoaViewModel pessoaViewModel)
     {
-        return pessoaViewModel.Adapt<Pessoa>();
+        var pessoa = pessoaViewModel.Adapt<Pessoa>();
+        if (pessoa.Cpf != null)
+            pessoa.Cpf = pessoa.Cpf.Replace(".", "").Replace("-", "");
+        if (pessoa.Cep != null)
+            pessoa.Cep = pessoa.Cep.Replace("-", "");
+        return pessoa;
     }
 
     public static IEnumerable<PessoaViewModel> ToViewModel(this IEnumerable<Pessoa> pessoas)
