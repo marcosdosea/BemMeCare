@@ -30,7 +30,7 @@ namespace Service
         /// Exclui uma categoria do banco de dados com base no id fornecido. Se a categoria não for encontrado, nenhuma ação será realizada.
         /// </summary>
         /// <param name="id">O id da categoria a ser excluído.</param>
-        public void Delete(uint id)
+        public void Delete(uint id, uint idEstabelecimento)
         {
             var categoria = context.Categoria.Find(id);
             if (categoria != null)
@@ -55,7 +55,7 @@ namespace Service
         /// </summary>
         /// <param name="id">id da categoria</param>
         /// <returns>Uma categoria ou null, se não existir.</returns>
-        public Categorium? Get(uint id)
+        public Categorium? Get(uint id, uint idEstabelecimento)
         {
             return context.Categoria.Find(id);
         }
@@ -64,7 +64,7 @@ namespace Service
         /// Recupera todos as categorias do banco de dados.
         /// </summary>
         /// <returns>Uma coleção de categorias</returns>
-        public IEnumerable<Categorium> GetAll()
+        public IEnumerable<Categorium> GetAll(uint idEstabelecimento)
         {
             return context.Categoria.AsNoTracking();
         }
