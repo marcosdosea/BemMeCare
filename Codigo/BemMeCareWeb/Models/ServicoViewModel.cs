@@ -14,8 +14,8 @@ namespace BemMeCareWeb.Models
         [Required(ErrorMessage = "Código do estabelecimento é obrigatório")]
         public uint IdEstabelecimento { get; set; }
 
-        [Display(Name = "Código da categoria")]
-        [Required(ErrorMessage = "Código da categoria é obrigatório")]
+        [Display(Name = "Categoria")]
+        [Required(ErrorMessage = "Categoria é obrigatória")]
         public uint IdCategoria { get; set; }
 
         [Display(Name = "Nome do serviço")]

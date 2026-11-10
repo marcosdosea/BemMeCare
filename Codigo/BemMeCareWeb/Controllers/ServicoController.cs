@@ -1,7 +1,9 @@
 ﻿using BemMeCareWeb.Models;
+using Core;
 using Core.Service;
 using BemMeCareWeb.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BemMeCareWeb.Controllers
 {
@@ -9,18 +11,25 @@ namespace BemMeCareWeb.Controllers
     {
         private const uint IdEstabelecimentoProvisorio = 1;
         private readonly IServicoService servicoService;
+        private readonly ICategoriaService categoriaService;
 
-        public ServicoController(IServicoService servicoService)
+        public ServicoController(
+            IServicoService servicoService,
+            ICategoriaService categoriaService)
         {
             this.servicoService = servicoService;
+            this.categoriaService = categoriaService;
         }
 
         // GET: ServicoController
-        public ActionResult Index()
+        public ActionResult Index(string? nome = null)
         {
-            var listaServicos = servicoService.GetAll(IdEstabelecimentoProvisorio);
-            var listaServicoViewModel = listaServicos.ToViewModel();
-            return View(listaServicoViewModel);
+            var servicos = string.IsNullOrWhiteSpace(nome)
+                ? servicoService.GetAll(IdEstabelecimentoProvisorio)
+                : servicoService.GetByNome(nome.Trim(), IdEstabelecimentoProvisorio);
+            var servicoViewModels = servicos.ToViewModel();
+            ViewData["NomePesquisado"] = nome?.Trim();
+            return View(servicoViewModels);
         }
 
         // GET: ServicoController/Details/5
@@ -36,6 +45,7 @@ namespace BemMeCareWeb.Controllers
         // GET: ServicoController/Create
         public ActionResult Create()
         {
+            PopularCategorias();
             var servicoViewModel = new ServicoViewModel();
             return View(servicoViewModel);
         }
@@ -45,7 +55,7 @@ namespace BemMeCareWeb.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(ServicoViewModel servicoViewModel)
         {
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && CategoriaPertenceAoEstabelecimento(servicoViewModel.IdCategoria))
             {
                 var servico = servicoViewModel.ToEntity();
                 servicoService.Create(servico, IdEstabelecimentoProvisorio);
@@ -61,6 +71,7 @@ namespace BemMeCareWeb.Controllers
             var servicoViewModel = servico != null
                 ? servico.ToViewModel()
                 : new ServicoViewModel();
+            PopularCategorias();
             return View(servicoViewModel);
         }
 
@@ -69,7 +80,7 @@ namespace BemMeCareWeb.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(ServicoViewModel servicoViewModel)
         {
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && CategoriaPertenceAoEstabelecimento(servicoViewModel.IdCategoria))
             {
                 var servico = servicoViewModel.ToEntity();
                 servicoService.Edit(servico, IdEstabelecimentoProvisorio);
@@ -95,6 +106,27 @@ namespace BemMeCareWeb.Controllers
         {
             servicoService.Delete(servicoViewModel.Id, IdEstabelecimentoProvisorio);
             return RedirectToAction(nameof(Index));
+        }
+
+        private void PopularCategorias()
+        {
+            ViewBag.Categorias = new SelectList(
+                GetCategoriasDoEstabelecimento(),
+                nameof(Categorium.Id),
+                nameof(Categorium.Nome));
+        }
+
+        private bool CategoriaPertenceAoEstabelecimento(uint idCategoria)
+        {
+            return GetCategoriasDoEstabelecimento()
+                .Any(categoria => categoria.Id == idCategoria);
+        }
+
+        private IEnumerable<Categorium> GetCategoriasDoEstabelecimento()
+        {
+            return categoriaService.GetAll()
+                .Where(categoria =>
+                    categoria.IdEstabelecimento == IdEstabelecimentoProvisorio);
         }
     }
 }
