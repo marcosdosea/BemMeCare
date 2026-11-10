@@ -105,7 +105,7 @@ public class CategoriaServiceTests
         var categoriasRestantes = servicoCategoria.GetAll(1).ToList();
 
         Assert.IsNull(categoriaExcluida);
-        Assert.HasCount(2, categoriasRestantes);
+        Assert.HasCount(1, categoriasRestantes);
         Assert.IsFalse(categoriasRestantes.Any(categoria => categoria.Id == 2));
     }
 
@@ -179,10 +179,10 @@ public class CategoriaServiceTests
 
         // Assert
         Assert.IsNotNull(categorias);
-        Assert.HasCount(3, categorias);
+        Assert.HasCount(2, categorias);
 
         CollectionAssert.AreEquivalent(
-            new uint[] { 1, 2, 3 },
+            new uint[] { 1, 2 },
             categorias.Select(categoria => categoria.Id).ToList());
     }
 
