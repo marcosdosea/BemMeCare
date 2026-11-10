@@ -16,22 +16,27 @@ namespace Service
         /// <summary>
         /// Cria um novo serviço no banco de dados e retorna o id do serviço criado.
         /// </summary>
-        /// <param name="servico">O serviço a ser criado.</param>
+        /// <param name="servico">Os dados do serviço a ser criado.</param>
+        /// <param name="idEstabelecimento">O estabelecimento proprietário do serviço.</param>
         /// <returns>O id do serviço criado.</returns>
-        public uint Create(Servico servico)
+        public uint Create(Servico servico, uint idEstabelecimento)
         {
+            servico.IdEstabelecimento = idEstabelecimento;
             context.Add(servico);
             context.SaveChanges();
             return servico.Id;
         }
 
         /// <summary>
-        /// Exclui um serviço pelo id. Se ele não for encontrado, nenhuma ação é realizada.
+        /// Exclui um serviço do estabelecimento informado. Se não for encontrado, nenhuma ação é realizada.
         /// </summary>
         /// <param name="id">O id do serviço a ser excluído.</param>
-        public void Delete(uint id)
+        /// <param name="idEstabelecimento">O estabelecimento proprietário do serviço.</param>
+        public void Delete(uint id, uint idEstabelecimento)
         {
-            var servico = context.Servicos.Find(id);
+            var servico = context.Servicos.FirstOrDefault(
+                item => item.Id == id && item.IdEstabelecimento == idEstabelecimento);
+
             if (servico != null)
             {
                 context.Remove(servico);
@@ -40,43 +45,61 @@ namespace Service
         }
 
         /// <summary>
-        /// Atualiza as informações de um serviço existente.
+        /// Atualiza as informações de um serviço pertencente ao estabelecimento informado.
         /// </summary>
         /// <param name="servico">O serviço com os dados atualizados.</param>
-        public void Edit(Servico servico)
+        /// <param name="idEstabelecimento">O estabelecimento proprietário do serviço.</param>
+        public void Edit(Servico servico, uint idEstabelecimento)
         {
-            context.Update(servico);
-            context.SaveChanges();
+            var servicoExistente = context.Servicos.FirstOrDefault(
+                item => item.Id == servico.Id && item.IdEstabelecimento == idEstabelecimento);
+
+            if (servicoExistente != null)
+            {
+                servicoExistente.Nome = servico.Nome;
+                servicoExistente.IdCategoria = servico.IdCategoria;
+                context.SaveChanges();
+            }
         }
 
         /// <summary>
-        /// Obtém um serviço pelo id.
+        /// Obtém um serviço pelo id, limitado ao estabelecimento informado.
         /// </summary>
         /// <param name="id">O id do serviço.</param>
+        /// <param name="idEstabelecimento">O estabelecimento proprietário do serviço.</param>
         /// <returns>O serviço encontrado ou null, se não existir.</returns>
-        public Servico? Get(uint id)
-        {
-            return context.Servicos.Find(id);
-        }
-
-        /// <summary>
-        /// Recupera todos os serviços do banco de dados.
-        /// </summary>
-        /// <returns>Uma coleção de serviços.</returns>
-        public IEnumerable<Servico> GetAll()
-        {
-            return context.Servicos.AsNoTracking();
-        }
-
-        /// <summary>
-        /// Recupera serviços cujo nome começa com o texto informado.
-        /// </summary>
-        /// <param name="nome">O início do nome a pesquisar.</param>
-        /// <returns>Uma coleção dos serviços correspondentes.</returns>
-        public IEnumerable<Servico> GetByNome(string nome)
+        public Servico? Get(uint id, uint idEstabelecimento)
         {
             return context.Servicos
-                .Where(servico => servico.Nome.StartsWith(nome))
+                .AsNoTracking()
+                .FirstOrDefault(
+                    servico => servico.Id == id && servico.IdEstabelecimento == idEstabelecimento);
+        }
+
+        /// <summary>
+        /// Recupera os serviços pertencentes ao estabelecimento informado.
+        /// </summary>
+        /// <param name="idEstabelecimento">O estabelecimento proprietário dos serviços.</param>
+        /// <returns>Uma coleção de serviços.</returns>
+        public IEnumerable<Servico> GetAll(uint idEstabelecimento)
+        {
+            return context.Servicos
+                .Where(servico => servico.IdEstabelecimento == idEstabelecimento)
+                .AsNoTracking();
+        }
+
+        /// <summary>
+        /// Recupera serviços do estabelecimento informado cujo nome começa com o texto pesquisado.
+        /// </summary>
+        /// <param name="nome">O início do nome a pesquisar.</param>
+        /// <param name="idEstabelecimento">O estabelecimento proprietário dos serviços.</param>
+        /// <returns>Uma coleção dos serviços correspondentes.</returns>
+        public IEnumerable<Servico> GetByNome(string nome, uint idEstabelecimento)
+        {
+            return context.Servicos
+                .Where(servico =>
+                    servico.IdEstabelecimento == idEstabelecimento &&
+                    servico.Nome.StartsWith(nome))
                 .AsNoTracking();
         }
     }
