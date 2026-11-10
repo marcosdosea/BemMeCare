@@ -62,7 +62,7 @@ public class PessoaControllerTests
             .Returns(Array.Empty<Pessoa>());
 
         // Act
-        var resultado = controller.Index();
+        var result = controller.Index();
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
