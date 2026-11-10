@@ -15,10 +15,13 @@ namespace BemMeCareWeb
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddDbContext<BemMeCareContext>(
-                options => options.UseMySQL(builder.Configuration.GetConnectionString("BemMeCareDatabase")));
+                options => options.UseMySQL(builder.Configuration.GetConnectionString("BemMeCareDatabase") ?? throw new InvalidOperationException("Conexão com o banco de dados não foi possível. Favor entrar em contato com o Administrador.")));
 
+            builder.Services.AddTransient<ICategoriaService, CategoriaService>();
+            builder.Services.AddTransient<IEstabelecimentoService, EstabelecimentoService>();
             builder.Services.AddTransient<IProfissionalService, ProfissionalService>();
             builder.Services.AddTransient<IPessoaService, PessoaService>();
+            builder.Services.AddTransient<IServicoService, ServicoService>();
 
             var app = builder.Build();
 
