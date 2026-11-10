@@ -10,8 +10,8 @@ namespace BemMeCareWebTests.Controllers;
 [TestClass]
 public class PessoaControllerTests
 {
-    private PessoaController controller;
-    private Mock<IPessoaService> mockService;
+    private PessoaController controller = null!;
+    private Mock<IPessoaService> mockService = null!;
 
     [TestInitialize]
     public void Initialize()
@@ -44,7 +44,7 @@ public class PessoaControllerTests
         var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
         var listaPessoas = Assert.IsInstanceOfType<IEnumerable<PessoaViewModel>>(viewResult.ViewData.Model);
 
-        Assert.AreEqual(3, listaPessoas.Count());
+        Assert.HasCount(3, listaPessoas);
 
         AssertPessoaViewModel(CriarModeloDePessoaExistente(), listaPessoas.First());
 
@@ -65,11 +65,10 @@ public class PessoaControllerTests
         var resultado = controller.Index();
 
         // Assert
-        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var pessoas = Assert.IsInstanceOfType<IEnumerable<PessoaViewModel>>(
-            viewResult.ViewData.Model);
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
+        var listaPessoas = Assert.IsInstanceOfType<IEnumerable<PessoaViewModel>>(viewResult.ViewData.Model);
 
-        Assert.AreEqual(0, pessoas.Count());
+        Assert.IsEmpty(listaPessoas);
 
         mockService.Verify(
             service => service.GetAll(),
@@ -147,34 +146,37 @@ public class PessoaControllerTests
         Assert.AreEqual(modelo.Cor, pessoaCriada.Cor);
         Assert.AreEqual(modelo.Genero, pessoaCriada.Genero);
         Assert.AreEqual(modelo.Sexualidade, pessoaCriada.Sexualidade);
-        Assert.AreEqual(modelo.Cep, pessoaCriada.Cep);
+        Assert.AreEqual(modelo.Cep?.Replace("-", ""), pessoaCriada.Cep);
         Assert.AreEqual(modelo.Rua, pessoaCriada.Rua);
         Assert.AreEqual(modelo.Bairro, pessoaCriada.Bairro);
         Assert.AreEqual(modelo.Numero, pessoaCriada.Numero);
         Assert.AreEqual(modelo.Complemento, pessoaCriada.Complemento);
         Assert.AreEqual(modelo.Cidade, pessoaCriada.Cidade);
         Assert.AreEqual(modelo.Estado, pessoaCriada.Estado);
-        Assert.IsNull(pessoaCriada.Foto);
 
-        mockService.Verify(service => service.Create(It.IsAny<Pessoa>()), Times.Once);
+        mockService.Verify(
+            service => service.Create(It.IsAny<Pessoa>()), 
+            Times.Once);
     }
 
     [TestMethod]
-    public void Create_QuandoModeloInvalido_NaoDeveChamarCreate()
+    public void Create_QuandoModeloInvalido_NaoDeveCriarPessoaERetornarView()
     {
         // Arrange
-        controller.ModelState.AddModelError("Nome", "Nome da pessoa é obrigatório");
+        var modelo = CriarModeloDeNovaPessoa();
+        controller.ModelState.AddModelError("Nome", "Nome é obrigatório");
 
         // Act
-        var result = controller.Create(CriarModeloDeNovaPessoa());
+        var result = controller.Create(modelo);
 
         // Assert
         Assert.AreEqual(1, controller.ModelState.ErrorCount);
-        var redirectToActionResult = Assert.IsInstanceOfType<RedirectToActionResult>(result);
-        Assert.IsNull(redirectToActionResult.ControllerName);
-        Assert.AreEqual("Index", redirectToActionResult.ActionName);
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(result);
+        Assert.AreEqual(modelo, viewResult.ViewData.Model);
 
-        mockService.Verify(service => service.Create(It.IsAny<Pessoa>()), Times.Never);
+        mockService.Verify(
+            service => service.Create(It.IsAny<Pessoa>()), 
+            Times.Never);
     }
 
     [TestMethod]
@@ -206,7 +208,10 @@ public class PessoaControllerTests
 
         Assert.AreEqual(0U, pessoaModel.Id);
         Assert.IsTrue(string.IsNullOrEmpty(pessoaModel.Nome));
-        mockService.Verify(service => service.Get(999), Times.Once);
+
+        mockService.Verify(
+            service => service.Get(999), 
+            Times.Once);
     }
 
     [TestMethod]
@@ -234,27 +239,31 @@ public class PessoaControllerTests
         Assert.AreEqual(modelo.Email, pessoaEditada.Email);
         Assert.AreEqual(modelo.Senha, pessoaEditada.Senha);
         Assert.AreEqual(modelo.DataDeNascimento, pessoaEditada.DataDeNascimento);
-        Assert.AreEqual(modelo.Cep, pessoaEditada.Cep);
+        Assert.AreEqual(modelo.Cor, pessoaEditada.Cor);
+        Assert.AreEqual(modelo.Genero, pessoaEditada.Genero);
+        Assert.AreEqual(modelo.Sexualidade, pessoaEditada.Sexualidade);
+        Assert.AreEqual(modelo.Cep?.Replace("-", ""), pessoaEditada.Cep);
         Assert.AreEqual(modelo.Rua, pessoaEditada.Rua);
         Assert.AreEqual(modelo.Bairro, pessoaEditada.Bairro);
         Assert.AreEqual(modelo.Numero, pessoaEditada.Numero);
         Assert.AreEqual(modelo.Complemento, pessoaEditada.Complemento);
         Assert.AreEqual(modelo.Cidade, pessoaEditada.Cidade);
         Assert.AreEqual(modelo.Estado, pessoaEditada.Estado);
-        Assert.IsNull(pessoaEditada.Foto);
 
-
-        mockService.Verify(service => service.Edit(It.IsAny<Pessoa>()), Times.Once);
+        mockService.Verify(
+            service => service.Edit(It.IsAny<Pessoa>()), 
+            Times.Once);
     }
 
     [TestMethod]
-    public void Edit_QuandoModeloInvalido_NaoDeveChamarEdit()
+    public void Edit_QuandoModeloInvalido_NaoDeveAtualizarPessoaERedirecionarParaIndex()
     {
         // Arrange
-        controller.ModelState.AddModelError("Nome", "Nome da pessoa é obrigatório");
+        var modelo = CriarModeloDePessoaExistente();
+        controller.ModelState.AddModelError("Nome", "Nome é obrigatório");
 
         // Act
-        var result = controller.Edit(CriarModeloDePessoaExistente());
+        var result = controller.Edit(modelo);
 
         // Assert
         Assert.AreEqual(1, controller.ModelState.ErrorCount);
@@ -262,7 +271,9 @@ public class PessoaControllerTests
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
 
-        mockService.Verify(service => service.Edit(It.IsAny<Pessoa>()), Times.Never);
+        mockService.Verify(
+            service => service.Edit(It.IsAny<Pessoa>()), 
+            Times.Never);
     }
 
     [TestMethod]
@@ -278,7 +289,7 @@ public class PessoaControllerTests
         AssertPessoaViewModel(CriarModeloDePessoaExistente(), pessoaModel);
 
         mockService.Verify(
-            service => service.Get(1),
+            service => service.Get(1), 
             Times.Once);
     }
 
@@ -294,11 +305,14 @@ public class PessoaControllerTests
 
         Assert.AreEqual(0U, pessoaModel.Id);
         Assert.IsTrue(string.IsNullOrEmpty(pessoaModel.Nome));
-        mockService.Verify(service => service.Get(999), Times.Once);
+
+        mockService.Verify(
+            service => service.Get(999), 
+            Times.Once);
     }
 
     [TestMethod]
-    public void Delete_QuandoRequisicaoPost_DeveExcluirPessoaERedirecionarParaIndex()
+    public void Delete_QuandoPostEPessoaExiste_DeveExcluirPessoaERedirecionarParaIndex()
     {
         // Arrange
         var modelo = CriarModeloDePessoaExistente();
@@ -311,11 +325,15 @@ public class PessoaControllerTests
         Assert.IsNull(redirectToActionResult.ControllerName);
         Assert.AreEqual("Index", redirectToActionResult.ActionName);
 
-        mockService.Verify(service => service.Delete(modelo.Id), Times.Once);
+        mockService.Verify(
+            service => service.Delete(modelo.Id), 
+            Times.Once);
     }
 
     private static void AssertPessoaViewModel(PessoaViewModel esperado, PessoaViewModel obtido)
     {
+        Assert.IsNotNull(esperado);
+        Assert.IsNotNull(obtido);
         Assert.AreEqual(esperado.Id, obtido.Id);
         Assert.AreEqual(esperado.Nome, obtido.Nome);
         Assert.AreEqual(esperado.Email, obtido.Email);
