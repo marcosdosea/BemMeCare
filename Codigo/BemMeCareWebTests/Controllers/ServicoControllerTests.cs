@@ -19,22 +19,26 @@ public class ServicoControllerTests
         servicoServiceMock = new Mock<IServicoService>();
 
         servicoServiceMock
-            .Setup(service => service.GetAll())
-            .Returns(ObterServicosDeTeste());
+            .Setup(service => service.GetAll(1))
+            .Returns(ObterServicosDeTeste().Where(item => item.IdEstabelecimento == 1));
 
         servicoServiceMock
-            .Setup(service => service.Get(1))
+            .Setup(service => service.Get(1, 1))
             .Returns(ObterServicoAlvo());
 
         servicoServiceMock
-            .Setup(service => service.Get(999))
+            .Setup(service => service.Get(999, 1))
+            .Returns((Servico?)null);
+
+        servicoServiceMock
+            .Setup(service => service.Get(3, 1))
             .Returns((Servico?)null);
 
         controller = new ServicoController(servicoServiceMock.Object);
     }
 
     [TestMethod]
-    public void Index_QuandoChamado_DeveRetornarViewComTodosOsServicos()
+    public void Index_QuandoChamado_DeveRetornarSomenteServicosDoEstabelecimento()
     {
         // Act
         var resultado = controller.Index();
@@ -44,7 +48,8 @@ public class ServicoControllerTests
         var servicos = Assert.IsInstanceOfType<IEnumerable<ServicoViewModel>>(
             viewResult.ViewData.Model);
 
-        Assert.HasCount(3, servicos);
+        Assert.HasCount(2, servicos);
+        Assert.IsTrue(servicos.All(item => item.IdEstabelecimento == 1));
 
         var primeiroServico = servicos.First();
 
@@ -54,7 +59,7 @@ public class ServicoControllerTests
         Assert.AreEqual(1u, primeiroServico.IdEstabelecimento);
 
         servicoServiceMock.Verify(
-            service => service.GetAll(),
+            service => service.GetAll(1),
             Times.Once);
     }
 
@@ -63,7 +68,7 @@ public class ServicoControllerTests
     {
         // Arrange
         servicoServiceMock
-            .Setup(service => service.GetAll())
+            .Setup(service => service.GetAll(1))
             .Returns(Array.Empty<Servico>());
 
         // Act
@@ -77,7 +82,7 @@ public class ServicoControllerTests
         Assert.IsEmpty(servicos);
 
         servicoServiceMock.Verify(
-            service => service.GetAll(),
+            service => service.GetAll(1),
             Times.Once);
     }
 
@@ -95,7 +100,7 @@ public class ServicoControllerTests
         VerificarServicoAlvo(servico);
 
         servicoServiceMock.Verify(
-            service => service.Get(1),
+            service => service.Get(1, 1),
             Times.Once);
     }
 
@@ -113,7 +118,22 @@ public class ServicoControllerTests
         VerificarModeloVazio(servico);
 
         servicoServiceMock.Verify(
-            service => service.Get(999),
+            service => service.Get(999, 1),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void Details_QuandoServicoPertenceAOutroEstabelecimento_DeveRetornarViewComModeloVazio()
+    {
+        var resultado = controller.Details(3);
+
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servico = Assert.IsInstanceOfType<ServicoViewModel>(
+            viewResult.ViewData.Model);
+
+        VerificarModeloVazio(servico);
+        servicoServiceMock.Verify(
+            service => service.Get(3, 1),
             Times.Once);
     }
 
@@ -139,8 +159,8 @@ public class ServicoControllerTests
         Servico? servicoCriado = null;
 
         servicoServiceMock
-            .Setup(service => service.Create(It.IsAny<Servico>()))
-            .Callback<Servico>(servico => servicoCriado = servico);
+            .Setup(service => service.Create(It.IsAny<Servico>(), 1))
+            .Callback<Servico, uint>((servico, _) => servicoCriado = servico);
 
         // Act
         var resultado = controller.Create(modelo);
@@ -152,7 +172,7 @@ public class ServicoControllerTests
         VerificarConversao(modelo, servicoCriado);
 
         servicoServiceMock.Verify(
-            service => service.Create(It.IsAny<Servico>()),
+            service => service.Create(It.IsAny<Servico>(), 1),
             Times.Once);
     }
 
@@ -171,7 +191,7 @@ public class ServicoControllerTests
         VerificarRedirecionamentoParaIndex(resultado);
 
         servicoServiceMock.Verify(
-            service => service.Create(It.IsAny<Servico>()),
+            service => service.Create(It.IsAny<Servico>(), 1),
             Times.Never);
     }
 
@@ -189,7 +209,7 @@ public class ServicoControllerTests
         VerificarServicoAlvo(servico);
 
         servicoServiceMock.Verify(
-            service => service.Get(1),
+            service => service.Get(1, 1),
             Times.Once);
     }
 
@@ -207,7 +227,7 @@ public class ServicoControllerTests
         VerificarModeloVazio(servico);
 
         servicoServiceMock.Verify(
-            service => service.Get(999),
+            service => service.Get(999, 1),
             Times.Once);
     }
 
@@ -219,8 +239,8 @@ public class ServicoControllerTests
         Servico? servicoEditado = null;
 
         servicoServiceMock
-            .Setup(service => service.Edit(It.IsAny<Servico>()))
-            .Callback<Servico>(servico => servicoEditado = servico);
+            .Setup(service => service.Edit(It.IsAny<Servico>(), 1))
+            .Callback<Servico, uint>((servico, _) => servicoEditado = servico);
 
         // Act
         var resultado = controller.Edit(modelo);
@@ -232,7 +252,7 @@ public class ServicoControllerTests
         VerificarConversao(modelo, servicoEditado);
 
         servicoServiceMock.Verify(
-            service => service.Edit(It.IsAny<Servico>()),
+            service => service.Edit(It.IsAny<Servico>(), 1),
             Times.Once);
     }
 
@@ -251,7 +271,7 @@ public class ServicoControllerTests
         VerificarRedirecionamentoParaIndex(resultado);
 
         servicoServiceMock.Verify(
-            service => service.Edit(It.IsAny<Servico>()),
+            service => service.Edit(It.IsAny<Servico>(), 1),
             Times.Never);
     }
 
@@ -269,7 +289,7 @@ public class ServicoControllerTests
         VerificarServicoAlvo(servico);
 
         servicoServiceMock.Verify(
-            service => service.Get(1),
+            service => service.Get(1, 1),
             Times.Once);
     }
 
@@ -287,7 +307,7 @@ public class ServicoControllerTests
         VerificarModeloVazio(servico);
 
         servicoServiceMock.Verify(
-            service => service.Get(999),
+            service => service.Get(999, 1),
             Times.Once);
     }
 
@@ -304,7 +324,7 @@ public class ServicoControllerTests
         VerificarRedirecionamentoParaIndex(resultado);
 
         servicoServiceMock.Verify(
-            service => service.Delete(modelo.Id),
+            service => service.Delete(modelo.Id, 1),
             Times.Once);
     }
 
