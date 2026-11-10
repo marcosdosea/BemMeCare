@@ -33,7 +33,18 @@ namespace BemMeCareWeb.Controllers
         public ActionResult Index()
         {
             var listaProfissionais = profissionalService.GetAll();
-            var listaProfissionaisViewModel = listaProfissionais.ToViewModel();
+            var listaProfissionaisViewModel = listaProfissionais.ToViewModel().ToList();
+
+            // Garante que o Nome da pessoa seja carregado na listagem
+            var pessoas = pessoaService.GetAll().ToDictionary(p => p.Id, p => p.Nome);
+            foreach (var item in listaProfissionaisViewModel)
+            {
+                if (string.IsNullOrEmpty(item.Nome) && pessoas.TryGetValue(item.IdPessoa, out var nomePessoa))
+                {
+                    item.Nome = nomePessoa;
+                }
+            }
+
             return View(listaProfissionaisViewModel);
         }
 
@@ -42,6 +53,17 @@ namespace BemMeCareWeb.Controllers
         {
             var profissional = profissionalService.Get(id);
             var profissionalViewModel = profissional?.ToViewModel() ?? new ProfissionalViewModel();
+
+            if (profissional != null && string.IsNullOrEmpty(profissionalViewModel.Nome))
+            {
+                var pessoa = pessoaService.Get(id);
+                if (pessoa != null)
+                {
+                    profissionalViewModel.Nome = pessoa.Nome;
+                    profissionalViewModel.Cpf = pessoa.Cpf;
+                }
+            }
+
             return View(profissionalViewModel);
         }
 
@@ -76,7 +98,7 @@ namespace BemMeCareWeb.Controllers
                     var pessoa = BuscarPessoaPorCpf(profissionalViewModel.Cpf);
                     if (pessoa == null)
                     {
-                        ModelState.AddModelError(nameof(ProfissionalViewModel.Cpf), "CPF inválido. Digite novamente.");
+                        ModelState.AddModelError(nameof(ProfissionalViewModel.Cpf), "CPF não encontrado no sistema. Cadastre a Pessoa primeiro.");
                         CarregarListas(profissionalViewModel);
                         return View(profissionalViewModel);
                     }
