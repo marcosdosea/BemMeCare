@@ -1,23 +1,18 @@
 @model BemMeCareWeb.Models.CategoriaViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Visualizar categoria";
 }
 
-<h1>Details</h1>
+<h1>Visualizar categoria</h1>
 
-<div>
-    <h4>CategoriaViewModel</h4>
-    <hr />
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-    </dl>
+<div class="col-md-4">
+    <div class="form-group">
+        <label asp-for="Nome" class="control-label"></label>
+        <input asp-for="Nome" class="form-control" size="45" disabled/>
+        <span asp-validation-for="Nome" class="text-danger"></span>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+    <a asp-action="Index" class="btn btn-bmc-medio">Voltar</a>
 </div>
