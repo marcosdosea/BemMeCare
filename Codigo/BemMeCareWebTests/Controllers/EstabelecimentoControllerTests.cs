@@ -11,12 +11,14 @@ namespace BemMeCareWebTests.Controllers;
 public class EstabelecimentoControllerTests
 {
     private Mock<IEstabelecimentoService> estabelecimentoServiceMock = null!;
+    private Mock<IPessoaService> pessoaServiceMock = null!;
     private EstabelecimentoController controller = null!;
 
     [TestInitialize]
     public void Inicializar()
     {
         estabelecimentoServiceMock = new Mock<IEstabelecimentoService>();
+        pessoaServiceMock = new Mock<IPessoaService>();
 
         estabelecimentoServiceMock
             .Setup(service => service.GetAll())
@@ -30,7 +32,9 @@ public class EstabelecimentoControllerTests
             .Setup(service => service.Get(999))
             .Returns((Estabelecimento?)null);
 
-        controller = new EstabelecimentoController(estabelecimentoServiceMock.Object);
+        controller = new EstabelecimentoController(
+            estabelecimentoServiceMock.Object,
+            pessoaServiceMock.Object);
     }
 
     [TestMethod]

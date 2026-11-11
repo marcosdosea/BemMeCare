@@ -42,7 +42,7 @@ public class ServicoControllerTests
             .Returns([ObterServicoAlvo()]);
 
         categoriaServiceMock
-            .Setup(service => service.GetAll())
+            .Setup(service => service.GetAll(1))
             .Returns(ObterCategoriasDeTeste());
 
         controller = new ServicoController(
