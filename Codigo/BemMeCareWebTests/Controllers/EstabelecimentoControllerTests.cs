@@ -11,12 +11,17 @@ namespace BemMeCareWebTests.Controllers;
 public class EstabelecimentoControllerTests
 {
     private Mock<IEstabelecimentoService> estabelecimentoServiceMock = null!;
+    private Mock<IPessoaService> pessoaServiceMock = null!;
     private EstabelecimentoController controller = null!;
 
     [TestInitialize]
     public void Inicializar()
     {
         estabelecimentoServiceMock = new Mock<IEstabelecimentoService>();
+        pessoaServiceMock = new Mock<IPessoaService>();
+        pessoaServiceMock
+            .Setup(service => service.GetAll())
+            .Returns([new Pessoa { Id = 1 }]);
 
         estabelecimentoServiceMock
             .Setup(service => service.GetAll())
@@ -30,7 +35,9 @@ public class EstabelecimentoControllerTests
             .Setup(service => service.Get(999))
             .Returns((Estabelecimento?)null);
 
-        controller = new EstabelecimentoController(estabelecimentoServiceMock.Object);
+        controller = new EstabelecimentoController(
+            estabelecimentoServiceMock.Object,
+            pessoaServiceMock.Object);
     }
 
     [TestMethod]
@@ -208,7 +215,7 @@ public class EstabelecimentoControllerTests
         var resultado = controller.Create(CriarModeloDeNovoEstabelecimento());
 
         // Assert
-        VerificarRedirecionamentoParaIndex(resultado);
+        Assert.IsInstanceOfType<ViewResult>(resultado);
 
         estabelecimentoServiceMock.Verify(
             service => service.Create(It.IsAny<Estabelecimento>()),
@@ -315,7 +322,7 @@ public class EstabelecimentoControllerTests
         var resultado = controller.Edit(CriarModeloDeEstabelecimentoExistente());
 
         // Assert
-        VerificarRedirecionamentoParaIndex(resultado);
+        Assert.IsInstanceOfType<ViewResult>(resultado);
 
         estabelecimentoServiceMock.Verify(
             service => service.Edit(It.IsAny<Estabelecimento>()),
