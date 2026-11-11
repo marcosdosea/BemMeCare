@@ -30,44 +30,6 @@
         </div>
     </form>
 
-<<<<<<< Updated upstream
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Nome)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdCategoria)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Nome)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.NomeCategoria)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Alterar</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Consultar</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Excluir</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
-=======
     <table>
         <thead>
             <tr>
@@ -106,4 +68,3 @@
         </tbody>
     </table>
 </div>
->>>>>>> Stashed changes
