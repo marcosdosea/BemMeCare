@@ -13,22 +13,27 @@ namespace Service
             this.context = context;
         }
 
-        /// <summary>
-        /// Cria um novo profissional no banco de dados e retorna o id do profissional criado.
-        /// </summary>
-        /// <param name="profissional">O profissional a ser criado.</param>
-        /// <returns>O id (IdPessoa) do profissional criado.</returns>
         public uint Create(Profissional profissional)
         {
+            if (profissional.IdCategoria != null && profissional.IdCategoria.Any())
+            {
+                var idCategorias = profissional.IdCategoria.Select(c => c.Id).ToList();
+                profissional.IdCategoria.Clear();
+                foreach (var id in idCategorias)
+                {
+                    var cat = context.Categoria.Find(id);
+                    if (cat != null)
+                    {
+                        profissional.IdCategoria.Add(cat);
+                    }
+                }
+            }
+
             context.Add(profissional);
             context.SaveChanges();
             return profissional.IdPessoa;
         }
 
-        /// <summary>
-        /// Exclui um profissional do banco de dados com base no id fornecido. Se o profissional não for encontrado, nenhuma ação será realizada.
-        /// </summary>
-        /// <param name="idProfissional">O id (IdPessoa) do profissional a ser excluído.</param>
         public void Delete(uint idProfissional)
         {
             var profissional = context.Profissionals.FirstOrDefault(p => p.IdPessoa == idProfissional);
@@ -39,33 +44,85 @@ namespace Service
             }
         }
 
-        /// <summary>
-        /// Atualiza as informações de um profissional existente no banco de dados.
-        /// </summary>
-        /// <param name="profissional">O profissional a ser atualizado.</param>
         public void Edit(Profissional profissional)
         {
-            context.Update(profissional);
-            context.SaveChanges();
+            var existente = context.Profissionals
+                .Include(p => p.IdCategoria)
+                .Include(p => p.Servicoprofissionals)
+                .FirstOrDefault(p => p.IdPessoa == profissional.IdPessoa);
+
+            if (existente != null)
+            {
+                // Copia os IDs antes de limpar caso seja o mesmo objeto rastreado (ex: nos testes)
+                var idsCategorias = profissional.IdCategoria?.Select(c => c.Id).ToList() ?? new List<uint>();
+                var idsServicos = profissional.Servicoprofissionals?.Select(sp => sp.IdServico).ToList() ?? new List<uint>();
+
+                context.Entry(existente).CurrentValues.SetValues(profissional);
+
+                // Atualiza categorias vinculadas
+                existente.IdCategoria.Clear();
+                foreach (var idCat in idsCategorias)
+                {
+                    var catBanco = context.Categoria.Find(idCat);
+                    if (catBanco != null)
+                        existente.IdCategoria.Add(catBanco);
+                }
+
+                // Remove apenas os serviços que foram desmarcados
+                var servicosParaRemover = existente.Servicoprofissionals
+                    .Where(sp => !idsServicos.Contains(sp.IdServico))
+                    .ToList();
+                foreach (var sp in servicosParaRemover)
+                {
+                    existente.Servicoprofissionals.Remove(sp);
+                }
+
+               
+                var idsExistentes = existente.Servicoprofissionals.Select(sp => sp.IdServico).ToHashSet();
+                foreach (var idServ in idsServicos)
+                {
+                    if (!idsExistentes.Contains(idServ))
+                    {
+                        existente.Servicoprofissionals.Add(new Servicoprofissional
+                        {
+                            IdProfissional = existente.IdPessoa,
+                            IdEstabelecimento = existente.IdEstabelecimento,
+                            IdServico = idServ,
+                            ExigeAnamnese = 0,
+                            FormAnamnese = string.Empty,
+                            Preco = 0m,
+                            PercentualSinal = 0f,
+                            QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO",
+                            Duracao = 0
+                        });
+                    }
+                }
+
+                context.SaveChanges();
+            }
+            else
+            {
+                context.Update(profissional);
+                context.SaveChanges();
+            }
         }
 
-        /// <summary>
-        /// Obtém um profissional pelo id (IdPessoa).
-        /// </summary>
-        /// <param name="idProfissional">Id do profissional.</param>
-        /// <returns>O profissional encontrado ou null se não for encontrado.</returns>
         public Profissional? Get(uint idProfissional)
         {
-            return context.Profissionals.FirstOrDefault(p => p.IdPessoa == idProfissional);
+            return context.Profissionals
+                .Include(p => p.IdCategoria)
+                .Include(p => p.Servicoprofissionals)
+                    .ThenInclude(sp => sp.IdServicoNavigation)
+                .FirstOrDefault(p => p.IdPessoa == idProfissional);
         }
 
-        /// <summary>
-        /// Recupera todos os profissionais do banco de dados.
-        /// </summary>
-        /// <returns>Uma coleção de profissionais.</returns>
         public IEnumerable<Profissional> GetAll()
         {
-            return context.Profissionals.AsNoTracking();
+            return context.Profissionals
+                .Include(p => p.IdCategoria)
+                .Include(p => p.Servicoprofissionals)
+                    .ThenInclude(sp => sp.IdServicoNavigation)
+                .AsNoTracking();
         }
     }
 }

@@ -1,0 +1,42 @@
+﻿@model IEnumerable<BemMeCareWeb.Models.ProfissionalViewModel>
+
+@{
+    ViewData["Title"] = "Profissionais";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/listagem.css" asp-append-version="true" />
+}
+
+<h1>Profissionais</h1>
+
+<div style="width: 75%; margin: auto;">
+    <p class="text-end">
+        <a asp-action="Create" class="btn rounded-pill shadow-sm px-4 py-2 btn-bmc-grande">
+            Adicionar Profissional
+        </a>
+    </p>
+    <table>
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.EstaAtivo)</th>
+                <th>@Html.DisplayNameFor(model => model.Nome)</th>
+                <th>@Html.DisplayNameFor(model => model.Servicos)</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@(item.EstaAtivo == 1 ? "Ativo" : "Inativo")</td>
+                    <td>@Html.DisplayFor(modelItem => item.Nome)</td>
+                    <td>@string.Join(", ", item.Servicos.Select(servico => servico.Nome))</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.IdPessoa">Acessar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
