@@ -53,29 +53,47 @@ namespace Service
 
             if (existente != null)
             {
+                // Copia os IDs antes de limpar caso seja o mesmo objeto rastreado (ex: nos testes)
+                var idsCategorias = profissional.IdCategoria?.Select(c => c.Id).ToList() ?? new List<uint>();
+                var idsServicos = profissional.Servicoprofissionals?.Select(sp => sp.IdServico).ToList() ?? new List<uint>();
+
                 context.Entry(existente).CurrentValues.SetValues(profissional);
 
+                // Atualiza categorias vinculadas
                 existente.IdCategoria.Clear();
-                if (profissional.IdCategoria != null)
+                foreach (var idCat in idsCategorias)
                 {
-                    foreach (var cat in profissional.IdCategoria)
-                    {
-                        var catBanco = context.Categoria.Find(cat.Id);
-                        if (catBanco != null)
-                            existente.IdCategoria.Add(catBanco);
-                    }
+                    var catBanco = context.Categoria.Find(idCat);
+                    if (catBanco != null)
+                        existente.IdCategoria.Add(catBanco);
                 }
 
-                existente.Servicoprofissionals.Clear();
-                if (profissional.Servicoprofissionals != null)
+                // Remove apenas os serviços que foram desmarcados
+                var servicosParaRemover = existente.Servicoprofissionals
+                    .Where(sp => !idsServicos.Contains(sp.IdServico))
+                    .ToList();
+                foreach (var sp in servicosParaRemover)
                 {
-                    foreach (var sp in profissional.Servicoprofissionals)
+                    existente.Servicoprofissionals.Remove(sp);
+                }
+
+               
+                var idsExistentes = existente.Servicoprofissionals.Select(sp => sp.IdServico).ToHashSet();
+                foreach (var idServ in idsServicos)
+                {
+                    if (!idsExistentes.Contains(idServ))
                     {
                         existente.Servicoprofissionals.Add(new Servicoprofissional
                         {
                             IdProfissional = existente.IdPessoa,
                             IdEstabelecimento = existente.IdEstabelecimento,
-                            IdServico = sp.IdServico
+                            IdServico = idServ,
+                            ExigeAnamnese = 0,
+                            FormAnamnese = string.Empty,
+                            Preco = 0m,
+                            PercentualSinal = 0f,
+                            QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO",
+                            Duracao = 0
                         });
                     }
                 }

@@ -47,8 +47,8 @@ namespace BemMeCareWeb.Models
         [Display(Name = "CPF")]
         public string? Cpf { get; set; }
 
-        [Display(Name = "Categoria")]
-        public uint? IdCategoriaSelecionada { get; set; }
+        [Display(Name = "Categoria(s)")]
+        public IEnumerable<uint> IdCategoriasSelecionadas { get; set; } = Enumerable.Empty<uint>();
 
         [Display(Name = "Serviços")]
         public IEnumerable<uint> IdServicosSelecionados { get; set; } = Enumerable.Empty<uint>();
@@ -62,7 +62,7 @@ namespace BemMeCareWeb.Models
         public IEnumerable<Servico> Servicos { get; set; } = Enumerable.Empty<Servico>();
 
         [BindNever]
-        public SelectList? ListaCategorias { get; set; }
+        public MultiSelectList? ListaCategorias { get; set; }
 
         [BindNever]
         public IEnumerable<Servico> ServicosDisponiveis { get; set; } = Enumerable.Empty<Servico>();

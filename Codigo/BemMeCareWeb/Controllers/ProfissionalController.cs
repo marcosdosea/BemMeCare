@@ -35,7 +35,6 @@ namespace BemMeCareWeb.Controllers
             var listaProfissionais = profissionalService.GetAll();
             var listaProfissionaisViewModel = listaProfissionais.ToViewModel().ToList();
 
-            // Garante que o Nome da pessoa seja carregado na listagem
             var pessoas = pessoaService.GetAll().ToDictionary(p => p.Id, p => p.Nome);
             foreach (var item in listaProfissionaisViewModel)
             {
@@ -116,6 +115,17 @@ namespace BemMeCareWeb.Controllers
         {
             var profissional = profissionalService.Get(id);
             var profissionalViewModel = profissional?.ToViewModel() ?? new ProfissionalViewModel();
+
+            if (profissional != null && string.IsNullOrEmpty(profissionalViewModel.Cpf))
+            {
+                var pessoa = pessoaService.Get(id);
+                if (pessoa != null)
+                {
+                    profissionalViewModel.Nome = pessoa.Nome;
+                    profissionalViewModel.Cpf = pessoa.Cpf;
+                }
+            }
+
             CarregarListas(profissionalViewModel);
             return View(profissionalViewModel);
         }
@@ -139,6 +149,15 @@ namespace BemMeCareWeb.Controllers
         {
             var profissional = profissionalService.Get(id);
             var profissionalViewModel = profissional?.ToViewModel() ?? new ProfissionalViewModel();
+
+            if (profissional != null && string.IsNullOrEmpty(profissionalViewModel.Nome))
+            {
+                profissionalViewModel.Nome = pessoaService.Get(id)?.Nome;
+            }
+
+            // O CPF começa vazio para o usuário digitar e confirmar a remoção
+            profissionalViewModel.Cpf = string.Empty;
+
             return View(profissionalViewModel);
         }
 
@@ -147,6 +166,20 @@ namespace BemMeCareWeb.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(ProfissionalViewModel profissionalViewModel)
         {
+            var pessoa = pessoaService.Get(profissionalViewModel.IdPessoa);
+            if (pessoa != null)
+            {
+                var cpfDigitado = new string((profissionalViewModel.Cpf ?? string.Empty).Where(char.IsDigit).ToArray());
+                var cpfPessoa = new string((pessoa.Cpf ?? string.Empty).Where(char.IsDigit).ToArray());
+
+                if (string.IsNullOrEmpty(cpfDigitado) || cpfDigitado != cpfPessoa)
+                {
+                    ModelState.AddModelError(nameof(ProfissionalViewModel.Cpf), "O CPF informado não confere com o profissional selecionado.");
+                    profissionalViewModel.Nome = pessoa.Nome;
+                    return View(profissionalViewModel);
+                }
+            }
+
             profissionalService.Delete(profissionalViewModel.IdPessoa);
             return RedirectToAction(nameof(Index));
         }
@@ -157,8 +190,8 @@ namespace BemMeCareWeb.Controllers
             var servicos = servicoService.GetAll()
                 .Where(servico => servico.IdEstabelecimento == idEstabelecimentoProvisorio);
 
-            profissionalViewModel.ListaCategorias = new SelectList(
-                categorias, nameof(Categorium.Id), nameof(Categorium.Nome), profissionalViewModel.IdCategoriaSelecionada);
+            profissionalViewModel.ListaCategorias = new MultiSelectList(
+                categorias, nameof(Categorium.Id), nameof(Categorium.Nome), profissionalViewModel.IdCategoriasSelecionadas);
             profissionalViewModel.ServicosDisponiveis = servicos;
         }
 

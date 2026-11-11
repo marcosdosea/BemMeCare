@@ -18,7 +18,7 @@ public static class ProfissionalMapper
                 .Where(sp => sp.IdServicoNavigation != null)
                 .Select(sp => sp.IdServicoNavigation)
             : Enumerable.Empty<Servico>();
-        viewModel.IdCategoriaSelecionada = profissional.IdCategoria?.FirstOrDefault()?.Id;
+        viewModel.IdCategoriasSelecionadas = profissional.IdCategoria?.Select(c => c.Id) ?? Enumerable.Empty<uint>();
         viewModel.IdServicosSelecionados = profissional.Servicoprofissionals?.Select(sp => sp.IdServico) ?? Enumerable.Empty<uint>();
 
         return viewModel;
@@ -28,13 +28,16 @@ public static class ProfissionalMapper
     {
         var profissional = viewModel.Adapt<Profissional>();
 
-        if (viewModel.IdCategoriaSelecionada.HasValue && viewModel.IdCategoriaSelecionada.Value > 0)
+        if (viewModel.IdCategoriasSelecionadas != null)
         {
-            profissional.IdCategoria.Add(new Categorium
+            foreach (var idCategoria in viewModel.IdCategoriasSelecionadas)
             {
-                Id = viewModel.IdCategoriaSelecionada.Value,
-                IdEstabelecimento = viewModel.IdEstabelecimento
-            });
+                profissional.IdCategoria.Add(new Categorium
+                {
+                    Id = idCategoria,
+                    IdEstabelecimento = viewModel.IdEstabelecimento
+                });
+            }
         }
 
         if (viewModel.IdServicosSelecionados != null)
@@ -45,7 +48,13 @@ public static class ProfissionalMapper
                 {
                     IdProfissional = viewModel.IdPessoa,
                     IdEstabelecimento = viewModel.IdEstabelecimento,
-                    IdServico = idServico
+                    IdServico = idServico,
+                    ExigeAnamnese = 0,
+                    FormAnamnese = string.Empty,
+                    Preco = 0m,
+                    PercentualSinal = 0f,
+                    QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO",
+                    Duracao = 0
                 });
             }
         }
