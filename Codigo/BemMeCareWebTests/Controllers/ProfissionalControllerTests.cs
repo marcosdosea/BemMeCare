@@ -17,20 +17,20 @@ public class ProfissionalControllerTests
     public void Inicializar()
     {
         profissionalServiceMock = new Mock<IProfissionalService>();
-
         profissionalServiceMock
             .Setup(service => service.GetAll())
             .Returns(ObterProfissionaisDeTeste());
-
         profissionalServiceMock
             .Setup(service => service.Get(1))
             .Returns(ObterProfissionalAlvo());
-
         profissionalServiceMock
             .Setup(service => service.Get(999))
             .Returns((Profissional?)null);
-
-        controller = new ProfissionalController(profissionalServiceMock.Object);
+        controller = new ProfissionalController(
+            profissionalServiceMock.Object,
+            new Mock<ICategoriaService>().Object,
+            new Mock<IServicoService>().Object,
+            new Mock<IPessoaService>().Object);
     }
 
     [TestMethod]
