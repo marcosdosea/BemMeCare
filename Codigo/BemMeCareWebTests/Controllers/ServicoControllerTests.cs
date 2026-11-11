@@ -43,7 +43,8 @@ public class ServicoControllerTests
 
         categoriaServiceMock
             .Setup(service => service.GetAll(1))
-            .Returns(ObterCategoriasDeTeste());
+            .Returns(ObterCategoriasDeTeste()
+                .Where(categoria => categoria.IdEstabelecimento == 1));
 
         controller = new ServicoController(
             servicoServiceMock.Object,
