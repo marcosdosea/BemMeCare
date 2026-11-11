@@ -1,4 +1,4 @@
-﻿using BemMeCareWeb.Models;
+using BemMeCareWeb.Models;
 using Core;
 using Mapster;
 

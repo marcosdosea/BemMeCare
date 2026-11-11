@@ -1,0 +1,58 @@
+@model IEnumerable<BemMeCareWeb.Models.ServicoViewModel>
+
+@{
+    ViewData["Title"] = "Serviços";
+    var nomePesquisado = ViewData["NomePesquisado"] as string ?? string.Empty;
+}
+
+<h1>Serviços</h1>
+
+<p>
+    <a asp-action="Create">Cadastrar serviço</a>
+</p>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="form-group">
+        <label for="nome">Pesquisar por nome</label>
+        <input id="nome" name="nome" value="@nomePesquisado" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Pesquisar</button>
+    <a asp-action="Index" class="btn btn-secondary mt-2">Limpar</a>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nome)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdCategoria)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.Nome)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.NomeCategoria)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Alterar</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Consultar</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Excluir</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

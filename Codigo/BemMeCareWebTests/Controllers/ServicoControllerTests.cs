@@ -3,6 +3,7 @@ using BemMeCareWeb.Models;
 using Core;
 using Core.Service;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Moq;
 
 namespace BemMeCareWebTests.Controllers;
@@ -11,12 +12,14 @@ namespace BemMeCareWebTests.Controllers;
 public class ServicoControllerTests
 {
     private Mock<IServicoService> servicoServiceMock = null!;
+    private Mock<ICategoriaService> categoriaServiceMock = null!;
     private ServicoController controller = null!;
 
     [TestInitialize]
     public void Inicializar()
     {
         servicoServiceMock = new Mock<IServicoService>();
+        categoriaServiceMock = new Mock<ICategoriaService>();
 
         servicoServiceMock
             .Setup(service => service.GetAll(1))
@@ -34,7 +37,17 @@ public class ServicoControllerTests
             .Setup(service => service.Get(3, 1))
             .Returns((Servico?)null);
 
-        controller = new ServicoController(servicoServiceMock.Object);
+        servicoServiceMock
+            .Setup(service => service.GetByNome("Cor", 1))
+            .Returns([ObterServicoAlvo()]);
+
+        categoriaServiceMock
+            .Setup(service => service.GetAll())
+            .Returns(ObterCategoriasDeTeste());
+
+        controller = new ServicoController(
+            servicoServiceMock.Object,
+            categoriaServiceMock.Object);
     }
 
     [TestMethod]
@@ -56,10 +69,30 @@ public class ServicoControllerTests
         Assert.AreEqual(1u, primeiroServico.Id);
         Assert.AreEqual("Corte", primeiroServico.Nome);
         Assert.AreEqual(1u, primeiroServico.IdCategoria);
+        Assert.AreEqual("Cabelo", primeiroServico.NomeCategoria);
         Assert.AreEqual(1u, primeiroServico.IdEstabelecimento);
+        Assert.AreEqual("Unhas", servicos.Last().NomeCategoria);
 
         servicoServiceMock.Verify(
             service => service.GetAll(1),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void Index_QuandoInformadoNome_DevePesquisarPeloNome()
+    {
+        var resultado = controller.Index(" Cor ");
+
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        var servicos = Assert.IsInstanceOfType<IEnumerable<ServicoViewModel>>(
+            viewResult.ViewData.Model);
+
+        Assert.HasCount(1, servicos);
+        Assert.AreEqual("Corte", servicos.First().Nome);
+        Assert.AreEqual("Cabelo", servicos.First().NomeCategoria);
+        Assert.AreEqual("Cor", viewResult.ViewData["NomePesquisado"]);
+        servicoServiceMock.Verify(
+            service => service.GetByNome("Cor", 1),
             Times.Once);
     }
 
@@ -149,6 +182,9 @@ public class ServicoControllerTests
             viewResult.ViewData.Model);
 
         VerificarModeloVazio(servico);
+        var categorias = Assert.IsInstanceOfType<IEnumerable<SelectListItem>>(
+            viewResult.ViewData["Categorias"]);
+        Assert.HasCount(2, categorias);
     }
 
     [TestMethod]
@@ -190,6 +226,20 @@ public class ServicoControllerTests
         // Assert
         VerificarRedirecionamentoParaIndex(resultado);
 
+        servicoServiceMock.Verify(
+            service => service.Create(It.IsAny<Servico>(), 1),
+            Times.Never);
+    }
+
+    [TestMethod]
+    public void Create_QuandoCategoriaPertenceAOutroEstabelecimento_NaoDeveCriarServico()
+    {
+        var modelo = CriarModeloDeNovoServico();
+        modelo.IdCategoria = 3;
+
+        var resultado = controller.Create(modelo);
+
+        VerificarRedirecionamentoParaIndex(resultado);
         servicoServiceMock.Verify(
             service => service.Create(It.IsAny<Servico>(), 1),
             Times.Never);
@@ -415,6 +465,16 @@ public class ServicoControllerTests
                 IdCategoria = 1,
                 IdEstabelecimento = 2
             }
+        ];
+    }
+
+    private static IEnumerable<Categorium> ObterCategoriasDeTeste()
+    {
+        return
+        [
+            new Categorium { Id = 1, Nome = "Cabelo", IdEstabelecimento = 1 },
+            new Categorium { Id = 2, Nome = "Unhas", IdEstabelecimento = 1 },
+            new Categorium { Id = 3, Nome = "Outra", IdEstabelecimento = 2 }
         ];
     }
 }
