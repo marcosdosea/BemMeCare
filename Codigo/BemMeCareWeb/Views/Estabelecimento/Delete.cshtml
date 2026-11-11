@@ -1,115 +1,37 @@
 ﻿@model BemMeCareWeb.Models.EstabelecimentoViewModel
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Deletar estabelecimento";
 }
 
-<h1>Delete</h1>
+<h1>Deletar estabelecimento</h1>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>Tem certeza que quer deletar esse estabelecimento?</h3>
 <div>
-    <h4>BemMeCareWeb.Models.EstabelecimentoViewModel</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Modalidade)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Modalidade)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Cnpj)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Cnpj)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Cep)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Cep)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Rua)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Rua)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Numero)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Numero)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Complemento)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Complemento)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Bairro)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Bairro)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Cidade)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Cidade)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Contato)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Contato)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ChavePix)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ChavePix)
-        </dd>
-    </dl>
+    <div class="col-md-4">
+        <div class="form-group mb-3">
+            <label asp-for="Nome" class="control-label"></label>
+            <input asp-for="Nome" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Cnpj" class="control-label"></label>
+            <input asp-for="Cnpj" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Contato" class="control-label"></label>
+            <input asp-for="Contato" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Modalidade" class="control-label"></label>
+            <input asp-for="Modalidade" class="form-control" disabled />
+        </div>
 
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Back to List">Back to List</a>
-    </form>
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+                <a asp-action="Index" class="btn btn-bmc-medio">Cancelar</a>
+                <input type="submit" value="Deletar" class="btn btn-bmc-medio" />
+            </div>
+        </form>
+    </div>
 </div>
