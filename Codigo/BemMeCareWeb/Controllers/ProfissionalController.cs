@@ -187,7 +187,7 @@ namespace BemMeCareWeb.Controllers
         private void CarregarListas(ProfissionalViewModel profissionalViewModel)
         {
             var categorias = categoriaService.GetAll(idEstabelecimentoProvisorio);
-            var servicos = servicoService.GetAll()
+            var servicos = servicoService.GetAll(idEstabelecimentoProvisorio)
                 .Where(servico => servico.IdEstabelecimento == idEstabelecimentoProvisorio);
 
             profissionalViewModel.ListaCategorias = new MultiSelectList(
