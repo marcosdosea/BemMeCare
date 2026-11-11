@@ -27,7 +27,18 @@ namespace BemMeCareWeb.Controllers
             var servicos = string.IsNullOrWhiteSpace(nome)
                 ? servicoService.GetAll(IdEstabelecimentoProvisorio)
                 : servicoService.GetByNome(nome.Trim(), IdEstabelecimentoProvisorio);
-            var servicoViewModels = servicos.ToViewModel();
+            var servicoViewModels = servicos.ToViewModel().ToList();
+            var categoriasPorId = GetCategoriasDoEstabelecimento()
+                .ToDictionary(categoria => categoria.Id, categoria => categoria.Nome);
+
+            foreach (var servicoViewModel in servicoViewModels)
+            {
+                servicoViewModel.NomeCategoria =
+                    categoriasPorId.TryGetValue(servicoViewModel.IdCategoria, out var nomeCategoria)
+                        ? nomeCategoria
+                        : "Categoria não encontrada";
+            }
+
             ViewData["NomePesquisado"] = nome?.Trim();
             return View(servicoViewModels);
         }

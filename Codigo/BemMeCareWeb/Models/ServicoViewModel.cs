@@ -18,6 +18,9 @@ namespace BemMeCareWeb.Models
         [Required(ErrorMessage = "Categoria é obrigatória")]
         public uint IdCategoria { get; set; }
 
+        [Display(Name = "Categoria")]
+        public string? NomeCategoria { get; set; }
+
         [Display(Name = "Nome do serviço")]
         [Required(ErrorMessage = "Nome do serviço é obrigatório")]
         [StringLength(45, MinimumLength = 3, ErrorMessage = "Nome do serviço deve ter entre 3 e 45 caracteres")]

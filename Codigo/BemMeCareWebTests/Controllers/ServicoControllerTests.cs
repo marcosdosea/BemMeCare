@@ -69,7 +69,9 @@ public class ServicoControllerTests
         Assert.AreEqual(1u, primeiroServico.Id);
         Assert.AreEqual("Corte", primeiroServico.Nome);
         Assert.AreEqual(1u, primeiroServico.IdCategoria);
+        Assert.AreEqual("Cabelo", primeiroServico.NomeCategoria);
         Assert.AreEqual(1u, primeiroServico.IdEstabelecimento);
+        Assert.AreEqual("Unhas", servicos.Last().NomeCategoria);
 
         servicoServiceMock.Verify(
             service => service.GetAll(1),
@@ -87,6 +89,7 @@ public class ServicoControllerTests
 
         Assert.HasCount(1, servicos);
         Assert.AreEqual("Corte", servicos.First().Nome);
+        Assert.AreEqual("Cabelo", servicos.First().NomeCategoria);
         Assert.AreEqual("Cor", viewResult.ViewData["NomePesquisado"]);
         servicoServiceMock.Verify(
             service => service.GetByNome("Cor", 1),
