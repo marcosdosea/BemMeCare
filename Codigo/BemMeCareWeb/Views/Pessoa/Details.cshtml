@@ -1,109 +1,76 @@
 @model BemMeCareWeb.Models.PessoaViewModel
 
 @{
-    ViewData["Title"] = "Detalhes da pessoa";
+    ViewData["Title"] = "Visualizar pessoa";
 }
 
-<h1>Detalhes da pessoa</h1>
+<h1>Visualizar pessoa</h1>
 
 <div>
-    <h4>Pessoa</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Cpf)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Cpf)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Telefone)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Telefone)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.DataDeNascimento)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.DataDeNascimento)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Cor)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Cor)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Genero)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Genero)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Sexualidade)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Sexualidade)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Cep)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Cep)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Rua)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Rua)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Bairro)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Bairro)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Numero)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Numero)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Complemento)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Complemento)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Cidade)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Cidade)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-    </dl>
+    <div class="col-md-4">
+        <div class="form-group mb-3">
+            <label asp-for="Nome" class="control-label"></label>
+            <input asp-for="Nome" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Email" class="control-label"></label>
+            <input asp-for="Email" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Cpf" class="control-label"></label>
+            <input asp-for="Cpf" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Telefone" class="control-label"></label>
+            <input asp-for="Telefone" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="DataDeNascimento" class="control-label"></label>
+            <input asp-for="DataDeNascimento" class="form-control" type="date" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Cor" class="control-label"></label>
+            <input asp-for="Cor" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Genero" class="control-label"></label>
+            <input asp-for="Genero" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Sexualidade" class="control-label"></label>
+            <input asp-for="Sexualidade" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Cep" class="control-label"></label>
+            <input asp-for="Cep" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Rua" class="control-label"></label>
+            <input asp-for="Rua" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Numero" class="control-label"></label>
+            <input asp-for="Numero" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Complemento" class="control-label"></label>
+            <input asp-for="Complemento" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Bairro" class="control-label"></label>
+            <input asp-for="Bairro" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Cidade" class="control-label"></label>
+            <input asp-for="Cidade" class="form-control" disabled />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Estado" class="control-label"></label>
+            <input asp-for="Estado" class="form-control" disabled />
+        </div>
+    </div>
 </div>
 
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Editar</a> |
-    <a asp-action="Index">Voltar para a lista</a>
+<div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+    <a asp-action="Index" class="btn btn-bmc-medio">Voltar</a>
 </div>

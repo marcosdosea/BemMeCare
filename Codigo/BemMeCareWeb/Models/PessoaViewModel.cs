@@ -88,6 +88,6 @@ public class PessoaViewModel
 
     [Display(Name = "Estado")]
     [Required(ErrorMessage = "O estado é obrigatório")]
-    [StringLength(100, MinimumLength = 3, ErrorMessage = "O estado deve ter entre 3 e 100 caracteres")]
+    [StringLength(45, ErrorMessage = "O estado deve ter no máximo 45 caracteres")]
     public string? Estado { get; set; }
 }

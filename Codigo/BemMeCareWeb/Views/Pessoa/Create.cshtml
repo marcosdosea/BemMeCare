@@ -139,7 +139,7 @@
                 <div class="form-group mb-3">
                     <label asp-for="Estado" class="control-label"></label>
                     <select asp-for="Estado" class="form-select">
-                        <option value="Sergipe" selected>Sergipe</option>
+                        <option value="">Selecione...</option>
                         <option value="Acre">Acre</option>
                         <option value="Alagoas">Alagoas</option>
                         <option value="Amapá">Amapá</option>
@@ -165,6 +165,7 @@
                         <option value="Roraima">Roraima</option>
                         <option value="Santa Catarina">Santa Catarina</option>
                         <option value="São Paulo">São Paulo</option>
+                        <option value="Sergipe">Sergipe</option>
                         <option value="Tocantins">Tocantins</option>
                     </select>
                     <span asp-validation-for="Estado" class="text-danger"></span>
@@ -175,9 +176,9 @@
                     <label class="form-check-label" for="checkTermos">Aceito os termos de uso e privacidade</label>
                 </div>
 
-                <div class="form-group mt-3">
-                    <button type="button" id="btnVoltar" class="btn btn-secondary me-2">Voltar</button>
-                    <input type="submit" value="Criar conta" class="btn btn-primary" />
+                <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+                    <a asp-action="Index" class="btn btn-bmc-medio">Cancelar</a>
+                    <input type="submit" value="Adicionar" class="btn btn-bmc-medio" />
                 </div>
             </div>
         </form>
