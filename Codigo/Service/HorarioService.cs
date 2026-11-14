@@ -50,16 +50,15 @@ namespace Service
         }
 
         /// <summary>
-        /// Atualiza as informações de um horário existente no estabelecimento informado.
-        /// Se o horário não for encontrado no estabelecimento, nenhuma ação será realizada.
+        /// Atualiza as informações de um horário existente no banco de dados.
+        /// Se o horário não for encontrado no estabelecimento indicado pelo próprio modelo, nenhuma ação será realizada.
         /// Lança InvalidOperationException se a atualização causar choque de horários.
         /// </summary>
-        /// <param name="horario"> O horário a ser atualizado. </param>
-        /// <param name="idEstabelecimento"> O id do estabelecimento associado. </param>
-        public void Edit(Horario horario, uint idEstabelecimento)
+        /// <param name="horario"> O horário a ser atualizado, contendo o id do estabelecimento. </param>
+        public void Edit(Horario horario)
         {
             var horarioExistente = context.Horarios.FirstOrDefault(
-                h => h.Id == horario.Id && h.IdEstabelecimento == idEstabelecimento);
+                h => h.Id == horario.Id && h.IdEstabelecimento == horario.IdEstabelecimento);
 
             if (horarioExistente != null)
             {
@@ -135,6 +134,9 @@ namespace Service
         /// Verifica se há sobreposição/choque de turno e vigência para o profissional no mesmo dia da semana,
         /// independentemente de ser no mesmo ou em outro estabelecimento.
         /// </summary>
+        /// <param name="novoHorario">O horário que se deseja criar ou atualizar, contendo profissional, dia da semana, turno e vigência.</param>
+        /// <param name="idIgnorar">O id do horário a ser desconsiderado na busca de conflitos (utilizado durante a edição para não colidir consigo mesmo).</param>
+        /// <returns>Verdadeiro se houver sobreposição de horários; caso contrário, falso.</returns>
         private bool TemSobreposicao(Horario novoHorario, uint? idIgnorar = null)
         {
             var horariosExistentes = context.Horarios
@@ -146,29 +148,42 @@ namespace Service
 
             foreach (var existente in horariosExistentes)
             {
-                // Choque de turno diário: [InicioTurno, FimTurno)
-                bool sobrepoeTurno = novoHorario.InicioTurno < existente.FimTurno &&
-                                     novoHorario.FimTurno > existente.InicioTurno;
-
-                if (!sobrepoeTurno)
-                {
-                    continue;
-                }
-
-                // Choque de vigência: [InicioVigencia, FimVigencia ?? MaxValue]
-                var novoFim = novoHorario.FimVigencia ?? DateTime.MaxValue;
-                var existenteFim = existente.FimVigencia ?? DateTime.MaxValue;
-
-                bool sobrepoeVigencia = novoHorario.InicioVigencia <= existenteFim &&
-                                        novoFim >= existente.InicioVigencia;
-
-                if (sobrepoeVigencia)
+                if (HaConflitoDeTurno(novoHorario, existente) && HaConflitoDeVigencia(novoHorario, existente))
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Verifica se dois turnos diários no mesmo dia da semana colidem temporalmente.
+        /// Ocorre sobreposição quando o início de um turno é anterior ao término do outro e vice-versa.
+        /// </summary>
+        /// <param name="novoHorario">O novo horário a ser validado.</param>
+        /// <param name="horarioExistente">O horário existente para comparação.</param>
+        /// <returns>Verdadeiro se os turnos colidirem; caso contrário, falso.</returns>
+        private static bool HaConflitoDeTurno(Horario novoHorario, Horario horarioExistente)
+        {
+            return novoHorario.InicioTurno < horarioExistente.FimTurno &&
+                   novoHorario.FimTurno > horarioExistente.InicioTurno;
+        }
+
+        /// <summary>
+        /// Verifica se os períodos de vigência de dois horários se interceptam.
+        /// Quando a data final de vigência for nula, considera-se prazo indeterminado (DateTime.MaxValue).
+        /// </summary>
+        /// <param name="novoHorario">O novo horário a ser validado.</param>
+        /// <param name="horarioExistente">O horário existente para comparação.</param>
+        /// <returns>Verdadeiro se os períodos de vigência se sobrepuserem; caso contrário, falso.</returns>
+        private static bool HaConflitoDeVigencia(Horario novoHorario, Horario horarioExistente)
+        {
+            var novoFim = novoHorario.FimVigencia ?? DateTime.MaxValue;
+            var existenteFim = horarioExistente.FimVigencia ?? DateTime.MaxValue;
+
+            return novoHorario.InicioVigencia <= existenteFim &&
+                   novoFim >= horarioExistente.InicioVigencia;
         }
     }
 }

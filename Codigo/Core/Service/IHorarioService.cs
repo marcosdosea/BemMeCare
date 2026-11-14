@@ -3,7 +3,7 @@ namespace Core.Service;
 public interface IHorarioService
 {
     uint Create(Horario horario);
-    void Edit(Horario horario, uint idEstabelecimento);
+    void Edit(Horario horario);
     void Delete(uint id, uint idEstabelecimento);
     Horario? Get(uint id, uint idEstabelecimento);
     IEnumerable<Horario> GetAll(uint idEstabelecimento);
