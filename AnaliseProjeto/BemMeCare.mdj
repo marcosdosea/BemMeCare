@@ -198889,7 +198889,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGh25pnTfSk1AI="
 									},
-									"name": "SequenceDiagramBuscarEstabelecimento",
+									"name": "SequenceDiagramListarEstabelecimento",
 									"ownedViews": [
 										{
 											"_type": "UMLFrameView",
@@ -198910,9 +198910,9 @@
 													"font": "Arial;13;0",
 													"left": 32.72998046875,
 													"top": 5,
-													"width": 245.2451171875,
+													"width": 236.57421875,
 													"height": 13,
-													"text": "SequenceDiagramBuscarEstabelecimento"
+													"text": "SequenceDiagramListarEstabelecimento"
 												},
 												{
 													"_type": "LabelView",
