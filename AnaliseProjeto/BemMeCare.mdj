@@ -120963,7 +120963,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGh2ZfIvhsNXGo="
 									},
-									"name": "SequenceDiagramBuscarCategoria",
+									"name": "SequenceDiagramListarCategoria",
 									"ownedViews": [
 										{
 											"_type": "UMLFrameView",
@@ -120984,9 +120984,9 @@
 													"font": "Arial;13;0",
 													"left": 32.72998046875,
 													"top": 5,
-													"width": 205.50244140625,
+													"width": 196.83154296875,
 													"height": 13,
-													"text": "SequenceDiagramBuscarCategoria"
+													"text": "SequenceDiagramListarCategoria"
 												},
 												{
 													"_type": "LabelView",
@@ -135132,7 +135132,7 @@
 														"$ref": "AAAAAAGh27NbCCIgPro="
 													},
 													"edgePosition": 1,
-													"text": "2 : Get(id: Integer)"
+													"text": "2 : Message2"
 												},
 												{
 													"_type": "EdgeLabelView",
@@ -135354,7 +135354,7 @@
 														"$ref": "AAAAAAGh27SexCJPkn8="
 													},
 													"edgePosition": 1,
-													"text": "4 : Get(id: Integer)"
+													"text": "4 : Message4"
 												},
 												{
 													"_type": "EdgeLabelView",
@@ -137822,122 +137822,6 @@
 											}
 										},
 										{
-											"_type": "UMLSeqLifelineView",
-											"_id": "AAAAAAGh27hGdiRHtEE=",
-											"_parent": {
-												"$ref": "AAAAAAGh27hGdiQubi8="
-											},
-											"model": {
-												"$ref": "AAAAAAGh27hGdiRjmq4="
-											},
-											"subViews": [
-												{
-													"_type": "UMLNameCompartmentView",
-													"_id": "AAAAAAGh27hGdiRIXug=",
-													"_parent": {
-														"$ref": "AAAAAAGh27hGdiRHtEE="
-													},
-													"model": {
-														"$ref": "AAAAAAGh27hGdiRjmq4="
-													},
-													"subViews": [
-														{
-															"_type": "LabelView",
-															"_id": "AAAAAAGh27hGdiRJDRw=",
-															"_parent": {
-																"$ref": "AAAAAAGh27hGdiRIXug="
-															},
-															"visible": false,
-															"font": "Arial;13;0",
-															"left": 586,
-															"height": 13
-														},
-														{
-															"_type": "LabelView",
-															"_id": "AAAAAAGh27hGdiRK/ug=",
-															"_parent": {
-																"$ref": "AAAAAAGh27hGdiRIXug="
-															},
-															"font": "Arial;13;1",
-															"left": 861,
-															"top": 47,
-															"width": 207.24072265625,
-															"height": 13,
-															"text": ": BemMeCareContext"
-														},
-														{
-															"_type": "LabelView",
-															"_id": "AAAAAAGh27hGdiRLgjo=",
-															"_parent": {
-																"$ref": "AAAAAAGh27hGdiRIXug="
-															},
-															"visible": false,
-															"font": "Arial;13;0",
-															"left": 586,
-															"width": 206.62890625,
-															"height": 13,
-															"text": "(from InteractionListarProfissional)"
-														},
-														{
-															"_type": "LabelView",
-															"_id": "AAAAAAGh27hGdiRMFDc=",
-															"_parent": {
-																"$ref": "AAAAAAGh27hGdiRIXug="
-															},
-															"visible": false,
-															"font": "Arial;13;0",
-															"left": 586,
-															"height": 13,
-															"horizontalAlignment": 1
-														}
-													],
-													"font": "Arial;13;0",
-													"left": 856,
-													"top": 40,
-													"width": 217.24072265625,
-													"height": 40,
-													"stereotypeLabel": {
-														"$ref": "AAAAAAGh27hGdiRJDRw="
-													},
-													"nameLabel": {
-														"$ref": "AAAAAAGh27hGdiRK/ug="
-													},
-													"namespaceLabel": {
-														"$ref": "AAAAAAGh27hGdiRLgjo="
-													},
-													"propertyLabel": {
-														"$ref": "AAAAAAGh27hGdiRMFDc="
-													}
-												},
-												{
-													"_type": "UMLLinePartView",
-													"_id": "AAAAAAGh27hGdiRNkC8=",
-													"_parent": {
-														"$ref": "AAAAAAGh27hGdiRHtEE="
-													},
-													"model": {
-														"$ref": "AAAAAAGh27hGdiRjmq4="
-													},
-													"font": "Arial;13;0",
-													"left": 965,
-													"top": 80,
-													"width": 1,
-													"height": 233
-												}
-											],
-											"font": "Arial;13;0",
-											"left": 856,
-											"top": 40,
-											"width": 217.24072265625,
-											"height": 273,
-											"nameCompartment": {
-												"$ref": "AAAAAAGh27hGdiRIXug="
-											},
-											"linePart": {
-												"$ref": "AAAAAAGh27hGdiRNkC8="
-											}
-										},
-										{
 											"_type": "UMLSeqMessageView",
 											"_id": "AAAAAAGh27hGdiRO6eA=",
 											"_parent": {
@@ -138473,17 +138357,6 @@
 									},
 									"represent": {
 										"$ref": "AAAAAAGhaPo/6arU2MU="
-									},
-									"isMultiInstance": false
-								},
-								{
-									"_type": "UMLLifeline",
-									"_id": "AAAAAAGh27hGdiRjmq4=",
-									"_parent": {
-										"$ref": "AAAAAAGh27hGdiQtKdM="
-									},
-									"represent": {
-										"$ref": "AAAAAAGhaPo/6arYAVg="
 									},
 									"isMultiInstance": false
 								},
