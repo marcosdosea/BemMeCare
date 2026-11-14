@@ -174,7 +174,7 @@ public class HorarioServiceTests
         horario.IdEstabelecimento = 1;
 
         // Act
-        servicoHorario.Edit(horario, 1);
+        servicoHorario.Edit(horario);
 
         // Assert
         var horarioAtualizado = servicoHorario.Get(1, 1);
@@ -327,7 +327,7 @@ public class HorarioServiceTests
     [TestMethod]
     public void Edit_QuandoHorarioPertenceAOutroEstabelecimento_NaoDeveAtualizar()
     {
-        // Arrange
+        // Arrange (Horário 1 pertence ao estabelecimento 1, alteração enviada com IdEstabelecimento 2)
         var alteracao = new Horario
         {
             Id = 1,
@@ -337,11 +337,11 @@ public class HorarioServiceTests
             FimVigencia = null,
             DiaSemana = "Segunda-feira",
             IdProfissional = 1,
-            IdEstabelecimento = 1
+            IdEstabelecimento = 2
         };
 
-        // Act (Tentando editar o horário 1 fornecendo o estabelecimento 2)
-        servicoHorario.Edit(alteracao, 2);
+        // Act
+        servicoHorario.Edit(alteracao);
 
         // Assert (Os dados originais do horário 1 devem permanecer inalterados)
         var horarioOriginal = servicoHorario.Get(1, 1);
@@ -516,7 +516,7 @@ public class HorarioServiceTests
         Assert.IsNotNull(h1);
         h1.InicioVigencia = new DateTime(2023, 1, 1);
         h1.FimVigencia = new DateTime(2023, 12, 31);
-        servicoHorario.Edit(h1, 1);
+        servicoHorario.Edit(h1);
 
         // Novo horário na mesma Segunda-feira das 09:00 às 17:00, mas com vigência a partir de 2024
         var horarioNovo = new Horario
@@ -553,7 +553,7 @@ public class HorarioServiceTests
         // Act & Assert
         try
         {
-            servicoHorario.Edit(horario2, 1);
+            servicoHorario.Edit(horario2);
             Assert.Fail("Deveria ter lançado InvalidOperationException.");
         }
         catch (InvalidOperationException)
@@ -573,7 +573,7 @@ public class HorarioServiceTests
         horario1.FimTurno = new TimeSpan(16, 30, 0);
 
         // Act
-        servicoHorario.Edit(horario1, 1);
+        servicoHorario.Edit(horario1);
 
         // Assert
         var atualizado = servicoHorario.Get(1, 1);
