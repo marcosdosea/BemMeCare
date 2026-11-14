@@ -101,7 +101,7 @@ namespace BemMeCareWeb.Controllers
                 {
                     horarioViewModel.IdEstabelecimento = IdEstabelecimentoProvisorio;
                     var horario = horarioViewModel.ToEntity();
-                    horarioService.Edit(horario, horarioViewModel.IdEstabelecimento);
+                    horarioService.Edit(horario);
                     return RedirectToAction(nameof(Index));
                 }
                 catch (InvalidOperationException ex)

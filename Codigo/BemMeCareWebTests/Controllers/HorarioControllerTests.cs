@@ -251,8 +251,8 @@ public class HorarioControllerTests
         Horario? horarioAtualizado = null;
 
         horarioServiceMock
-            .Setup(service => service.Edit(It.IsAny<Horario>(), idEstabelecimentoEsperado))
-            .Callback<Horario, uint>((h, idEst) => horarioAtualizado = h);
+            .Setup(service => service.Edit(It.IsAny<Horario>()))
+            .Callback<Horario>((h) => horarioAtualizado = h);
 
         // Act
         var resultado = controller.Edit(modelo);
@@ -265,7 +265,7 @@ public class HorarioControllerTests
         Assert.AreEqual(idEstabelecimentoEsperado, horarioAtualizado.IdEstabelecimento);
 
         horarioServiceMock.Verify(
-            service => service.Edit(It.IsAny<Horario>(), idEstabelecimentoEsperado),
+            service => service.Edit(It.IsAny<Horario>()),
             Times.Once);
     }
 
@@ -284,7 +284,7 @@ public class HorarioControllerTests
         Assert.AreEqual(modelo, viewResult.ViewData.Model);
 
         horarioServiceMock.Verify(
-            service => service.Edit(It.IsAny<Horario>(), It.IsAny<uint>()),
+            service => service.Edit(It.IsAny<Horario>()),
             Times.Never);
     }
 
@@ -294,7 +294,7 @@ public class HorarioControllerTests
         // Arrange
         var modelo = CriarModeloDeHorarioExistente();
         horarioServiceMock
-            .Setup(service => service.Edit(It.IsAny<Horario>(), idEstabelecimentoEsperado))
+            .Setup(service => service.Edit(It.IsAny<Horario>()))
             .Throws(new InvalidOperationException("Choque de horário."));
 
         // Act
