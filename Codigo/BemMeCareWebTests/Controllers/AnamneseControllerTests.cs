@@ -22,7 +22,7 @@ public class AnamneseControllerTests
         profissionalServiceMock = new Mock<IProfissionalService>();
 
         profissionalServiceMock
-            .Setup(service => service.GetServicoProfissional(idProfissional))
+            .Setup(service => service.GetServicoProfissional(idProfissional, idEstabelecimentoEsperado))
             .Returns(ObterServicosDeTeste());
 
         profissionalServiceMock
@@ -56,7 +56,7 @@ public class AnamneseControllerTests
         Assert.AreEqual("https://forms.gle/abc123", primeiraAnamnese.FormAnamnese);
 
         profissionalServiceMock.Verify(
-            service => service.GetServicoProfissional(idProfissional),
+            service => service.GetServicoProfissional(idProfissional, idEstabelecimentoEsperado),
             Times.Once);
     }
 
@@ -65,7 +65,7 @@ public class AnamneseControllerTests
     {
         // Arrange
         profissionalServiceMock
-            .Setup(service => service.GetServicoProfissional(idProfissional))
+            .Setup(service => service.GetServicoProfissional(idProfissional, idEstabelecimentoEsperado))
             .Returns(Array.Empty<Servicoprofissional>());
 
         // Act
@@ -79,7 +79,7 @@ public class AnamneseControllerTests
         Assert.IsEmpty(anamneses);
 
         profissionalServiceMock.Verify(
-            service => service.GetServicoProfissional(idProfissional),
+            service => service.GetServicoProfissional(idProfissional, idEstabelecimentoEsperado),
             Times.Once);
     }
 
@@ -288,7 +288,7 @@ public class AnamneseControllerTests
         Assert.HasCount(1, servicosEnviados);
         Assert.AreEqual(modelo.IdServico, servicosEnviados[0].IdServico);
         Assert.AreEqual(string.Empty, servicosEnviados[0].FormAnamnese);
-        Assert.AreEqual<sbyte>(1, servicosEnviados[0].ExigeAnamnese);
+        Assert.AreEqual<sbyte>(0, servicosEnviados[0].ExigeAnamnese);
         Assert.AreEqual(idEstabelecimentoEsperado, servicosEnviados[0].IdEstabelecimento);
 
         profissionalServiceMock.Verify(

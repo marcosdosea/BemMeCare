@@ -125,11 +125,12 @@ namespace Service
                 .AsNoTracking();
         }
 
-        public IEnumerable<Servicoprofissional> GetServicoProfissional(uint idProfissional)
+        public IEnumerable<Servicoprofissional> GetServicoProfissional(uint idProfissional, uint idEstabelecimento)
         {
             return context.Servicoprofissionals
                 .Include(sp => sp.IdServicoNavigation)
-                .Where(sp => sp.IdProfissional == idProfissional)
+                .Where(sp => sp.IdProfissional == idProfissional &&
+                             sp.IdEstabelecimento == idEstabelecimento)
                 .AsNoTracking()
                 .ToList();
         }

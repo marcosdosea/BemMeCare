@@ -9,7 +9,7 @@ namespace Core.Service
         void Delete(uint idProfissional);
         Profissional? Get(uint idProfissional);
         IEnumerable<Profissional> GetAll();
-        IEnumerable<Servicoprofissional> GetServicoProfissional(uint idProfissional);
+        IEnumerable<Servicoprofissional> GetServicoProfissional(uint idProfissional, uint idEstabelecimento);
         Servicoprofissional? GetServicoProfissional(uint idProfissional, uint idServico, uint idEstabelecimento);
         void EditServicoProfissional(uint idProfissional, IEnumerable<Servicoprofissional> servicos);
     }

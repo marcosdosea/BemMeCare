@@ -18,9 +18,11 @@ namespace BemMeCareWeb.Controllers
         }
 
         // GET: AnamneseController
+        // GET: AnamneseController
         public ActionResult Index(uint idProfissional)
         {
-            var listaServicos = profissionalService.GetServicoProfissional(idProfissional);
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+            var listaServicos = profissionalService.GetServicoProfissional(idProfissional, idEstabelecimento);
             var listaAnamneseViewModel = listaServicos.ToViewModel();
             return View(listaAnamneseViewModel);
         }
@@ -77,6 +79,7 @@ namespace BemMeCareWeb.Controllers
         {
             anamneseViewModel.IdEstabelecimento = idEstabelecimentoProvisorio;
             anamneseViewModel.FormAnamnese = string.Empty;
+            anamneseViewModel.ExigeAnamnese = false;
             var servico = anamneseViewModel.ToEntity();
             profissionalService.EditServicoProfissional(
                 anamneseViewModel.IdProfissional,
