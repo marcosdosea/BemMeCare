@@ -124,5 +124,45 @@ namespace Service
                     .ThenInclude(sp => sp.IdServicoNavigation)
                 .AsNoTracking();
         }
+
+        public IEnumerable<Servicoprofissional> GetServicoProfissional(uint idProfissional, uint idEstabelecimento)
+        {
+            return context.Servicoprofissionals
+                .Include(sp => sp.IdServicoNavigation)
+                .Where(sp => sp.IdProfissional == idProfissional &&
+                             sp.IdEstabelecimento == idEstabelecimento)
+                .AsNoTracking()
+                .ToList();
+        }
+
+        public Servicoprofissional? GetServicoProfissional(uint idProfissional, uint idServico, uint idEstabelecimento)
+        {
+            return context.Servicoprofissionals
+                .Include(sp => sp.IdServicoNavigation)
+                .AsNoTracking()
+                .FirstOrDefault(sp =>
+                    sp.IdProfissional == idProfissional &&
+                    sp.IdServico == idServico &&
+                    sp.IdEstabelecimento == idEstabelecimento);
+        }
+
+        public void EditServicoProfissional(uint idProfissional, IEnumerable<Servicoprofissional> servicos)
+        {
+            foreach (var servico in servicos)
+            {
+                var existente = context.Servicoprofissionals.FirstOrDefault(sp =>
+                    sp.IdProfissional == idProfissional &&
+                    sp.IdEstabelecimento == servico.IdEstabelecimento &&
+                    sp.IdServico == servico.IdServico);
+
+                if (existente == null)
+                    continue;
+
+                existente.ExigeAnamnese = servico.ExigeAnamnese;
+                existente.FormAnamnese = servico.FormAnamnese ?? string.Empty;
+            }
+
+            context.SaveChanges();
+        }
     }
 }
