@@ -14,6 +14,14 @@
             <input asp-for="Id" class="form-control" disabled />
         </div>
         <div class="form-group">
+            <label asp-for="NomeProfissional" class="control-label"></label>
+            <input value="@(string.IsNullOrEmpty(Model?.NomeProfissional) ? Model?.IdProfissional.ToString() : Model.NomeProfissional)" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="NomeEstabelecimento" class="control-label"></label>
+            <input value="@(string.IsNullOrEmpty(Model?.NomeEstabelecimento) ? Model?.IdEstabelecimento.ToString() : Model.NomeEstabelecimento)" class="form-control" disabled />
+        </div>
+        <div class="form-group">
             <label asp-for="DiaSemana" class="control-label"></label>
             <input asp-for="DiaSemana" class="form-control" disabled />
         </div>

@@ -10,10 +10,17 @@ namespace BemMeCareWeb.Controllers
         // ID provisório que depois será obtido automaticamente pelo usuário logado no sistema
         private const uint IdEstabelecimentoProvisorio = 1;
         private readonly IHorarioService horarioService;
+        private readonly IPessoaService? pessoaService;
+        private readonly IEstabelecimentoService? estabelecimentoService;
 
-        public HorarioController(IHorarioService horarioService)
+        public HorarioController(
+            IHorarioService horarioService,
+            IPessoaService? pessoaService = null,
+            IEstabelecimentoService? estabelecimentoService = null)
         {
             this.horarioService = horarioService;
+            this.pessoaService = pessoaService;
+            this.estabelecimentoService = estabelecimentoService;
         }
 
         // GET: HorarioController
@@ -45,14 +52,17 @@ namespace BemMeCareWeb.Controllers
             var idEstabelecimento = IdEstabelecimentoProvisorio;
             var horario = horarioService.Get(id, idEstabelecimento);
             var horarioViewModel = horario != null ? horario.ToViewModel() : new HorarioViewModel();
+            PreencherNomesAuxiliares(horarioViewModel);
             return View(horarioViewModel);
         }
 
         // GET: HorarioController/Create
-        public ActionResult Create()
+        public ActionResult Create(uint? idProfissional = null, string? diaSemana = null)
         {
             var horarioViewModel = new HorarioViewModel
             {
+                IdProfissional = idProfissional ?? 0,
+                DiaSemana = diaSemana ?? string.Empty,
                 InicioVigencia = DateTime.Today
             };
             return View(horarioViewModel);
@@ -70,7 +80,7 @@ namespace BemMeCareWeb.Controllers
                     horarioViewModel.IdEstabelecimento = IdEstabelecimentoProvisorio;
                     var horario = horarioViewModel.ToEntity();
                     horarioService.Create(horario);
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index), new { idProfissional = horarioViewModel.IdProfissional, diaSemana = horarioViewModel.DiaSemana });
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -102,7 +112,7 @@ namespace BemMeCareWeb.Controllers
                     horarioViewModel.IdEstabelecimento = IdEstabelecimentoProvisorio;
                     var horario = horarioViewModel.ToEntity();
                     horarioService.Edit(horario);
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index), new { idProfissional = horarioViewModel.IdProfissional, diaSemana = horarioViewModel.DiaSemana });
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -119,6 +129,7 @@ namespace BemMeCareWeb.Controllers
             var idEstabelecimento = IdEstabelecimentoProvisorio;
             var horario = horarioService.Get(id, idEstabelecimento);
             var horarioViewModel = horario != null ? horario.ToViewModel() : new HorarioViewModel();
+            PreencherNomesAuxiliares(horarioViewModel);
             return View(horarioViewModel);
         }
 
@@ -129,7 +140,28 @@ namespace BemMeCareWeb.Controllers
         {
             horarioViewModel.IdEstabelecimento = IdEstabelecimentoProvisorio;
             horarioService.Delete(horarioViewModel.Id, horarioViewModel.IdEstabelecimento);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { idProfissional = horarioViewModel.IdProfissional, diaSemana = horarioViewModel.DiaSemana });
+        }
+
+        private void PreencherNomesAuxiliares(HorarioViewModel viewModel)
+        {
+            if (pessoaService != null && viewModel.IdProfissional > 0)
+            {
+                var pessoa = pessoaService.Get(viewModel.IdProfissional);
+                if (pessoa != null)
+                {
+                    viewModel.NomeProfissional = pessoa.Nome;
+                }
+            }
+
+            if (estabelecimentoService != null && viewModel.IdEstabelecimento > 0)
+            {
+                var estabelecimento = estabelecimentoService.Get(viewModel.IdEstabelecimento);
+                if (estabelecimento != null)
+                {
+                    viewModel.NomeEstabelecimento = estabelecimento.Nome;
+                }
+            }
         }
     }
 }

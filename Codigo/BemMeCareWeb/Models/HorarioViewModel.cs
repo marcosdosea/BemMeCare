@@ -29,7 +29,7 @@ public class HorarioViewModel
 
     [Display(Name = "Dia da Semana")]
     [Required(ErrorMessage = "O dia da semana é obrigatório.")]
-    [StringLength(20, MinimumLength = 3, ErrorMessage = "O dia da semana deve ter entre 3 e 20 caracteres.")]
+    [StringLength(20, ErrorMessage = "O dia da semana deve ter entre 3 e 20 caracteres.")]
     public string DiaSemana { get; set; } = string.Empty;
 
     [Display(Name = "Profissional")]
@@ -42,4 +42,7 @@ public class HorarioViewModel
 
     [Display(Name = "Nome do Profissional")]
     public string? NomeProfissional { get; set; }
+
+    [Display(Name = "Nome do Estabelecimento")]
+    public string? NomeEstabelecimento { get; set; }
 }
