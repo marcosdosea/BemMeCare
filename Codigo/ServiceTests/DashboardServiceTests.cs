@@ -85,13 +85,11 @@ namespace Service.Tests
 
             contexto.Categoria.AddRange(
                 new Categorium { Id = 1, IdEstabelecimento = 1, Nome = "Cabelo" },
-                new Categorium { Id = 2, IdEstabelecimento = 1, Nome = "Estética" },
-                new Categorium { Id = 3, IdEstabelecimento = 2, Nome = "Outra Clinica" });
+                new Categorium { Id = 2, IdEstabelecimento = 1, Nome = "Estética" });
 
             contexto.Servicos.AddRange(
                 new Servico { Id = 1, IdCategoria = 1, IdEstabelecimento = 1, Nome = "Corte" },
-                new Servico { Id = 2, IdCategoria = 2, IdEstabelecimento = 1, Nome = "Depilação" },
-                new Servico { Id = 3, IdCategoria = 3, IdEstabelecimento = 2, Nome = "Serviço Externo" });
+                new Servico { Id = 2, IdCategoria = 2, IdEstabelecimento = 1, Nome = "Depilação" });
 
             contexto.Agendamentos.AddRange(
                 new Agendamento
@@ -142,6 +140,7 @@ namespace Service.Tests
                     StatusAgendamento = "CO",
                     StatusPagamento = "FI"
                 },
+                // Cancelado ("CA") - deve ser ignorado
                 new Agendamento
                 {
                     Id = 4,
@@ -157,13 +156,31 @@ namespace Service.Tests
                     ValorPagoSinal = 0m,
                     StatusAgendamento = "CA",
                     StatusPagamento = "CA"
+                },
+                // Pendente ("PE") - também deve ser ignorado
+                new Agendamento
+                {
+                    Id = 5,
+                    IdEstabelecimento = 1,
+                    IdProfissional = 1,
+                    IdPessoaCliente = 3,
+                    IdPessoaMarcou = 3,
+                    DataHoraAtendimento = new DateTime(2026, 5, 23, 16, 0, 0),
+                    DataHoraFimAtendimento = new DateTime(2026, 5, 23, 17, 0, 0),
+                    DataHoraCriacao = new DateTime(2026, 5, 5, 9, 0, 0),
+                    DuracaoMinutos = 60,
+                    PrecoFinal = 300m,
+                    ValorPagoSinal = 0m,
+                    StatusAgendamento = "PE",
+                    StatusPagamento = "MA"
                 });
 
             contexto.Agendamentoservicos.AddRange(
                 new Agendamentoservico { IdAgendamento = 1, IdServico = 1, PrecoCobrado = 100m },
                 new Agendamentoservico { IdAgendamento = 2, IdServico = 1, PrecoCobrado = 100m },
                 new Agendamentoservico { IdAgendamento = 3, IdServico = 2, PrecoCobrado = 50m },
-                new Agendamentoservico { IdAgendamento = 4, IdServico = 2, PrecoCobrado = 500m });
+                new Agendamentoservico { IdAgendamento = 4, IdServico = 2, PrecoCobrado = 500m },
+                new Agendamentoservico { IdAgendamento = 5, IdServico = 2, PrecoCobrado = 300m });
 
             contexto.SaveChanges();
 
@@ -177,7 +194,7 @@ namespace Service.Tests
         }
 
         [TestMethod]
-        public void GetResumoServicos_DeveRetornarMaisUsadoMenosUsadoECategoriaMaisUsadaIgnorandoCancelados()
+        public void GetResumoServicos_DeveConsiderarApenasAgendamentosCompletos()
         {
             // Act
             var resumo = dashboardService.GetResumoServicos(1);
@@ -190,6 +207,22 @@ namespace Service.Tests
             Assert.AreEqual(1, resumo.ServicoMenosUsadoQuantidade);
             Assert.AreEqual("Cabelo", resumo.CategoriaMaisUsadaNome);
             Assert.AreEqual(2, resumo.CategoriaMaisUsadaQuantidade);
+        }
+
+        [TestMethod]
+        public void GetResumoServicos_QuandoEstabelecimentoNaoPossuiAgendamentos_DeveRetornarValoresPadraoZerados()
+        {
+            // Act
+            var resumo = dashboardService.GetResumoServicos(99);
+
+            // Assert
+            Assert.IsNotNull(resumo);
+            Assert.AreEqual("-", resumo.ServicoMaisUsadoNome);
+            Assert.AreEqual(0, resumo.ServicoMaisUsadoQuantidade);
+            Assert.AreEqual("-", resumo.ServicoMenosUsadoNome);
+            Assert.AreEqual(0, resumo.ServicoMenosUsadoQuantidade);
+            Assert.AreEqual("-", resumo.CategoriaMaisUsadaNome);
+            Assert.AreEqual(0, resumo.CategoriaMaisUsadaQuantidade);
         }
 
         [TestMethod]
@@ -207,12 +240,25 @@ namespace Service.Tests
         }
 
         [TestMethod]
-        public void GetDistribuicaoPorCategoria_QuandoServicoDeOutroEstabelecimento_DeveLancarArgumentException()
+        public void GetDistribuicaoPorServico_QuandoEstabelecimentoNaoPossuiAgendamentos_DeveRetornarColecaoVazia()
         {
-            // Act & Assert
-            Assert.ThrowsExactly<ArgumentException>(() =>
-                dashboardService.GetDistribuicaoPorCategoria(
-                    1, 3, "Genero", new DateTime(2026, 5, 1), new DateTime(2026, 5, 31)));
+            // Act
+            var resultado = dashboardService.GetDistribuicaoPorServico(
+                99, 1, "Genero", new DateTime(2026, 5, 1), new DateTime(2026, 5, 31)).ToList();
+
+            // Assert
+            Assert.AreEqual(0, resultado.Count);
+        }
+
+        [TestMethod]
+        public void GetDistribuicaoPorCategoria_QuandoEstabelecimentoNaoPossuiAgendamentos_DeveRetornarColecaoVazia()
+        {
+            // Act
+            var resultado = dashboardService.GetDistribuicaoPorCategoria(
+                99, 1, "Genero", new DateTime(2026, 5, 1), new DateTime(2026, 5, 31)).ToList();
+
+            // Assert
+            Assert.AreEqual(0, resultado.Count);
         }
 
         [TestMethod]
@@ -225,7 +271,7 @@ namespace Service.Tests
         }
 
         [TestMethod]
-        public void GetResumoFaturamento_DeveCalcularFaturamentoMensalEServicosIgnorandoCancelados()
+        public void GetResumoFaturamento_DeveCalcularFaturamentoConsiderandoApenasAgendamentosCompletos()
         {
             // Act
             var resumo = dashboardService.GetResumoFaturamento(1, new DateTime(2026, 5, 25));
@@ -241,7 +287,27 @@ namespace Service.Tests
         }
 
         [TestMethod]
-        public void GetFaturamentoPorProfissional_DeveSomarApenasAgendamentosValidosNoPeriodo()
+        public void GetResumoFaturamento_QuandoEstabelecimentoNaoPossuiAgendamentos_DeveRetornarValoresZerados()
+        {
+            // Act
+            var resumo = dashboardService.GetResumoFaturamento(99, new DateTime(2026, 5, 25));
+
+            // Assert
+            Assert.IsNotNull(resumo);
+            Assert.AreEqual(0m, resumo.FaturamentoMesAtual);
+            Assert.AreEqual(0m, resumo.PercentualVariacaoMensal);
+            Assert.AreEqual(0m, resumo.FaturamentoSemanal);
+            Assert.AreEqual(0m, resumo.PercentualVariacaoSemanal);
+            Assert.AreEqual("-", resumo.ServicoMaisFaturaNome);
+            Assert.AreEqual(0m, resumo.ServicoMaisFaturaValor);
+            Assert.AreEqual("-", resumo.ServicoMenosFaturaNome);
+            Assert.AreEqual(0m, resumo.ServicoMenosFaturaValor);
+            Assert.AreEqual(12, resumo.FaturamentoUltimos12Meses.Count());
+            Assert.IsTrue(resumo.FaturamentoUltimos12Meses.All(m => m.Valor == 0m));
+        }
+
+        [TestMethod]
+        public void GetFaturamentoPorProfissional_DeveSomarApenasAgendamentosCompletosNoPeriodo()
         {
             // Act
             var resultado = dashboardService.GetFaturamentoPorProfissional(
@@ -252,6 +318,17 @@ namespace Service.Tests
             Assert.AreEqual("Fulano de Tal", resultado[0].Label);
             Assert.AreEqual(3, resultado[0].Quantidade);
             Assert.AreEqual(250m, resultado[0].Valor);
+        }
+
+        [TestMethod]
+        public void GetFaturamentoPorProfissional_QuandoEstabelecimentoNaoPossuiAgendamentos_DeveRetornarColecaoVazia()
+        {
+            // Act
+            var resultado = dashboardService.GetFaturamentoPorProfissional(
+                99, new DateTime(2026, 5, 1), new DateTime(2026, 5, 31)).ToList();
+
+            // Assert
+            Assert.AreEqual(0, resultado.Count);
         }
 
         [TestMethod]
