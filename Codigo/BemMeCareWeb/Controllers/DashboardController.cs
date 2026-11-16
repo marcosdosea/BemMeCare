@@ -63,6 +63,13 @@ namespace BemMeCareWeb.Controllers
 
                 if (string.Equals(viewModel.TipoFiltroItem, "Categoria", StringComparison.OrdinalIgnoreCase))
                 {
+                    var categoria = categoriaService.Get(viewModel.IdItemSelecionado, idEstabelecimentoProvisorio);
+                    if (categoria == null)
+                    {
+                        viewModel.MensagemErro = "A categoria informada não pertence ao estabelecimento.";
+                        return View(viewModel);
+                    }
+
                     resultado = dashboardService.GetDistribuicaoPorCategoria(
                         idEstabelecimentoProvisorio,
                         viewModel.IdItemSelecionado,
@@ -71,11 +78,17 @@ namespace BemMeCareWeb.Controllers
                         viewModel.DataFim);
 
                     nomeTipo = "a categoria";
-                    nomeItem = viewModel.CategoriasDisponiveis
-                        .FirstOrDefault(c => c.Id == viewModel.IdItemSelecionado)?.Nome ?? string.Empty;
+                    nomeItem = categoria.Nome;
                 }
                 else
                 {
+                    var servico = servicoService.Get(viewModel.IdItemSelecionado, idEstabelecimentoProvisorio);
+                    if (servico == null)
+                    {
+                        viewModel.MensagemErro = "O serviço informado não pertence ao estabelecimento.";
+                        return View(viewModel);
+                    }
+
                     resultado = dashboardService.GetDistribuicaoPorServico(
                         idEstabelecimentoProvisorio,
                         viewModel.IdItemSelecionado,
@@ -84,8 +97,7 @@ namespace BemMeCareWeb.Controllers
                         viewModel.DataFim);
 
                     nomeTipo = "o serviço";
-                    nomeItem = viewModel.ServicosDisponiveis
-                        .FirstOrDefault(s => s.Id == viewModel.IdItemSelecionado)?.Nome ?? string.Empty;
+                    nomeItem = servico.Nome;
                 }
 
                 viewModel.ItensGrafico = resultado.ToList();

@@ -49,19 +49,24 @@ namespace BemMeCareWebTests.Controllers
                     ServicoMenosFaturaValor = 100m
                 });
 
+            var categoriaPadrao = new Categorium { Id = 1, IdEstabelecimento = 1, Nome = "Massagista" };
+            var servicoPadrao = new Servico { Id = 1, IdCategoria = 1, IdEstabelecimento = 1, Nome = "Massagem Relaxante" };
+
             categoriaServiceMock
                 .Setup(s => s.GetAll(1))
-                .Returns(new List<Categorium>
-                {
-                    new Categorium { Id = 1, IdEstabelecimento = 1, Nome = "Massagista" }
-                });
+                .Returns(new List<Categorium> { categoriaPadrao });
+
+            categoriaServiceMock
+                .Setup(s => s.Get(1, 1))
+                .Returns(categoriaPadrao);
 
             servicoServiceMock
                 .Setup(s => s.GetAll(1))
-                .Returns(new List<Servico>
-                {
-                    new Servico { Id = 1, IdCategoria = 1, IdEstabelecimento = 1, Nome = "Massagem Relaxante" }
-                });
+                .Returns(new List<Servico> { servicoPadrao });
+
+            servicoServiceMock
+                .Setup(s => s.Get(1, 1))
+                .Returns(servicoPadrao);
 
             controller = new DashboardController(
                 dashboardServiceMock.Object,
@@ -130,6 +135,34 @@ namespace BemMeCareWebTests.Controllers
             Assert.IsNull(model.MensagemErro);
             Assert.AreEqual(2, model.ItensGrafico.Count);
             Assert.AreEqual(40, model.TotalAtendimentos);
+        }
+
+        [TestMethod]
+        public void Servicos_Post_QuandoCategoriaNaoPertenceAoEstabelecimento_DeveRetornarMensagemDeErro()
+        {
+            // Arrange
+            categoriaServiceMock
+                .Setup(s => s.Get(99, 1))
+                .Returns((Categorium?)null);
+
+            var input = new DashboardServicosViewModel
+            {
+                FiltroDemografico = "Genero",
+                TipoFiltroItem = "Categoria",
+                IdItemSelecionado = 99,
+                DataInicio = new DateTime(2026, 5, 1),
+                DataFim = new DateTime(2026, 5, 31)
+            };
+
+            // Act
+            var resultado = controller.Servicos(input);
+
+            // Assert
+            var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+            var model = Assert.IsInstanceOfType<DashboardServicosViewModel>(viewResult.ViewData.Model);
+
+            Assert.IsFalse(model.PesquisaRealizada);
+            Assert.AreEqual("A categoria informada não pertence ao estabelecimento.", model.MensagemErro);
         }
 
         [TestMethod]
