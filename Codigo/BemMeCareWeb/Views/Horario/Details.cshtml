@@ -1,0 +1,40 @@
+@model BemMeCareWeb.Models.HorarioViewModel
+
+@{
+    ViewData["Title"] = "Consultar turno";
+}
+
+<h1>Consultar turno</h1>
+
+<div>
+    <hr />
+    <div class="col-md-4">
+        <div class="form-group">
+            <label asp-for="Id" class="control-label"></label>
+            <input asp-for="Id" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="DiaSemana" class="control-label"></label>
+            <input asp-for="DiaSemana" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="InicioTurno" class="control-label"></label>
+            <input value="@Model?.InicioTurno.ToString(@"hh\:mm")" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="FimTurno" class="control-label"></label>
+            <input value="@Model?.FimTurno.ToString(@"hh\:mm")" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="InicioVigencia" class="control-label"></label>
+            <input value="@Model?.InicioVigencia.ToString("dd/MM/yyyy")" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="FimVigencia" class="control-label"></label>
+            <input value="@(Model?.FimVigencia.HasValue == true ? Model.FimVigencia.Value.ToString("dd/MM/yyyy") : "Indefinido")" class="form-control" disabled />
+        </div>
+    </div>
+    <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+        <a asp-action="Index" asp-route-idProfissional="@Model?.IdProfissional" class="btn btn-bmc-medio">Voltar</a>
+    </div>
+</div>
