@@ -33,7 +33,8 @@
                     <td>@Html.DisplayFor(modelItem => item.Nome)</td>
                     <td>@string.Join(", ", item.Servicos.Select(servico => servico.Nome))</td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@item.IdPessoa">Acessar</a>
+                        <a asp-action="Details" asp-route-id="@item.IdPessoa">Acessar</a> |
+                        <a asp-controller="Horario" asp-action="Index" asp-route-idProfissional="@item.IdPessoa">Expediente</a>
                     </td>
                 </tr>
             }

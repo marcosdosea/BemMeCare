@@ -45,6 +45,7 @@
 
 <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
     <a asp-action="Index" class="btn btn-bmc-medio">Voltar</a>
+    <a asp-controller="Horario" asp-action="Index" asp-route-idProfissional="@Model.IdPessoa" class="btn btn-bmc-medio">Expediente</a>
     <a asp-action="Edit" asp-route-id="@Model.IdPessoa" class="btn btn-bmc-medio">Editar dados</a>
     <a asp-action="Delete" asp-route-id="@Model.IdPessoa" class="btn btn-bmc-medio">Excluir dados</a>
 </div>
