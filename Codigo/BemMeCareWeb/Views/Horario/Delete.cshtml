@@ -1,0 +1,45 @@
+@model BemMeCareWeb.Models.HorarioViewModel
+
+@{
+    ViewData["Title"] = "Deletar turno";
+}
+
+<h1>Deletar turno</h1>
+
+<h3>Tem certeza que quer deletar esse turno?</h3>
+<div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label asp-for="Id" class="control-label"></label>
+            <input asp-for="Id" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="DiaSemana" class="control-label"></label>
+            <input asp-for="DiaSemana" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="InicioTurno" class="control-label"></label>
+            <input value="@Model?.InicioTurno.ToString(@"hh\:mm")" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="FimTurno" class="control-label"></label>
+            <input value="@Model?.FimTurno.ToString(@"hh\:mm")" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="InicioVigencia" class="control-label"></label>
+            <input value="@Model?.InicioVigencia.ToString("dd/MM/yyyy")" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="FimVigencia" class="control-label"></label>
+            <input value="@(Model?.FimVigencia.HasValue == true ? Model.FimVigencia.Value.ToString("dd/MM/yyyy") : "Indefinido")" class="form-control" disabled />
+        </div>
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="IdProfissional" />
+            <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+                <a asp-action="Index" asp-route-idProfissional="@Model?.IdProfissional" class="btn btn-bmc-medio">Cancelar</a>
+                <input type="submit" value="Deletar" class="btn btn-bmc-medio" />
+            </div>
+        </form>
+    </div>
+</div>
