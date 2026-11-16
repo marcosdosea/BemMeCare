@@ -15,12 +15,15 @@ namespace Service
 
         /// <summary>
         /// Cria um novo horário no banco de dados e retorna o id do horário criado.
+        /// Lança ArgumentException se os horários do turno ou o período de vigência forem inválidos.
         /// Lança InvalidOperationException caso haja sobreposição de horários para o mesmo profissional.
         /// </summary>
         /// <param name="horario"> O horário a ser criado. </param>
         /// <returns> O id do horário criado. </returns>
         public uint Create(Horario horario)
         {
+            ValidarConsistenciaHorario(horario);
+
             if (TemSobreposicao(horario))
             {
                 throw new InvalidOperationException("Já existe um horário conflitante para este profissional no mesmo dia da semana.");
@@ -52,6 +55,7 @@ namespace Service
         /// <summary>
         /// Atualiza as informações de um horário existente no banco de dados.
         /// Se o horário não for encontrado no estabelecimento indicado pelo próprio modelo, nenhuma ação será realizada.
+        /// Lança ArgumentException se os horários do turno ou o período de vigência forem inválidos.
         /// Lança InvalidOperationException se a atualização causar choque de horários.
         /// </summary>
         /// <param name="horario"> O horário a ser atualizado, contendo o id do estabelecimento. </param>
@@ -62,6 +66,8 @@ namespace Service
 
             if (horarioExistente != null)
             {
+                ValidarConsistenciaHorario(horario);
+
                 if (TemSobreposicao(horario, horario.Id))
                 {
                     throw new InvalidOperationException("Já existe um horário conflitante para este profissional no mesmo dia da semana.");
@@ -184,6 +190,23 @@ namespace Service
 
             return novoHorario.InicioVigencia <= existenteFim &&
                    novoFim >= horarioExistente.InicioVigencia;
+        }
+
+        /// <summary>
+        /// Valida a consistência temporal das horas do turno e das datas do período de vigência.
+        /// </summary>
+        /// <param name="horario">O horário a ser validado.</param>
+        private static void ValidarConsistenciaHorario(Horario horario)
+        {
+            if (horario.FimTurno <= horario.InicioTurno)
+            {
+                throw new ArgumentException("O fim do turno deve ser posterior ao início do turno.");
+            }
+
+            if (horario.FimVigencia.HasValue && horario.FimVigencia.Value.Date <= horario.InicioVigencia.Date)
+            {
+                throw new ArgumentException("A data de fim da vigência deve ser posterior à data de início.");
+            }
         }
     }
 }

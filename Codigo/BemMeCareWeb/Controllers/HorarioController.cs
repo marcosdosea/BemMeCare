@@ -82,6 +82,10 @@ namespace BemMeCareWeb.Controllers
                     horarioService.Create(horario);
                     return RedirectToAction(nameof(Index), new { idProfissional = horarioViewModel.IdProfissional, diaSemana = horarioViewModel.DiaSemana });
                 }
+                catch (ArgumentException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
                 catch (InvalidOperationException ex)
                 {
                     ModelState.AddModelError(string.Empty, ex.Message);
@@ -113,6 +117,10 @@ namespace BemMeCareWeb.Controllers
                     var horario = horarioViewModel.ToEntity();
                     horarioService.Edit(horario);
                     return RedirectToAction(nameof(Index), new { idProfissional = horarioViewModel.IdProfissional, diaSemana = horarioViewModel.DiaSemana });
+                }
+                catch (ArgumentException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
                 }
                 catch (InvalidOperationException ex)
                 {
