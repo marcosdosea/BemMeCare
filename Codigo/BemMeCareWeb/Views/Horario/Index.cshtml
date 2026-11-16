@@ -1,0 +1,103 @@
+@model IEnumerable<BemMeCareWeb.Models.HorarioViewModel>
+
+@{
+    ViewData["Title"] = "Expediente";
+
+    var diasSemana = new[]
+    {
+        "Segunda-feira",
+        "Terça-feira",
+        "Quarta-feira",
+        "Quinta-feira",
+        "Sexta-feira",
+        "Sábado",
+        "Domingo"
+    };
+
+    var abreviacoes = new Dictionary<string, string>
+    {
+        { "Segunda-feira", "Seg" },
+        { "Terça-feira",   "Ter" },
+        { "Quarta-feira",  "Qua" },
+        { "Quinta-feira",  "Qui" },
+        { "Sexta-feira",   "Sex" },
+        { "Sábado",        "Sáb" },
+        { "Domingo",       "Dom" }
+    };
+
+    var idProfissional = Context.Request.Query["idProfissional"].FirstOrDefault() ?? string.Empty;
+    var diaSemanaAtual = Context.Request.Query["diaSemana"].FirstOrDefault() ?? string.Empty;
+    var nomeProfissional = Model.FirstOrDefault()?.NomeProfissional ?? string.Empty;
+}
+
+<h1>Expediente@(nomeProfissional != string.Empty ? " de " + nomeProfissional : string.Empty)</h1>
+
+<hr />
+
+<div>
+    <ul>
+        @foreach (var dia in diasSemana)
+        {
+            <li>
+                <a asp-action="Index"
+                   asp-route-idProfissional="@idProfissional"
+                   asp-route-diaSemana="@dia"
+                   style="@(dia == diaSemanaAtual ? "font-weight: bold;" : string.Empty)">
+                    @abreviacoes[dia]
+                </a>
+            </li>
+        }
+    </ul>
+</div>
+
+<div>
+    <p>
+        <strong>@(diaSemanaAtual != string.Empty ? diaSemanaAtual : "Todos os dias")</strong>
+    </p>
+    <p>
+        <a asp-action="Create"
+           asp-route-idProfissional="@idProfissional"
+           asp-route-diaSemana="@diaSemanaAtual">
+            + Adicionar turno
+        </a>
+    </p>
+</div>
+
+@if (!Model.Any())
+{
+    <p>Nenhum turno cadastrado para este dia.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(m => m.InicioTurno)</th>
+                <th>@Html.DisplayNameFor(m => m.FimTurno)</th>
+                <th>@Html.DisplayNameFor(m => m.InicioVigencia)</th>
+                <th>@Html.DisplayNameFor(m => m.FimVigencia)</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.InicioTurno.ToString(@"hh\:mm")</td>
+                    <td>@item.FimTurno.ToString(@"hh\:mm")</td>
+                    <td>@item.InicioVigencia.ToString("dd/MM/yyyy")</td>
+                    <td>@(item.FimVigencia.HasValue ? item.FimVigencia.Value.ToString("dd/MM/yyyy") : "Indefinido")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Alterar</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Consultar</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Excluir</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+    <a asp-controller="Profissional" asp-action="Index" class="btn btn-bmc-medio">Voltar</a>
+</div>
