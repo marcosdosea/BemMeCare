@@ -1,0 +1,38 @@
+﻿@model BemMeCareWeb.Models.AnamneseViewModel
+
+@{
+    ViewData["Title"] = "Anamnese";
+}
+
+<h1>Anamnese</h1>
+
+<h4>Link do formulário</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="IdProfissional" />
+            <input type="hidden" asp-for="IdServico" />
+
+            <div class="form-group">
+                <label asp-for="FormAnamnese" class="control-label"></label>
+                <input asp-for="FormAnamnese" class="form-control" placeholder="Cole aqui o link do formulário" />
+                <span asp-validation-for="FormAnamnese" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Adicionar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" asp-route-idProfissional="@Model.IdProfissional">Voltar</a>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -158,6 +158,9 @@ namespace Service
                 if (existente == null)
                     continue;
 
+                if (servico.ExigeAnamnese == 1 && string.IsNullOrWhiteSpace(servico.FormAnamnese))
+                    continue;
+
                 existente.ExigeAnamnese = servico.ExigeAnamnese;
                 existente.FormAnamnese = servico.FormAnamnese ?? string.Empty;
             }
