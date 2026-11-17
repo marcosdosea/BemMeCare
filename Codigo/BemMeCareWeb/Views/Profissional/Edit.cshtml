@@ -1,0 +1,89 @@
+﻿@model BemMeCareWeb.Models.ProfissionalViewModel
+
+@{
+    ViewData["Title"] = "Editar profissional";
+}
+
+<h1>Alterar profissional</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="IdPessoa" />
+            <input type="hidden" asp-for="EstaAtivo" />
+            <input type="hidden" asp-for="DuracaoIntervaloTempo" />
+            <input type="hidden" asp-for="EProfissional" />
+            <input type="hidden" asp-for="EAtendente" />
+
+            <div class="form-group">
+                <label asp-for="Cpf" class="control-label"></label>
+                <input asp-for="Cpf" class="form-control" disabled />
+            </div>
+            <div class="form-group">
+                <label asp-for="ChavePix" class="control-label"></label>
+                <input asp-for="ChavePix" class="form-control" />
+                <span asp-validation-for="ChavePix" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="IdCategoriasSelecionadas" class="control-label"></label>
+                <select asp-for="IdCategoriasSelecionadas" asp-items="Model.ListaCategorias" class="form-control" id="selectCategoria" multiple>
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="IdServicosSelecionados" class="control-label"></label>
+                <select name="IdServicosSelecionados" class="form-control" id="selectServico" multiple>
+                    @foreach (var servico in Model.ServicosDisponiveis)
+                    {
+                        <option value="@servico.Id" data-categoria="@servico.IdCategoria"
+                                selected="@Model.IdServicosSelecionados.Contains(servico.Id)">@servico.Nome</option>
+                    }
+                </select>
+            </div>
+
+            <label class="control-label">Configurações adicionais</label>
+            <div class="form-group form-check">
+                <input class="form-check-input" type="checkbox" id="GerirHorario" name="GerirHorario" value="1" checked="@(Model.GerirHorario == 1)" />
+                <input type="hidden" name="GerirHorario" value="0" />
+                <label class="form-check-label" for="GerirHorario">@Html.DisplayNameFor(model => model.GerirHorario)</label>
+            </div>
+            <div class="form-group form-check">
+                <input class="form-check-input" type="checkbox" id="GerirServico" name="GerirServico" value="1" checked="@(Model.GerirServico == 1)" />
+                <input type="hidden" name="GerirServico" value="0" />
+                <label class="form-check-label" for="GerirServico">@Html.DisplayNameFor(model => model.GerirServico)</label>
+            </div>
+            <div class="form-group form-check">
+                <input class="form-check-input" type="checkbox" id="ReceberPagamentoDireto" name="ReceberPagamentoDireto" value="1" checked="@(Model.ReceberPagamentoDireto == 1)" />
+                <input type="hidden" name="ReceberPagamentoDireto" value="0" />
+                <label class="form-check-label" for="ReceberPagamentoDireto">@Html.DisplayNameFor(model => model.ReceberPagamentoDireto)</label>
+            </div>
+
+            <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+                <a asp-action="Details" asp-route-id="@Model.IdPessoa" class="btn btn-bmc-medio">Cancelar</a>
+                <input type="submit" value="Confirmar" class="btn btn-bmc-medio" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        (function() {
+            const categoria = document.getElementById('selectCategoria');
+            const servicos = document.getElementById('selectServico');
+            function filtrar() {
+                const selecionadas = Array.from(categoria.selectedOptions).map(o => o.value);
+                servicos.querySelectorAll('option').forEach(function(opcao) {
+                    const visivel = selecionadas.length === 0 || selecionadas.includes(opcao.dataset.categoria);
+                    opcao.hidden = !visivel;
+                    if (!visivel) opcao.selected = false;
+                });
+            }
+            categoria.addEventListener('change', filtrar);
+            filtrar();
+        })();
+    </script>
+}

@@ -8,28 +8,21 @@
 
 <div>
     <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Id)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Id)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.IdCategoria)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.IdCategoria)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Alterar</a> |
-    <a asp-action="Index">Voltar para a lista</a>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label asp-for="Id" class="control-label"></label>
+            <input asp-for="Id" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="Nome" class="control-label"></label>
+            <input asp-for="Nome" class="form-control" size="45" disabled />
+        </div>
+        <div class="form-group">
+            <label asp-for="IdCategoria" class="control-label"></label>
+            <input asp-for="IdCategoria" class="form-control" disabled />
+        </div>
+    </div>
+    <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+        <a asp-action="Index" class="btn btn-bmc-medio">Voltar</a>
+    </div>
 </div>

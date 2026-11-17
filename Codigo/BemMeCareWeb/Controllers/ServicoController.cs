@@ -135,9 +135,7 @@ namespace BemMeCareWeb.Controllers
 
         private IEnumerable<Categorium> GetCategoriasDoEstabelecimento()
         {
-            return categoriaService.GetAll()
-                .Where(categoria =>
-                    categoria.IdEstabelecimento == IdEstabelecimentoProvisorio);
+            return categoriaService.GetAll(IdEstabelecimentoProvisorio);
         }
     }
 }

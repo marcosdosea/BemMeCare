@@ -26,13 +26,12 @@
                 <span asp-validation-for="IdCategoria" class="text-danger"></span>
             </div>
 
-            <button type="submit" class="btn btn-primary">Cadastrar</button>
+            <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+                <a asp-action="Index" class="btn btn-bmc-medio">Cancelar</a>
+                <input type="submit" value="Cadastrar" class="btn btn-bmc-medio" />
+            </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Voltar para a lista</a>
 </div>
 
 @section Scripts {

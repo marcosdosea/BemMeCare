@@ -54,8 +54,8 @@ public class EstabelecimentoViewModel
     public string? Cidade { get; set; }
 
     [Display(Name = "Estado")]
-    [Required(ErrorMessage = "Estado do estabelecimento é obrigatório")]
-    [StringLength(45, MinimumLength = 2, ErrorMessage = "Estado do estabelecimento deve ter entre 2 e 45 caracteres")]
+    [Required(ErrorMessage = "O estado do estabelecimento é obrigatório")]
+    [StringLength(45, ErrorMessage = "O estado deve ter no máximo 45 caracteres")]
     public string? Estado { get; set; }
 
     [Display(Name = "Contato")]
