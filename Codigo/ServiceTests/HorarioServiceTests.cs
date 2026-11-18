@@ -581,4 +581,88 @@ public class HorarioServiceTests
         Assert.AreEqual(new TimeSpan(8, 30, 0), atualizado.InicioTurno);
         Assert.AreEqual(new TimeSpan(16, 30, 0), atualizado.FimTurno);
     }
+
+    [TestMethod]
+    public void Create_QuandoFimVigenciaAnteriorAoInicioVigencia_DeveLancarArgumentException()
+    {
+        // Arrange
+        var horarioInvalido = new Horario
+        {
+            Id = 99,
+            InicioTurno = new TimeSpan(8, 0, 0),
+            FimTurno = new TimeSpan(12, 0, 0),
+            InicioVigencia = new DateTime(2026, 11, 16),
+            FimVigencia = new DateTime(2026, 11, 14),
+            DiaSemana = "Sexta-feira",
+            IdProfissional = 1,
+            IdEstabelecimento = 1
+        };
+
+        // Act & Assert
+        try
+        {
+            servicoHorario.Create(horarioInvalido);
+            Assert.Fail("Deveria ter lançado ArgumentException.");
+        }
+        catch (ArgumentException)
+        {
+            // Exceção esperada
+        }
+    }
+
+    [TestMethod]
+    public void Create_QuandoFimVigenciaIgualAoInicioVigencia_DeveLancarArgumentException()
+    {
+        // Arrange
+        var horarioInvalido = new Horario
+        {
+            Id = 99,
+            InicioTurno = new TimeSpan(8, 0, 0),
+            FimTurno = new TimeSpan(12, 0, 0),
+            InicioVigencia = new DateTime(2026, 11, 16),
+            FimVigencia = new DateTime(2026, 11, 16),
+            DiaSemana = "Sexta-feira",
+            IdProfissional = 1,
+            IdEstabelecimento = 1
+        };
+
+        // Act & Assert
+        try
+        {
+            servicoHorario.Create(horarioInvalido);
+            Assert.Fail("Deveria ter lançado ArgumentException.");
+        }
+        catch (ArgumentException)
+        {
+            // Exceção esperada
+        }
+    }
+
+    [TestMethod]
+    public void Create_QuandoFimTurnoMenorOuIgualAoInicioTurno_DeveLancarArgumentException()
+    {
+        // Arrange
+        var horarioInvalido = new Horario
+        {
+            Id = 99,
+            InicioTurno = new TimeSpan(12, 0, 0),
+            FimTurno = new TimeSpan(12, 0, 0),
+            InicioVigencia = new DateTime(2026, 11, 16),
+            FimVigencia = new DateTime(2026, 11, 17),
+            DiaSemana = "Sexta-feira",
+            IdProfissional = 1,
+            IdEstabelecimento = 1
+        };
+
+        // Act & Assert
+        try
+        {
+            servicoHorario.Create(horarioInvalido);
+            Assert.Fail("Deveria ter lançado ArgumentException.");
+        }
+        catch (ArgumentException)
+        {
+            // Exceção esperada
+        }
+    }
 }

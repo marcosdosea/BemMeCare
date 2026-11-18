@@ -1,0 +1,66 @@
+@model BemMeCareWeb.Models.HorarioViewModel
+
+@{
+    ViewData["Title"] = "Alterar turno";
+}
+
+<h1>Alterar turno</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="IdProfissional" />
+
+            <div class="form-group">
+                <label asp-for="DiaSemana" class="control-label"></label>
+                <select asp-for="DiaSemana" class="form-control">
+                    <option value="">-- Selecione o dia da semana --</option>
+                    <option value="Segunda-feira">Segunda-feira</option>
+                    <option value="Terça-feira">Terça-feira</option>
+                    <option value="Quarta-feira">Quarta-feira</option>
+                    <option value="Quinta-feira">Quinta-feira</option>
+                    <option value="Sexta-feira">Sexta-feira</option>
+                    <option value="Sábado">Sábado</option>
+                    <option value="Domingo">Domingo</option>
+                </select>
+                <span asp-validation-for="DiaSemana" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="InicioTurno" class="control-label"></label>
+                <input asp-for="InicioTurno" type="time" class="form-control" />
+                <span asp-validation-for="InicioTurno" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="FimTurno" class="control-label"></label>
+                <input asp-for="FimTurno" type="time" class="form-control" />
+                <span asp-validation-for="FimTurno" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="InicioVigencia" class="control-label"></label>
+                <input asp-for="InicioVigencia" type="date" class="form-control" />
+                <span asp-validation-for="InicioVigencia" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="FimVigencia" class="control-label"></label>
+                <input asp-for="FimVigencia" type="date" class="form-control" />
+                <span asp-validation-for="FimVigencia" class="text-danger"></span>
+            </div>
+
+            <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+                <a asp-action="Index" asp-route-idProfissional="@Model?.IdProfissional" class="btn btn-bmc-medio">Cancelar</a>
+                <input type="submit" value="Alterar" class="btn btn-bmc-medio" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
