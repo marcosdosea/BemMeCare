@@ -145,8 +145,21 @@ namespace Service
         /// <returns>Coleção com os turnos do profissional no dia especificado.</returns>
         public IEnumerable<Horario> GetByProfissionalNaData(uint idProfissional, DateOnly data, uint idEstabelecimento)
         {
-            // Implementação vazia para rodar os testes
-            return [];
+            var diaSemana = ObterDiaSemana(data.DayOfWeek);
+
+            var inicioDoDia = data.ToDateTime(TimeOnly.MinValue);
+            var inicioDiaSeguinte = inicioDoDia.AddDays(1);
+
+            return context.Horarios
+                .AsNoTracking()
+                .Where(h => h.IdProfissional == idProfissional
+                         && h.IdEstabelecimento == idEstabelecimento
+                         && h.DiaSemana == diaSemana
+                         && h.InicioVigencia < inicioDiaSeguinte
+                         && (h.FimVigencia == null
+                             || inicioDoDia < h.FimVigencia.Value.Date.AddDays(1)))
+                .OrderBy(h => h.InicioTurno)
+                .ToList();
         }
 
         /// <summary>
@@ -219,6 +232,34 @@ namespace Service
             if (horario.FimVigencia.HasValue && horario.FimVigencia.Value.Date <= horario.InicioVigencia.Date)
             {
                 throw new ArgumentException("A data de fim da vigência deve ser posterior à data de início.");
+            }
+        }
+
+        /// <summary>
+        /// Determina o dia da semana na aplicação a partir do dia da semana da data no C#.
+        /// </summary>
+        /// <param name="dia">Dia da semana no C#.</param>
+        /// <returns>O dia da semana na aplicação.</returns>
+        private static string ObterDiaSemana(DayOfWeek dia)
+        {
+            switch (dia)
+            {
+                case DayOfWeek.Monday:
+                    return "Segunda-feira";
+                case DayOfWeek.Tuesday:
+                    return "Terça-feira";
+                case DayOfWeek.Wednesday:
+                    return "Quarta-feira";
+                case DayOfWeek.Thursday:
+                    return "Quinta-feira";
+                case DayOfWeek.Friday:
+                    return "Sexta-feira";
+                case DayOfWeek.Saturday:
+                    return "Sábado";
+                case DayOfWeek.Sunday:
+                    return "Domingo";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dia));
             }
         }
     }
