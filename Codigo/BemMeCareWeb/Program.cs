@@ -26,7 +26,7 @@ namespace BemMeCareWeb
             builder.Services.AddTransient<IDashboardService, DashboardService>();
             
             
-            builder.Services.AddTransient<IAgendamentoService, IAgendamentoService>();
+            builder.Services.AddTransient<IAgendamentoService, AgendamentoService>();
 
             var app = builder.Build();
 
