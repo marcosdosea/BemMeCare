@@ -5,6 +5,12 @@ namespace Core.Service;
 
 public interface IAgendamentoDeClientesService
 {
+    IEnumerable<Agendamento> GetByPeriodo(
+        DateTime dataInicio,
+        DateTime dataFimExclusiva,
+        uint idEstabelecimento,
+        uint? idProfissional = null);
+
     IEnumerable<Agendamento> GetByData(
         DateTime data,
         uint idEstabelecimento,

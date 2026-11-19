@@ -29,13 +29,34 @@ public class AgendamentoDeClientesService : IAgendamentoDeClientesService
         uint? idProfissional = null)
     {
         var inicioDoDia = data.Date;
-        var inicioDoProximoDia = inicioDoDia.AddDays(1);
+        return GetByPeriodo(
+            inicioDoDia,
+            inicioDoDia.AddDays(1),
+            idEstabelecimento,
+            idProfissional);
+    }
+
+    public IEnumerable<Agendamento> GetByPeriodo(
+        DateTime dataInicio,
+        DateTime dataFimExclusiva,
+        uint idEstabelecimento,
+        uint? idProfissional = null)
+    {
+        var inicio = dataInicio.Date;
+        var fimExclusivo = dataFimExclusiva.Date;
+        if (fimExclusivo <= inicio)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(dataFimExclusiva),
+                "A data final deve ser posterior à data inicial.");
+        }
+
         var consulta = context.Agendamentos
             .AsNoTracking()
             .Where(agendamento =>
                 agendamento.IdEstabelecimento == idEstabelecimento &&
-                agendamento.DataHoraAtendimento >= inicioDoDia &&
-                agendamento.DataHoraAtendimento < inicioDoProximoDia);
+                agendamento.DataHoraAtendimento >= inicio &&
+                agendamento.DataHoraAtendimento < fimExclusivo);
 
         if (idProfissional.HasValue)
         {
@@ -43,7 +64,9 @@ public class AgendamentoDeClientesService : IAgendamentoDeClientesService
                 agendamento => agendamento.IdProfissional == idProfissional.Value);
         }
 
-        return IncluirDadosRelacionados(consulta).ToList();
+        return IncluirDadosRelacionados(consulta)
+            .OrderBy(agendamento => agendamento.DataHoraAtendimento)
+            .ToList();
     }
 
     public Agendamento? Get(uint id, uint idEstabelecimento)
