@@ -10,6 +10,7 @@ namespace BemMeCareWeb.Controllers
     {
         // ID provisório que depois será obtido automaticamente pelo usuário logado no sistema
         private const uint idEstabelecimentoProvisorio = 1;
+        private const uint idPessoaProvisorio = 1;
         private readonly IProfissionalService profissionalService;
         private readonly IAgendamentoService agendamentoService;
         private readonly IHorarioService horarioService;
@@ -147,25 +148,27 @@ namespace BemMeCareWeb.Controllers
             return View();
         }
 
-        // GET: AgendamentoController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
         // POST: AgendamentoController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(SelecaoAgendamentoViewModel selecao)
         {
-            try
+            if (!ModelState.IsValid
+                || selecao.DataDoAgendamento is null
+                || selecao.HorarioAgendamento is null)
             {
-                return RedirectToAction(nameof(Index));
+                TempData["Erro"] = "Os dados do agendamento são inválidos. Escolha novamente.";
+                return RedirectToAction(nameof(Servico));
             }
-            catch
-            {
-                return View();
-            }
+
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+            var idPessoa = idPessoaProvisorio;
+            var selecaoDTO = selecao.ToEntity();
+
+            var resultado = agendamentoService.Create(selecaoDTO, idEstabelecimento, idPessoa);
+
+            // Sucesso: manda de volta para começo do processo de agendamento provisoriamente
+            return RedirectToAction(nameof(Servico));
         }
 
         // GET: AgendamentoController/Edit/5
