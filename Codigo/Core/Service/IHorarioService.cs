@@ -9,4 +9,5 @@ public interface IHorarioService
     IEnumerable<Horario> GetAll(uint idEstabelecimento);
     IEnumerable<Horario> GetByProfissional(uint idProfissional, uint idEstabelecimento);
     IEnumerable<Horario> GetByDiaSemana(string diaSemana, uint idProfissional, uint idEstabelecimento);
+    IEnumerable<Horario> GetByProfissionalNaData(uint idProfissional, DateOnly data, uint idEstabelecimento);
 }
