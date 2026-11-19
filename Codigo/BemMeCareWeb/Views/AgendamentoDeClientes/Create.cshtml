@@ -1,0 +1,107 @@
+@model BemMeCareWeb.Models.AgendamentoDeClientesViewModel
+
+<h1>Novo agendamento</h1>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="DataHoraAtendimento" class="form-label"></label>
+        <input asp-for="DataHoraAtendimento" type="datetime-local" class="form-control" />
+        <span asp-validation-for="DataHoraAtendimento" class="text-danger"></span>
+    </div>
+
+    <fieldset class="mb-3">
+        <legend>Serviços e profissionais</legend>
+        <p>Selecione um ou mais serviços realizados pelo mesmo profissional.</p>
+        <input asp-for="IdProfissional" type="hidden" value="@Model.IdProfissional" />
+        <span asp-validation-for="IdProfissional" class="text-danger"></span>
+
+        @if (!Model.OpcoesServicoProfissional.Any())
+        {
+            <p class="text-danger">Não há serviços vinculados a profissionais ativos neste estabelecimento.</p>
+        }
+        else
+        {
+            var indice = 0;
+            @foreach (var opcao in Model.OpcoesServicoProfissional)
+            {
+                var checkboxId = $"servico-profissional-{indice++}";
+                var selecionado = Model.IdProfissional == opcao.IdProfissional &&
+                    Model.IdsServicos.Contains(opcao.IdServico);
+                <div class="form-check">
+                    <input id="@checkboxId"
+                           class="form-check-input servico-profissional"
+                           type="checkbox"
+                           name="IdsServicos"
+                           value="@opcao.IdServico"
+                           data-profissional="@opcao.IdProfissional"
+                           checked="@(selecionado ? "checked" : null)" />
+                    <label class="form-check-label" for="@checkboxId">
+                        @opcao.NomeServico — @opcao.NomeProfissional
+                    </label>
+                </div>
+            }
+        }
+    </fieldset>
+
+    <div class="mb-3">
+        <label asp-for="NomeCliente" class="form-label"></label>
+        <input asp-for="NomeCliente" class="form-control" />
+        <span asp-validation-for="NomeCliente" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TelefoneCliente" class="form-label"></label>
+        <input asp-for="TelefoneCliente" class="form-control" />
+        <span asp-validation-for="TelefoneCliente" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Observacoes" class="form-label"></label>
+        <textarea asp-for="Observacoes" class="form-control"></textarea>
+        <span asp-validation-for="Observacoes" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Criar agendamento</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
+
+<partial name="_ValidationScriptsPartial" />
+
+@section Scripts {
+    <script>
+        const profissionalSelecionado = document.getElementById("IdProfissional");
+        const opcoesServicoProfissional = document.querySelectorAll(".servico-profissional");
+
+        function atualizarProfissionaisDisponiveis() {
+            const selecionadas = Array.from(opcoesServicoProfissional)
+                .filter(opcao => opcao.checked);
+            const idProfissional = selecionadas.length > 0
+                ? selecionadas[0].dataset.profissional
+                : "0";
+
+            profissionalSelecionado.value = idProfissional;
+            opcoesServicoProfissional.forEach(opcao => {
+                opcao.disabled = idProfissional !== "0" &&
+                    opcao.dataset.profissional !== idProfissional;
+            });
+        }
+
+        opcoesServicoProfissional.forEach(opcao => {
+            opcao.addEventListener("change", () => {
+                if (opcao.checked) {
+                    opcoesServicoProfissional.forEach(outraOpcao => {
+                        if (outraOpcao.dataset.profissional !== opcao.dataset.profissional) {
+                            outraOpcao.checked = false;
+                        }
+                    });
+                }
+
+                atualizarProfissionaisDisponiveis();
+            });
+        });
+
+        atualizarProfissionaisDisponiveis();
+    </script>
+}
