@@ -1,0 +1,49 @@
+﻿@model IEnumerable<BemMeCareWeb.Models.AnamneseViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Anamneses dos serviços</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.IdServico)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ExigeAnamnese)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FormAnamnese)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.IdServico)
+            </td>
+            <td>
+                <form asp-action="AlterarExigencia" method="post">
+                    <input type="hidden" name="IdProfissional" value="@item.IdProfissional" />
+                    <input type="hidden" name="IdServico" value="@item.IdServico" />
+                    <input type="hidden" name="ExigeAnamnese" value="@((!item.ExigeAnamnese).ToString().ToLower())" />
+                    <input type="checkbox" checked="@item.ExigeAnamnese" onchange="this.form.submit()" />
+                </form>
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.FormAnamnese)
+            </td>
+            <td>
+                <a asp-action="Create" asp-route-idProfissional="@item.IdProfissional" asp-route-idServico="@item.IdServico">Editar</a> |
+                <a asp-action="Details" asp-route-idProfissional="@item.IdProfissional" asp-route-idServico="@item.IdServico">Detalhes</a> |
+                <a asp-action="Delete" asp-route-idProfissional="@item.IdProfissional" asp-route-idServico="@item.IdServico">Remover</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

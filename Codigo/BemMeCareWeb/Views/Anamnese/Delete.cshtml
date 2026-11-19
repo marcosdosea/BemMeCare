@@ -1,0 +1,27 @@
+﻿@model BemMeCareWeb.Models.AnamneseViewModel
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Remover anamnese</h1>
+
+<h3>Deseja realmente remover essa anamnese?</h3>
+<div>
+    <h4>Anamnese</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.FormAnamnese)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.FormAnamnese)
+        </dd>
+    </dl>
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="IdProfissional" />
+        <input type="hidden" asp-for="IdServico" />
+        <input type="submit" value="Confirmar" class="btn btn-danger" /> |
+        <a asp-action="Details" asp-route-idProfissional="@Model.IdProfissional" asp-route-idServico="@Model.IdServico">Cancelar</a>
+    </form>
+</div>

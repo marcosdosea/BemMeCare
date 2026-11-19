@@ -30,6 +30,14 @@ public class AnamneseControllerTests
             .Returns(ObterServicoAlvo());
 
         profissionalServiceMock
+            .Setup(service => service.GetServicoProfissional(idProfissional, 4, idEstabelecimentoEsperado))
+            .Returns(ObterServicoSemAnamnese());
+
+        profissionalServiceMock
+            .Setup(service => service.GetServicoProfissional(idProfissional, 5, idEstabelecimentoEsperado))
+            .Returns(ObterServicoComLinkDesabilitado());
+
+        profissionalServiceMock
             .Setup(service => service.GetServicoProfissional(idProfissional, 999, idEstabelecimentoEsperado))
             .Returns((Servicoprofissional?)null);
 
@@ -169,6 +177,7 @@ public class AnamneseControllerTests
     {
         // Arrange
         var modelo = CriarModeloDeNovaAnamnese();
+        modelo.ExigeAnamnese = false; // quem liga a flag é o controller, ao cadastrar o link
         uint? idProfissionalEnviado = null;
         List<Servicoprofissional>? servicosEnviados = null;
 
@@ -196,6 +205,8 @@ public class AnamneseControllerTests
         Assert.AreEqual(modelo.IdServico, servico.IdServico);
         Assert.AreEqual(modelo.FormAnamnese, servico.FormAnamnese);
         Assert.AreEqual(idEstabelecimentoEsperado, servico.IdEstabelecimento);
+        Assert.AreEqual<sbyte>(1, servico.ExigeAnamnese); // cadastrar o link ativa a anamnese
+
         profissionalServiceMock.Verify(
             service => service.EditServicoProfissional(
                 idProfissional,
@@ -302,6 +313,102 @@ public class AnamneseControllerTests
             Times.Never);
     }
 
+    [TestMethod]
+    public void AlterarExigencia_QuandoMarcaServicoComLink_DeveLigarAFlagERedirecionarParaIndex()
+    {
+        // Arrange (serviço 5: tem link, mas a flag está desligada)
+        var modelo = CriarModeloDeAlteracaoDeExigencia(idServico: 5, exigeAnamnese: true);
+        List<Servicoprofissional>? servicosEnviados = null;
+
+        profissionalServiceMock
+            .Setup(service => service.EditServicoProfissional(
+                It.IsAny<uint>(),
+                It.IsAny<IEnumerable<Servicoprofissional>>()))
+            .Callback<uint, IEnumerable<Servicoprofissional>>((_, servicos) =>
+                servicosEnviados = servicos.ToList());
+
+        // Act
+        var resultado = controller.AlterarExigencia(modelo);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        Assert.IsNotNull(servicosEnviados);
+        Assert.AreEqual<sbyte>(1, servicosEnviados.Single().ExigeAnamnese);
+        Assert.AreEqual("https://forms.gle/guardado", servicosEnviados.Single().FormAnamnese);
+
+        profissionalServiceMock.Verify(
+            service => service.EditServicoProfissional(
+                idProfissional,
+                It.IsAny<IEnumerable<Servicoprofissional>>()),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void AlterarExigencia_QuandoMarcaServicoSemLink_NaoDeveGravarERedirecionarParaCreate()
+    {
+        // Arrange (serviço 4: link vazio)
+        var modelo = CriarModeloDeAlteracaoDeExigencia(idServico: 4, exigeAnamnese: true);
+
+        // Act
+        var resultado = controller.AlterarExigencia(modelo);
+
+        // Assert
+        var redirectResult = Assert.IsInstanceOfType<RedirectToActionResult>(resultado);
+        Assert.AreEqual(nameof(AnamneseController.Create), redirectResult.ActionName);
+        Assert.AreEqual(idProfissional, redirectResult.RouteValues!["idProfissional"]);
+        Assert.AreEqual(4u, redirectResult.RouteValues!["idServico"]);
+
+        profissionalServiceMock.Verify(
+            service => service.EditServicoProfissional(
+                It.IsAny<uint>(),
+                It.IsAny<IEnumerable<Servicoprofissional>>()),
+            Times.Never);
+    }
+
+    [TestMethod]
+    public void AlterarExigencia_QuandoDesmarca_DeveDesligarAFlagERedirecionarParaIndex()
+    {
+        // Arrange (serviço 3: link e flag ligada)
+        var modelo = CriarModeloDeAlteracaoDeExigencia(idServico: 3, exigeAnamnese: false);
+        List<Servicoprofissional>? servicosEnviados = null;
+
+        profissionalServiceMock
+            .Setup(service => service.EditServicoProfissional(
+                It.IsAny<uint>(),
+                It.IsAny<IEnumerable<Servicoprofissional>>()))
+            .Callback<uint, IEnumerable<Servicoprofissional>>((_, servicos) =>
+                servicosEnviados = servicos.ToList());
+
+        // Act
+        var resultado = controller.AlterarExigencia(modelo);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        Assert.IsNotNull(servicosEnviados);
+        Assert.AreEqual<sbyte>(0, servicosEnviados.Single().ExigeAnamnese);
+    }
+
+    [TestMethod]
+    public void AlterarExigencia_QuandoServicoNaoExiste_NaoDeveGravarERedirecionarParaIndex()
+    {
+        // Arrange
+        var modelo = CriarModeloDeAlteracaoDeExigencia(idServico: 999, exigeAnamnese: true);
+
+        // Act
+        var resultado = controller.AlterarExigencia(modelo);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        profissionalServiceMock.Verify(
+            service => service.EditServicoProfissional(
+                It.IsAny<uint>(),
+                It.IsAny<IEnumerable<Servicoprofissional>>()),
+            Times.Never);
+    }
+
     private static void VerificarRedirecionamentoParaIndex(
         ActionResult resultado, uint idProfissionalEsperado)
     {
@@ -339,6 +446,17 @@ public class AnamneseControllerTests
         };
     }
 
+    private static AnamneseViewModel CriarModeloDeAlteracaoDeExigencia(uint idServico, bool exigeAnamnese)
+    {
+        return new AnamneseViewModel
+        {
+            IdProfissional = idProfissional,
+            IdServico = idServico,
+            ExigeAnamnese = exigeAnamnese
+            // Sem FormAnamnese: o formulário do checkbox não envia o link
+        };
+    }
+
     private static Servicoprofissional ObterServicoAlvo()
     {
         return new Servicoprofissional
@@ -348,6 +466,30 @@ public class AnamneseControllerTests
             IdServico = 3,
             ExigeAnamnese = 1,
             FormAnamnese = "https://forms.gle/abc123"
+        };
+    }
+
+    private static Servicoprofissional ObterServicoSemAnamnese()
+    {
+        return new Servicoprofissional
+        {
+            IdProfissional = idProfissional,
+            IdEstabelecimento = idEstabelecimentoEsperado,
+            IdServico = 4,
+            ExigeAnamnese = 0,
+            FormAnamnese = string.Empty
+        };
+    }
+
+    private static Servicoprofissional ObterServicoComLinkDesabilitado()
+    {
+        return new Servicoprofissional
+        {
+            IdProfissional = idProfissional,
+            IdEstabelecimento = idEstabelecimentoEsperado,
+            IdServico = 5,
+            ExigeAnamnese = 0,
+            FormAnamnese = "https://forms.gle/guardado"
         };
     }
 

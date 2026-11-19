@@ -18,7 +18,6 @@ namespace BemMeCareWeb.Controllers
         }
 
         // GET: AnamneseController
-        // GET: AnamneseController
         public ActionResult Index(uint idProfissional)
         {
             var idEstabelecimento = idEstabelecimentoProvisorio;
@@ -55,6 +54,7 @@ namespace BemMeCareWeb.Controllers
             if (ModelState.IsValid)
             {
                 anamneseViewModel.IdEstabelecimento = idEstabelecimentoProvisorio;
+                anamneseViewModel.ExigeAnamnese = true;
                 var servico = anamneseViewModel.ToEntity();
                 profissionalService.EditServicoProfissional(
                     anamneseViewModel.IdProfissional,
@@ -84,6 +84,33 @@ namespace BemMeCareWeb.Controllers
             profissionalService.EditServicoProfissional(
                 anamneseViewModel.IdProfissional,
                 new List<Servicoprofissional> { servico });
+            return RedirectToAction(nameof(Index), new { idProfissional = anamneseViewModel.IdProfissional });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AlterarExigencia(AnamneseViewModel anamneseViewModel)
+        {
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+            var servico = profissionalService.GetServicoProfissional(
+                anamneseViewModel.IdProfissional, anamneseViewModel.IdServico, idEstabelecimento);
+
+            if (servico != null)
+            {
+                if (anamneseViewModel.ExigeAnamnese && string.IsNullOrWhiteSpace(servico.FormAnamnese))
+                {
+                    return RedirectToAction(nameof(Create), new
+                    {
+                        idProfissional = anamneseViewModel.IdProfissional,
+                        idServico = anamneseViewModel.IdServico
+                    });
+                }
+
+                servico.ExigeAnamnese = (sbyte)(anamneseViewModel.ExigeAnamnese ? 1 : 0);
+                profissionalService.EditServicoProfissional(
+                    anamneseViewModel.IdProfissional,
+                    new List<Servicoprofissional> { servico });
+            }
             return RedirectToAction(nameof(Index), new { idProfissional = anamneseViewModel.IdProfissional });
         }
     }
