@@ -14,12 +14,14 @@ public class AnamneseControllerTests
     private const uint idProfissional = 1;
 
     private Mock<IProfissionalService> profissionalServiceMock = null!;
+    private Mock<IServicoService> servicoServiceMock = null!;
     private AnamneseController controller = null!;
 
     [TestInitialize]
     public void Inicializar()
     {
         profissionalServiceMock = new Mock<IProfissionalService>();
+        servicoServiceMock = new Mock<IServicoService>();
 
         profissionalServiceMock
             .Setup(service => service.GetServicoProfissional(idProfissional, idEstabelecimentoEsperado))
@@ -41,7 +43,11 @@ public class AnamneseControllerTests
             .Setup(service => service.GetServicoProfissional(idProfissional, 999, idEstabelecimentoEsperado))
             .Returns((Servicoprofissional?)null);
 
-        controller = new AnamneseController(profissionalServiceMock.Object);
+        servicoServiceMock
+            .Setup(service => service.GetAll(idEstabelecimentoEsperado))
+            .Returns(ObterServicosCadastrados());
+
+        controller = new AnamneseController(profissionalServiceMock.Object, servicoServiceMock.Object);
     }
 
     [TestMethod]
@@ -52,19 +58,48 @@ public class AnamneseControllerTests
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var anamneses = Assert.IsInstanceOfType<IEnumerable<AnamneseViewModel>>(
+        var profissionalServicos = Assert.IsInstanceOfType<IEnumerable<ProfissionalServicoViewModel>>(
             viewResult.ViewData.Model);
 
-        Assert.HasCount(2, anamneses);
+        Assert.HasCount(2, profissionalServicos);
 
-        var primeiraAnamnese = anamneses.First();
+        var primeiroServico = profissionalServicos.First();
 
-        Assert.AreEqual(idProfissional, primeiraAnamnese.IdProfissional);
-        Assert.AreEqual(3u, primeiraAnamnese.IdServico);
-        Assert.AreEqual("https://forms.gle/abc123", primeiraAnamnese.FormAnamnese);
+        Assert.AreEqual(idProfissional, primeiroServico.IdProfissional);
+        Assert.AreEqual(3u, primeiroServico.IdServico);
+        Assert.IsTrue(primeiroServico.ExigeAnamnese);
+        Assert.AreEqual("https://forms.gle/abc123", primeiroServico.FormAnamnese);
+        Assert.AreEqual(70m, primeiroServico.Preco);
+        Assert.AreEqual(50f, primeiroServico.PercentualSinal);
+        Assert.AreEqual("TODO_AGENDAMENTO", primeiroServico.QuandoPagarSinal);
+        Assert.AreEqual(60u, primeiroServico.Duracao);
 
         profissionalServiceMock.Verify(
             service => service.GetServicoProfissional(idProfissional, idEstabelecimentoEsperado),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void Index_QuandoChamado_DeveEnviarParaAViewOIdDoProfissionalEOsNomesDosServicos()
+    {
+        // Act
+        var resultado = controller.Index(idProfissional);
+
+        // Assert
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+
+        Assert.AreEqual(idProfissional, (uint)viewResult.ViewData["IdProfissional"]!);
+
+        var nomesServicos = Assert.IsInstanceOfType<Dictionary<uint, string>>(
+            viewResult.ViewData["NomesServicos"]);
+
+        Assert.HasCount(3, nomesServicos);
+        Assert.AreEqual("Escova", nomesServicos[3]);
+        Assert.AreEqual("Botox", nomesServicos[4]);
+        Assert.AreEqual("Mega hair", nomesServicos[5]);
+
+        servicoServiceMock.Verify(
+            service => service.GetAll(idEstabelecimentoEsperado),
             Times.Once);
     }
 
@@ -81,10 +116,11 @@ public class AnamneseControllerTests
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var anamneses = Assert.IsInstanceOfType<IEnumerable<AnamneseViewModel>>(
+        var profissionalServicos = Assert.IsInstanceOfType<IEnumerable<ProfissionalServicoViewModel>>(
             viewResult.ViewData.Model);
 
-        Assert.IsEmpty(anamneses);
+        Assert.IsEmpty(profissionalServicos);
+        Assert.AreEqual(idProfissional, (uint)viewResult.ViewData["IdProfissional"]!);
 
         profissionalServiceMock.Verify(
             service => service.GetServicoProfissional(idProfissional, idEstabelecimentoEsperado),
@@ -99,13 +135,13 @@ public class AnamneseControllerTests
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var anamnese = Assert.IsInstanceOfType<AnamneseViewModel>(
+        var profissionalServico = Assert.IsInstanceOfType<ProfissionalServicoViewModel>(
             viewResult.ViewData.Model);
 
-        Assert.AreEqual(idProfissional, anamnese.IdProfissional);
-        Assert.AreEqual(3u, anamnese.IdServico);
-        Assert.AreEqual("https://forms.gle/abc123", anamnese.FormAnamnese);
-        Assert.AreEqual(idEstabelecimentoEsperado, anamnese.IdEstabelecimento);
+        Assert.AreEqual(idProfissional, profissionalServico.IdProfissional);
+        Assert.AreEqual(3u, profissionalServico.IdServico);
+        Assert.AreEqual("https://forms.gle/abc123", profissionalServico.FormAnamnese);
+        Assert.AreEqual(idEstabelecimentoEsperado, profissionalServico.IdEstabelecimento);
 
         profissionalServiceMock.Verify(
             service => service.GetServicoProfissional(idProfissional, 3, idEstabelecimentoEsperado),
@@ -120,11 +156,11 @@ public class AnamneseControllerTests
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var anamnese = Assert.IsInstanceOfType<AnamneseViewModel>(
+        var profissionalServico = Assert.IsInstanceOfType<ProfissionalServicoViewModel>(
             viewResult.ViewData.Model);
 
-        Assert.AreEqual(0u, anamnese.IdServico);
-        Assert.IsTrue(string.IsNullOrEmpty(anamnese.FormAnamnese));
+        Assert.AreEqual(0u, profissionalServico.IdServico);
+        Assert.IsTrue(string.IsNullOrEmpty(profissionalServico.FormAnamnese));
 
         profissionalServiceMock.Verify(
             service => service.GetServicoProfissional(idProfissional, 999, idEstabelecimentoEsperado),
@@ -139,13 +175,13 @@ public class AnamneseControllerTests
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var anamnese = Assert.IsInstanceOfType<AnamneseViewModel>(
+        var profissionalServico = Assert.IsInstanceOfType<ProfissionalServicoViewModel>(
             viewResult.ViewData.Model);
 
-        Assert.AreEqual(idProfissional, anamnese.IdProfissional);
-        Assert.AreEqual(3u, anamnese.IdServico);
-        Assert.AreEqual("https://forms.gle/abc123", anamnese.FormAnamnese);
-        Assert.AreEqual(idEstabelecimentoEsperado, anamnese.IdEstabelecimento);
+        Assert.AreEqual(idProfissional, profissionalServico.IdProfissional);
+        Assert.AreEqual(3u, profissionalServico.IdServico);
+        Assert.AreEqual("https://forms.gle/abc123", profissionalServico.FormAnamnese);
+        Assert.AreEqual(idEstabelecimentoEsperado, profissionalServico.IdEstabelecimento);
 
         profissionalServiceMock.Verify(
             service => service.GetServicoProfissional(idProfissional, 3, idEstabelecimentoEsperado),
@@ -160,12 +196,12 @@ public class AnamneseControllerTests
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var anamnese = Assert.IsInstanceOfType<AnamneseViewModel>(
+        var profissionalServico = Assert.IsInstanceOfType<ProfissionalServicoViewModel>(
             viewResult.ViewData.Model);
 
-        Assert.AreEqual(idProfissional, anamnese.IdProfissional);
-        Assert.AreEqual(999u, anamnese.IdServico);
-        Assert.IsTrue(string.IsNullOrEmpty(anamnese.FormAnamnese));
+        Assert.AreEqual(idProfissional, profissionalServico.IdProfissional);
+        Assert.AreEqual(999u, profissionalServico.IdServico);
+        Assert.IsTrue(string.IsNullOrEmpty(profissionalServico.FormAnamnese));
 
         profissionalServiceMock.Verify(
             service => service.GetServicoProfissional(idProfissional, 999, idEstabelecimentoEsperado),
@@ -219,7 +255,7 @@ public class AnamneseControllerTests
     {
         // Arrange
         controller.ModelState.AddModelError(
-            nameof(AnamneseViewModel.FormAnamnese),
+            nameof(ProfissionalServicoViewModel.FormAnamnese),
             "O link do formulário é obrigatório");
 
         // Act
@@ -243,13 +279,13 @@ public class AnamneseControllerTests
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var anamnese = Assert.IsInstanceOfType<AnamneseViewModel>(
+        var profissionalServico = Assert.IsInstanceOfType<ProfissionalServicoViewModel>(
             viewResult.ViewData.Model);
 
-        Assert.AreEqual(idProfissional, anamnese.IdProfissional);
-        Assert.AreEqual(3u, anamnese.IdServico);
-        Assert.AreEqual("https://forms.gle/abc123", anamnese.FormAnamnese);
-        Assert.AreEqual(idEstabelecimentoEsperado, anamnese.IdEstabelecimento);
+        Assert.AreEqual(idProfissional, profissionalServico.IdProfissional);
+        Assert.AreEqual(3u, profissionalServico.IdServico);
+        Assert.AreEqual("https://forms.gle/abc123", profissionalServico.FormAnamnese);
+        Assert.AreEqual(idEstabelecimentoEsperado, profissionalServico.IdEstabelecimento);
 
         profissionalServiceMock.Verify(
             service => service.GetServicoProfissional(idProfissional, 3, idEstabelecimentoEsperado),
@@ -264,11 +300,11 @@ public class AnamneseControllerTests
 
         // Assert
         var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var anamnese = Assert.IsInstanceOfType<AnamneseViewModel>(
+        var profissionalServico = Assert.IsInstanceOfType<ProfissionalServicoViewModel>(
             viewResult.ViewData.Model);
 
-        Assert.AreEqual(0u, anamnese.IdServico);
-        Assert.IsTrue(string.IsNullOrEmpty(anamnese.FormAnamnese));
+        Assert.AreEqual(0u, profissionalServico.IdServico);
+        Assert.IsTrue(string.IsNullOrEmpty(profissionalServico.FormAnamnese));
 
         profissionalServiceMock.Verify(
             service => service.GetServicoProfissional(idProfissional, 999, idEstabelecimentoEsperado),
@@ -391,6 +427,33 @@ public class AnamneseControllerTests
     }
 
     [TestMethod]
+    public void AlterarExigencia_QuandoAltera_NaoDeveAlterarPrecoSinalEDuracao()
+    {
+        // Arrange (serviço 5: preço 90, sinal 20, PRIMEIRO_AGENDAMENTO, duração 45)
+        var modelo = CriarModeloDeAlteracaoDeExigencia(idServico: 5, exigeAnamnese: true);
+        List<Servicoprofissional>? servicosEnviados = null;
+
+        profissionalServiceMock
+            .Setup(service => service.EditServicoProfissional(
+                It.IsAny<uint>(),
+                It.IsAny<IEnumerable<Servicoprofissional>>()))
+            .Callback<uint, IEnumerable<Servicoprofissional>>((_, servicos) =>
+                servicosEnviados = servicos.ToList());
+
+        // Act
+        controller.AlterarExigencia(modelo);
+
+        // Assert
+        Assert.IsNotNull(servicosEnviados);
+
+        var servico = servicosEnviados.Single();
+        Assert.AreEqual(90m, servico.Preco);
+        Assert.AreEqual(20f, servico.PercentualSinal);
+        Assert.AreEqual("PRIMEIRO_AGENDAMENTO", servico.QuandoPagarSinal);
+        Assert.AreEqual(45u, servico.Duracao);
+    }
+
+    [TestMethod]
     public void AlterarExigencia_QuandoServicoNaoExiste_NaoDeveGravarERedirecionarParaIndex()
     {
         // Arrange
@@ -424,9 +487,9 @@ public class AnamneseControllerTests
             redirectResult.RouteValues!["idProfissional"]);
     }
 
-    private static AnamneseViewModel CriarModeloDeNovaAnamnese()
+    private static ProfissionalServicoViewModel CriarModeloDeNovaAnamnese()
     {
-        return new AnamneseViewModel
+        return new ProfissionalServicoViewModel
         {
             IdProfissional = idProfissional,
             IdServico = 4,
@@ -435,9 +498,9 @@ public class AnamneseControllerTests
         };
     }
 
-    private static AnamneseViewModel CriarModeloDeAnamneseExistente()
+    private static ProfissionalServicoViewModel CriarModeloDeAnamneseExistente()
     {
-        return new AnamneseViewModel
+        return new ProfissionalServicoViewModel
         {
             IdProfissional = idProfissional,
             IdServico = 3,
@@ -446,14 +509,14 @@ public class AnamneseControllerTests
         };
     }
 
-    private static AnamneseViewModel CriarModeloDeAlteracaoDeExigencia(uint idServico, bool exigeAnamnese)
+    private static ProfissionalServicoViewModel CriarModeloDeAlteracaoDeExigencia(uint idServico, bool exigeAnamnese)
     {
-        return new AnamneseViewModel
+        return new ProfissionalServicoViewModel
         {
             IdProfissional = idProfissional,
             IdServico = idServico,
             ExigeAnamnese = exigeAnamnese
-            // Sem FormAnamnese: o formulário do checkbox não envia o link
+            // Sem FormAnamnese: o formulário do checkbox envia só os ids e a flag
         };
     }
 
@@ -465,7 +528,11 @@ public class AnamneseControllerTests
             IdEstabelecimento = idEstabelecimentoEsperado,
             IdServico = 3,
             ExigeAnamnese = 1,
-            FormAnamnese = "https://forms.gle/abc123"
+            FormAnamnese = "https://forms.gle/abc123",
+            Preco = 70m,
+            PercentualSinal = 50f,
+            QuandoPagarSinal = "TODO_AGENDAMENTO",
+            Duracao = 60
         };
     }
 
@@ -477,7 +544,11 @@ public class AnamneseControllerTests
             IdEstabelecimento = idEstabelecimentoEsperado,
             IdServico = 4,
             ExigeAnamnese = 0,
-            FormAnamnese = string.Empty
+            FormAnamnese = string.Empty,
+            Preco = 35m,
+            PercentualSinal = 0f,
+            QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO",
+            Duracao = 30
         };
     }
 
@@ -489,7 +560,11 @@ public class AnamneseControllerTests
             IdEstabelecimento = idEstabelecimentoEsperado,
             IdServico = 5,
             ExigeAnamnese = 0,
-            FormAnamnese = "https://forms.gle/guardado"
+            FormAnamnese = "https://forms.gle/guardado",
+            Preco = 90m,
+            PercentualSinal = 20f,
+            QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO",
+            Duracao = 45
         };
     }
 
@@ -497,22 +572,18 @@ public class AnamneseControllerTests
     {
         return
         [
-            new Servicoprofissional
-            {
-                IdProfissional = idProfissional,
-                IdEstabelecimento = idEstabelecimentoEsperado,
-                IdServico = 3,
-                ExigeAnamnese = 1,
-                FormAnamnese = "https://forms.gle/abc123"
-            },
-            new Servicoprofissional
-            {
-                IdProfissional = idProfissional,
-                IdEstabelecimento = idEstabelecimentoEsperado,
-                IdServico = 4,
-                ExigeAnamnese = 0,
-                FormAnamnese = string.Empty
-            }
+            ObterServicoAlvo(),
+            ObterServicoSemAnamnese()
+        ];
+    }
+
+    private static IEnumerable<Servico> ObterServicosCadastrados()
+    {
+        return
+        [
+            new Servico { Id = 3, Nome = "Escova", IdEstabelecimento = idEstabelecimentoEsperado },
+            new Servico { Id = 4, Nome = "Botox", IdEstabelecimento = idEstabelecimentoEsperado },
+            new Servico { Id = 5, Nome = "Mega hair", IdEstabelecimento = idEstabelecimentoEsperado }
         ];
     }
 }

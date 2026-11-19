@@ -1,36 +1,34 @@
-﻿@model BemMeCareWeb.Models.AnamneseViewModel
+﻿@model BemMeCareWeb.Models.ProfissionalServicoViewModel
 
 @{
     ViewData["Title"] = "Anamnese";
+    var temLink = !string.IsNullOrWhiteSpace(Model.FormAnamnese);
 }
 
 <h1>Anamnese</h1>
 
-<h4>Link do formulário</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<form asp-action="Create" class="mt-4">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <input type="hidden" asp-for="IdProfissional" />
-            <input type="hidden" asp-for="IdServico" />
+    <input type="hidden" asp-for="IdProfissional" />
+    <input type="hidden" asp-for="IdServico" />
 
-            <div class="form-group">
-                <label asp-for="FormAnamnese" class="control-label"></label>
+    <div class="form-group">
+        <label asp-for="FormAnamnese" class="control-label">Link da anamnese</label>
+        <div class="d-flex gap-2 align-items-start">
+            <div class="flex-grow-1">
                 <input asp-for="FormAnamnese" class="form-control" placeholder="Cole aqui o link do formulário" />
                 <span asp-validation-for="FormAnamnese" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Adicionar" class="btn btn-primary" />
-            </div>
-        </form>
+            <input type="submit" value="@(temLink ? "Salvar" : "Adicionar")" class="btn btn-bmc-medio" />
+        </div>
     </div>
+</form>
+
+<div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+    <a asp-action="Index" asp-route-idProfissional="@Model.IdProfissional" class="btn btn-bmc-medio">Voltar</a>
 </div>
 
-<div>
-    <a asp-action="Index" asp-route-idProfissional="@Model.IdProfissional">Voltar</a>
-</div>
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

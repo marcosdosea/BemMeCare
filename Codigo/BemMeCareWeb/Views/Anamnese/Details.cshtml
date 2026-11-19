@@ -1,4 +1,4 @@
-﻿@model BemMeCareWeb.Models.AnamneseViewModel
+﻿@model BemMeCareWeb.Models.ProfissionalServicoViewModel
 
 @{
     ViewData["Title"] = "Detalhes da anamnese";
@@ -24,7 +24,7 @@
                 @if (Model.FormAnamnese.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
                      Model.FormAnamnese.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
                 {
-                    <a href="@Model.FormAnamnese" target="_blank" rel="noopener noreferrer">Abrir</a>
+                    <a href="@Model.FormAnamnese" target="_blank" rel="noopener noreferrer" class="btn btn-bmc-medio">Abrir</a>
                 }
             }
         </dd>
@@ -33,14 +33,14 @@
 <div>
     @if (string.IsNullOrWhiteSpace(Model.FormAnamnese))
     {
-        <a asp-action="Create" asp-route-idProfissional="@Model.IdProfissional" asp-route-idServico="@Model.IdServico">Adicionar</a>
+        <a asp-action="Create" asp-route-idProfissional="@Model.IdProfissional" asp-route-idServico="@Model.IdServico" class="btn btn-bmc-medio">Adicionar</a>
     }
     else
     {
-        <a asp-action="Create" asp-route-idProfissional="@Model.IdProfissional" asp-route-idServico="@Model.IdServico">Editar</a>
-        <span>|</span>
-        <a asp-action="Delete" asp-route-idProfissional="@Model.IdProfissional" asp-route-idServico="@Model.IdServico">Remover</a>
-        <span>|</span>
+        <a asp-action="Create" asp-route-idProfissional="@Model.IdProfissional" asp-route-idServico="@Model.IdServico" class="btn btn-bmc-medio">Editar</a>
+        <span></span>
+        <a asp-action="Delete" asp-route-idProfissional="@Model.IdProfissional" asp-route-idServico="@Model.IdServico" class="btn btn-bmc-medio">Remover</a>
+        <span></span>
     }
-    <a asp-action="Index" asp-route-idProfissional="@Model.IdProfissional">Voltar</a>
+    <a asp-action="Index" asp-route-idProfissional="@Model.IdProfissional" class="btn btn-bmc-medio">Voltar</a>
 </div>

@@ -137,6 +137,19 @@ namespace Service
         }
 
         /// <summary>
+        /// Obtém os turnos do profissional para um dia específico.
+        /// </summary>
+        /// <param name="idProfissional">id do profissional</param>
+        /// <param name="data">data selecionada para o agendamento</param>
+        /// <param name="idEstabelecimento">id do estabelecimento</param>
+        /// <returns>Coleção com os turnos do profissional no dia especificado.</returns>
+        public IEnumerable<Horario> GetByProfissionalNaData(uint idProfissional, DateOnly data, uint idEstabelecimento)
+        {
+            // Implementação vazia para rodar os testes
+            return [];
+        }
+
+        /// <summary>
         /// Verifica se há sobreposição/choque de turno e vigência para o profissional no mesmo dia da semana,
         /// independentemente de ser no mesmo ou em outro estabelecimento.
         /// </summary>
