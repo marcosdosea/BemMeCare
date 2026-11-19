@@ -1,0 +1,155 @@
+﻿@model BemMeCareWeb.Models.DashboardFaturamentoViewModel
+@using System.Globalization
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Dashboards de faturamento";
+    var cultura = new CultureInfo("pt-BR");
+
+    string FormatarVariacao(decimal percentual)
+    {
+        if (percentual > 0)
+            return $"Aumento de {percentual.ToString("0.##", cultura)}%";
+        if (percentual < 0)
+            return $"Redução de {Math.Abs(percentual).ToString("0.##", cultura)}%";
+        return "Sem variação (0%)";
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Dashboards de faturamento</h1>
+    <div class="d-flex gap-2">
+        <a asp-action="Servicos" class="btn btn-outline-secondary">Serviços</a>
+        <a asp-action="Faturamento" class="btn btn-bmc-medio">Faturamento</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-5">
+        <div class="card h-100 shadow-sm text-center justify-content-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <p class="text-muted mb-2">Faturamento desse mês</p>
+                <h2 class="fw-bold my-2">@Model.Resumo.FaturamentoMesAtual.ToString("C2", cultura)</h2>
+                <small class="@(Model.Resumo.PercentualVariacaoMensal >= 0 ? "text-success" : "text-danger") fw-semibold">
+                    @FormatarVariacao(Model.Resumo.PercentualVariacaoMensal)
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted text-center mb-2">Faturamento nos últimos 12 meses</p>
+                <div class="dashboard-chart-12meses">
+                    <canvas id="graficoUltimos12Meses"
+                            data-labels="@JsonSerializer.Serialize(Model.Resumo.FaturamentoUltimos12Meses.Select(i => i.Label))"
+                            data-valores="@JsonSerializer.Serialize(Model.Resumo.FaturamentoUltimos12Meses.Select(i => i.Valor))"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4 text-center">
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Faturamento semanal</p>
+                <h4 class="fw-bold my-2">@Model.Resumo.FaturamentoSemanal.ToString("C2", cultura)</h4>
+                <small class="@(Model.Resumo.PercentualVariacaoSemanal >= 0 ? "text-success" : "text-danger") fw-semibold">
+                    @FormatarVariacao(Model.Resumo.PercentualVariacaoSemanal)
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Serviço que mais fatura</p>
+                <h4 class="fw-bold my-2">@Model.Resumo.ServicoMaisFaturaNome</h4>
+                <span class="fs-6">@Model.Resumo.ServicoMaisFaturaValor.ToString("C2", cultura)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Serviço que menos fatura</p>
+                <h4 class="fw-bold my-2">@Model.Resumo.ServicoMenosFaturaNome</h4>
+                <span class="fs-6">@Model.Resumo.ServicoMenosFaturaValor.ToString("C2", cultura)</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Faturamento" method="post" class="card shadow-sm p-3 mb-4">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label asp-for="FiltrarPor" class="control-label fw-semibold"></label>
+            <select asp-for="FiltrarPor" class="form-control">
+                <option value="Profissional">Profissional</option>
+                <option value="Servico">Serviço</option>
+                <option value="Categoria">Categoria</option>
+            </select>
+            <span asp-validation-for="FiltrarPor" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label asp-for="DataInicio" class="control-label fw-semibold"></label>
+            <input asp-for="DataInicio" type="date" class="form-control" />
+            <span asp-validation-for="DataInicio" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label asp-for="DataFim" class="control-label fw-semibold"></label>
+            <input asp-for="DataFim" type="date" class="form-control" />
+            <span asp-validation-for="DataFim" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3 d-grid">
+            <button type="submit" class="btn btn-bmc-medio">Gerar Dashboard</button>
+        </div>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.MensagemErro))
+{
+    <div class="alert alert-warning text-center shadow-sm" role="alert">
+        @Model.MensagemErro
+    </div>
+}
+
+@if (Model.PesquisaRealizada && Model.ItensGrafico.Any())
+{
+    <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <h5 class="fw-bold mx-auto text-center mb-0">@Model.TituloGrafico</h5>
+            <small class="text-muted">
+                @Model.DataInicio.ToString("dd/MM/yyyy") - @Model.DataFim.ToString("dd/MM/yyyy")
+            </small>
+        </div>
+
+        <div class="dashboard-chart-filtrado">
+            <canvas id="graficoFaturamentoFiltrado"
+                    data-labels="@JsonSerializer.Serialize(Model.ItensGrafico.Select(i => i.Label))"
+                    data-valores="@JsonSerializer.Serialize(Model.ItensGrafico.Select(i => i.Valor))"></canvas>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}
