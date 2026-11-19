@@ -1,4 +1,6 @@
-﻿namespace Core.Service;
+﻿using Core.DTO;
+
+namespace Core.Service;
 
 public interface IAgendamentoService
 {
@@ -7,4 +9,6 @@ public interface IAgendamentoService
     void Delete(uint id, uint idEstabelecimento);
     Agendamento? Get(uint id, uint idEstabelecimento);
     IEnumerable<Agendamento> GetAll(uint idEstabelecimento);
+    bool ValidateProfissionalServicosAgendamento(SelecaoAgendamentoDTO selecao, uint idEstabelecimento);
+    IEnumerable<TimeOnly> GetHorariosDisponiveisProfissionalAgendamento(SelecaoAgendamentoDTO selecao, IEnumerable<Horario> horarios, uint idEstabelecimento);
 }
