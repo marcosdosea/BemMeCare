@@ -3,6 +3,7 @@ using Core.Service;
 using BemMeCareWeb.Mappers;
 using BemMeCareWeb.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BemMeCareWeb.Controllers
 {
@@ -11,15 +12,21 @@ namespace BemMeCareWeb.Controllers
         private const uint IdEstabelecimentoProvisorio = 1;
         private const uint IdPessoaMarcouProvisorio = 1;
 
-        private readonly IAgendamentoService agendamentoService;
+        private readonly IAgendamentoDeClientesService agendamentoService;
         private readonly IPessoaService pessoaService;
+        private readonly IServicoService servicoService;
+        private readonly IProfissionalService profissionalService;
 
         public AgendamentoDeClientesController(
-            IAgendamentoService agendamentoService,
-            IPessoaService pessoaService)
+            IAgendamentoDeClientesService agendamentoService,
+            IPessoaService pessoaService,
+            IServicoService servicoService,
+            IProfissionalService profissionalService)
         {
             this.agendamentoService = agendamentoService;
             this.pessoaService = pessoaService;
+            this.servicoService = servicoService;
+            this.profissionalService = profissionalService;
         }
 
         public IActionResult Index(DateTime? data = null, uint? idProfissional = null)
@@ -46,7 +53,9 @@ namespace BemMeCareWeb.Controllers
 
         public IActionResult Create()
         {
-            return View(new AgendamentoDeClientesViewModel());
+            var viewModel = new AgendamentoDeClientesViewModel();
+            PopularOpcoesCreate(viewModel);
+            return View(viewModel);
         }
 
         [HttpPost]
@@ -55,7 +64,7 @@ namespace BemMeCareWeb.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(viewModel);
+                return RetornarCreate(viewModel);
             }
 
             var pessoaCliente = pessoaService
@@ -72,7 +81,7 @@ namespace BemMeCareWeb.Controllers
                 ModelState.AddModelError(
                     nameof(viewModel.NomeCliente),
                     "Não encontramos uma pessoa com esse nome e telefone. Cadastre a pessoa antes de criar o agendamento.");
-                return View(viewModel);
+                return RetornarCreate(viewModel);
             }
 
             var agendamento = viewModel.ToEntity();
@@ -89,7 +98,7 @@ namespace BemMeCareWeb.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(viewModel);
+                return RetornarCreate(viewModel);
             }
         }
 
@@ -97,7 +106,15 @@ namespace BemMeCareWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Cancel(uint id)
         {
-            agendamentoService.Cancel(id, IdEstabelecimentoProvisorio);
+            try
+            {
+                agendamentoService.Cancel(id, IdEstabelecimentoProvisorio);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -105,8 +122,50 @@ namespace BemMeCareWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ConfirmarSinal(uint id)
         {
-            agendamentoService.ConfirmarSinal(id, IdEstabelecimentoProvisorio);
+            try
+            {
+                agendamentoService.ConfirmarSinal(id, IdEstabelecimentoProvisorio);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
             return RedirectToAction(nameof(Index));
+        }
+
+        private IActionResult RetornarCreate(AgendamentoDeClientesViewModel viewModel)
+        {
+            PopularOpcoesCreate(viewModel);
+            return View(nameof(Create), viewModel);
+        }
+
+        private void PopularOpcoesCreate(AgendamentoDeClientesViewModel viewModel)
+        {
+            var pessoasPorId = pessoaService.GetAll()
+                .ToDictionary(pessoa => pessoa.Id, pessoa => pessoa.Nome);
+            viewModel.ProfissionaisDisponiveis = profissionalService.GetAll()
+                .Where(profissional =>
+                    profissional.IdEstabelecimento == IdEstabelecimentoProvisorio &&
+                    profissional.EstaAtivo == 1)
+                .Select(profissional => new SelectListItem
+                {
+                    Value = profissional.IdPessoa.ToString(),
+                    Text = pessoasPorId.TryGetValue(profissional.IdPessoa, out var nome)
+                        ? nome
+                        : $"Profissional {profissional.IdPessoa}",
+                    Selected = profissional.IdPessoa == viewModel.IdProfissional
+                })
+                .ToList();
+
+            viewModel.ServicosDisponiveis = servicoService.GetAll(IdEstabelecimentoProvisorio)
+                .Select(servico => new SelectListItem
+                {
+                    Value = servico.Id.ToString(),
+                    Text = servico.Nome,
+                    Selected = viewModel.IdsServicos.Contains(servico.Id)
+                })
+                .ToList();
         }
 
         private static string NormalizarTelefone(string telefone)

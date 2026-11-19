@@ -21,12 +21,13 @@ public static class AgendamentoDeClientesMapper
 
     public static Agendamento ToEntity(this AgendamentoDeClientesViewModel viewModel)
     {
-        if (!viewModel.DataHoraAtendimento.HasValue)
-        {
-            throw new InvalidOperationException("A data e o horário do atendimento são obrigatórios.");
-        }
-
         return viewModel.Adapt<Agendamento>(Config);
+    }
+
+    public static IEnumerable<Agendamento> ToEntity(
+        this IEnumerable<AgendamentoDeClientesViewModel> viewModels)
+    {
+        return viewModels.Select(viewModel => viewModel.ToEntity());
     }
 
     private static TypeAdapterConfig CriarConfiguracao()
@@ -46,7 +47,7 @@ public static class AgendamentoDeClientesMapper
 
         config.NewConfig<AgendamentoDeClientesViewModel, Agendamento>()
             .Ignore(destino => destino.Id)
-            .Map(destino => destino.DataHoraAtendimento, origem => origem.DataHoraAtendimento!.Value)
+            .Map(destino => destino.DataHoraAtendimento, origem => origem.DataHoraAtendimento.GetValueOrDefault())
             .Map(destino => destino.Observacoes, origem => origem.Observacoes)
             .Map(destino => destino.IdProfissional, origem => origem.IdProfissional)
             .Ignore(destino => destino.PrecoFinal)

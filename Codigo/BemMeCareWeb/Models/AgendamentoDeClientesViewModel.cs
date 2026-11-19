@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BemMeCareWeb.Models
 {
@@ -13,6 +14,7 @@ namespace BemMeCareWeb.Models
         public DateTime? DataHoraAtendimento { get; set; }
 
         [Display(Name = "Observações")]
+        [StringLength(100, ErrorMessage = "As observações devem ter no máximo 100 caracteres.")]
         public string? Observacoes { get; set; }
 
         [Display(Name = "Serviços")]
@@ -25,6 +27,7 @@ namespace BemMeCareWeb.Models
 
         [Display(Name = "Nome do cliente")]
         [Required(ErrorMessage = "O nome do cliente é obrigatório.")]
+        [StringLength(45, ErrorMessage = "O nome do cliente deve ter no máximo 45 caracteres.")]
         public string NomeCliente { get; set; } = string.Empty;
 
         [Display(Name = "Telefone do cliente")]
@@ -66,5 +69,13 @@ namespace BemMeCareWeb.Models
 
         [BindNever]
         public DateTime DataHoraFimAtendimento { get; set; }
+
+        [Display(Name = "Profissionais disponíveis")]
+        [BindNever]
+        public IEnumerable<SelectListItem> ProfissionaisDisponiveis { get; set; } = [];
+
+        [Display(Name = "Serviços disponíveis")]
+        [BindNever]
+        public IEnumerable<SelectListItem> ServicosDisponiveis { get; set; } = [];
     }
 }
