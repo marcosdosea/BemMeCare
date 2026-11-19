@@ -11,4 +11,5 @@ public interface IAgendamentoService
     IEnumerable<Agendamento> GetAll(uint idEstabelecimento);
     bool ValidateProfissionalServicosAgendamento(SelecaoAgendamentoDTO selecao, uint idEstabelecimento);
     IEnumerable<TimeOnly> GetHorariosDisponiveisProfissionalAgendamento(SelecaoAgendamentoDTO selecao, IEnumerable<Horario> horarios, uint idEstabelecimento);
+    AgendamentoResumoDTO GetResumoAgendamento(SelecaoAgendamentoDTO selecao, uint idEstabelecimento);
 }
