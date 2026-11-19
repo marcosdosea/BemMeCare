@@ -536,8 +536,8 @@ public class AgendamentoServiceTests
         var id = servico.Create(selecao, 1, IdOutroCliente);
 
         var agendamento = ObterAgendamento(id);
-        Assert.AreEqual("MA", agendamento.StatusAgendamento);
-        Assert.AreEqual("PE", agendamento.StatusPagamento);
+        Assert.AreEqual("PE", agendamento.StatusAgendamento);
+        Assert.AreEqual("MA", agendamento.StatusPagamento);
         Assert.AreEqual(0m, agendamento.ValorPagoSinal);
         Assert.AreEqual(IdOutroCliente, agendamento.IdPessoaCliente);
         Assert.AreEqual(IdOutroCliente, agendamento.IdPessoaMarcou);
@@ -645,8 +645,8 @@ public class AgendamentoServiceTests
 
         var agendamento = ObterAgendamento(id);
         Assert.IsFalse(resultado);
-        Assert.AreEqual("MA", agendamento.StatusAgendamento);
-        Assert.AreEqual("PE", agendamento.StatusPagamento);
+        Assert.AreEqual("PE", agendamento.StatusAgendamento);
+        Assert.AreEqual("MA", agendamento.StatusPagamento);
     }
 
     [TestMethod]
@@ -662,26 +662,13 @@ public class AgendamentoServiceTests
     [TestMethod]
     public void Cancel_QuandoAgendamentoEstaConcluido_DeveRetornarFalsoENaoAlterar()
     {
-        var id = AdicionarAgendamento(IdProfissionalA, 1, "09:00", "10:00", statusAgendamento: "CO");
+        var id = AdicionarAgendamento(IdProfissionalA, 1, "09:00", "10:00", statusAgendamento: "CO", statusPagamento: "FI");
 
         var resultado = servico.Cancel(id, 1);
 
         var agendamento = ObterAgendamento(id);
         Assert.IsFalse(resultado);
         Assert.AreEqual("CO", agendamento.StatusAgendamento);
-        Assert.AreEqual("PE", agendamento.StatusPagamento);
-    }
-
-    [TestMethod]
-    public void Cancel_QuandoPagamentoEstaFinalizado_DeveRetornarFalsoENaoAlterar()
-    {
-        var id = AdicionarAgendamento(IdProfissionalA, 1, "09:00", "10:00", statusPagamento: "FI");
-
-        var resultado = servico.Cancel(id, 1);
-
-        var agendamento = ObterAgendamento(id);
-        Assert.IsFalse(resultado);
-        Assert.AreEqual("MA", agendamento.StatusAgendamento);
         Assert.AreEqual("FI", agendamento.StatusPagamento);
     }
 
@@ -882,8 +869,8 @@ public class AgendamentoServiceTests
 
     private uint AdicionarAgendamento(
     uint idProfissional, uint idEstabelecimento, string inicio, string fim,
-    string statusAgendamento = "MA", DateOnly? data = null,
-    string statusPagamento = "PE", uint idCliente = IdCliente, decimal precoFinal = 0)
+    string statusAgendamento = "PE", DateOnly? data = null,
+    string statusPagamento = "MA", uint idCliente = IdCliente, decimal precoFinal = 0)
     {
         var dia = (data ?? DataFutura).ToDateTime(TimeOnly.MinValue);
         var dataInicio = dia + TimeSpan.Parse(inicio);

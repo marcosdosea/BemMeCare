@@ -8,8 +8,8 @@ namespace Service
 {
     public class AgendamentoService : IAgendamentoService
     {
-        private const string StatusAgendamentoNormal = "MA";
-        private const string StatusPagamentoInicial = "PE";
+        private const string StatusAgendamentoNormal = "PE";
+        private const string StatusPagamentoInicial = "MA";
         private const string StatusAgendamentoCancelado = "CA";
         private const string StatusAgendamentoConcluido = "CO";
         private const string StatusPagamentoCancelado = "CA";
