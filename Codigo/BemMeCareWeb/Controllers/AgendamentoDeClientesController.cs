@@ -1,7 +1,8 @@
-﻿using Core;
-using Core.Service;
+using System.Globalization;
 using BemMeCareWeb.Mappers;
 using BemMeCareWeb.Models;
+using Core;
+using Core.Service;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BemMeCareWeb.Controllers
@@ -10,27 +11,76 @@ namespace BemMeCareWeb.Controllers
     {
         private const uint IdEstabelecimentoProvisorio = 1;
         private const uint IdPessoaMarcouProvisorio = 1;
+        private const string VisualizacaoMes = "mes";
+        private const string VisualizacaoSemana = "semana";
+        private const string VisualizacaoDia = "dia";
 
-        private readonly IAgendamentoService agendamentoService;
+        private readonly IAgendamentoDeClientesService agendamentoService;
         private readonly IPessoaService pessoaService;
+        private readonly IProfissionalService profissionalService;
 
         public AgendamentoDeClientesController(
-            IAgendamentoService agendamentoService,
-            IPessoaService pessoaService)
+            IAgendamentoDeClientesService agendamentoService,
+            IPessoaService pessoaService,
+            IProfissionalService profissionalService)
         {
             this.agendamentoService = agendamentoService;
             this.pessoaService = pessoaService;
+            this.profissionalService = profissionalService;
         }
 
-        public IActionResult Index(DateTime? data = null, uint? idProfissional = null)
+        public IActionResult Index(
+            DateTime? data = null,
+            string visualizacao = VisualizacaoMes,
+            uint? idProfissional = null)
         {
-            var dataSelecionada = data?.Date ?? DateTime.Today;
-            var agendamentos = agendamentoService.GetByData(
-                dataSelecionada,
-                IdEstabelecimentoProvisorio,
-                idProfissional);
+            if (visualizacao is not VisualizacaoMes and not VisualizacaoSemana and not VisualizacaoDia)
+            {
+                return BadRequest();
+            }
 
-            return View(agendamentos.ToViewModel().ToList());
+            var dataReferencia = (data ?? DateTime.Today).Date;
+            var (dataInicio, dataFimExclusiva, tituloPeriodo) =
+                ObterPeriodo(dataReferencia, visualizacao);
+            var agendamentos = agendamentoService.GetByPeriodo(
+                dataInicio,
+                dataFimExclusiva,
+                IdEstabelecimentoProvisorio,
+                idProfissional)
+                .ToViewModel()
+                .GroupBy(agendamento => agendamento.DataHoraAtendimento!.Value.Date)
+                .ToDictionary(grupo => grupo.Key, grupo => grupo.ToList());
+
+            var dias = new List<AgendamentoDiaViewModel>();
+            for (var dia = dataInicio; dia < dataFimExclusiva; dia = dia.AddDays(1))
+            {
+                agendamentos.TryGetValue(dia, out var agendamentosDoDia);
+                dias.Add(new AgendamentoDiaViewModel
+                {
+                    Data = dia,
+                    PertenceAoMesAtual = dia.Month == dataReferencia.Month &&
+                        dia.Year == dataReferencia.Year,
+                    Agendamentos = agendamentosDoDia ?? []
+                });
+            }
+
+            var tamanhoSemana = visualizacao == VisualizacaoDia ? 1 : 7;
+            var semanas = dias
+                .Chunk(tamanhoSemana)
+                .Select(semana => (IReadOnlyList<AgendamentoDiaViewModel>)semana)
+                .ToList();
+
+            return View(new AgendamentoDeClientesAgendaViewModel
+            {
+                DataReferencia = dataReferencia,
+                DataAnterior = AvancarPeriodo(dataReferencia, visualizacao, -1),
+                DataProxima = AvancarPeriodo(dataReferencia, visualizacao, 1),
+                Visualizacao = visualizacao,
+                TituloPeriodo = tituloPeriodo,
+                IdProfissional = idProfissional,
+                ProfissionaisDisponiveis = ObterProfissionaisDisponiveis(idProfissional),
+                Semanas = semanas
+            });
         }
 
         public IActionResult Details(uint id)
@@ -46,7 +96,9 @@ namespace BemMeCareWeb.Controllers
 
         public IActionResult Create()
         {
-            return View(new AgendamentoDeClientesViewModel());
+            var viewModel = new AgendamentoDeClientesViewModel();
+            PopularOpcoesCreate(viewModel);
+            return View(viewModel);
         }
 
         [HttpPost]
@@ -55,7 +107,7 @@ namespace BemMeCareWeb.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(viewModel);
+                return RetornarCreate(viewModel);
             }
 
             var pessoaCliente = pessoaService
@@ -72,7 +124,7 @@ namespace BemMeCareWeb.Controllers
                 ModelState.AddModelError(
                     nameof(viewModel.NomeCliente),
                     "Não encontramos uma pessoa com esse nome e telefone. Cadastre a pessoa antes de criar o agendamento.");
-                return View(viewModel);
+                return RetornarCreate(viewModel);
             }
 
             var agendamento = viewModel.ToEntity();
@@ -89,24 +141,153 @@ namespace BemMeCareWeb.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(viewModel);
+                return RetornarCreate(viewModel);
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Cancel(uint id)
+        public IActionResult Cancel(
+            uint id,
+            DateTime? data = null,
+            string visualizacao = VisualizacaoMes,
+            uint? idProfissional = null)
         {
-            agendamentoService.Cancel(id, IdEstabelecimentoProvisorio);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                agendamentoService.Cancel(id, IdEstabelecimentoProvisorio);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Index), new { data, visualizacao, idProfissional });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult ConfirmarSinal(uint id)
+        public IActionResult ConfirmarSinal(
+            uint id,
+            DateTime? data = null,
+            string visualizacao = VisualizacaoMes,
+            uint? idProfissional = null)
         {
-            agendamentoService.ConfirmarSinal(id, IdEstabelecimentoProvisorio);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                agendamentoService.ConfirmarSinal(id, IdEstabelecimentoProvisorio);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Index), new { data, visualizacao, idProfissional });
+        }
+
+        private IActionResult RetornarCreate(AgendamentoDeClientesViewModel viewModel)
+        {
+            PopularOpcoesCreate(viewModel);
+            return View(nameof(Create), viewModel);
+        }
+
+        private void PopularOpcoesCreate(AgendamentoDeClientesViewModel viewModel)
+        {
+            var nomesPessoas = pessoaService.GetAll()
+                .ToDictionary(pessoa => pessoa.Id, pessoa => pessoa.Nome);
+            viewModel.OpcoesServicoProfissional = profissionalService.GetAll()
+                .Where(profissional =>
+                    profissional.IdEstabelecimento == IdEstabelecimentoProvisorio &&
+                    profissional.EstaAtivo == 1)
+                .SelectMany(profissional => profissional.Servicoprofissionals
+                    .Where(servicoProfissional =>
+                        servicoProfissional.IdEstabelecimento == IdEstabelecimentoProvisorio)
+                    .Select(servicoProfissional => new ServicoProfissionalOpcaoViewModel
+                    {
+                        IdServico = servicoProfissional.IdServico,
+                        IdProfissional = profissional.IdPessoa,
+                        NomeServico = servicoProfissional.IdServicoNavigation.Nome,
+                        NomeProfissional = nomesPessoas.TryGetValue(profissional.IdPessoa, out var nome)
+                            ? nome
+                            : $"Profissional {profissional.IdPessoa}"
+                    }))
+                .OrderBy(opcao => opcao.NomeServico)
+                .ThenBy(opcao => opcao.NomeProfissional)
+                .ToList();
+        }
+
+        private IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>
+            ObterProfissionaisDisponiveis(uint? idProfissionalSelecionado)
+        {
+            var nomesPessoas = pessoaService.GetAll()
+                .ToDictionary(pessoa => pessoa.Id, pessoa => pessoa.Nome);
+            return profissionalService.GetAll()
+                .Where(profissional =>
+                    profissional.IdEstabelecimento == IdEstabelecimentoProvisorio &&
+                    profissional.EstaAtivo == 1)
+                .Select(profissional => new
+                {
+                    profissional.IdPessoa,
+                    Nome = nomesPessoas.TryGetValue(profissional.IdPessoa, out var nome)
+                        ? nome
+                        : $"Profissional {profissional.IdPessoa}"
+                })
+                .OrderBy(profissional => profissional.Nome)
+                .Select(profissional => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = profissional.IdPessoa.ToString(),
+                    Text = profissional.Nome,
+                    Selected = profissional.IdPessoa == idProfissionalSelecionado
+                })
+                .ToList();
+        }
+
+        private static (DateTime Inicio, DateTime FimExclusivo, string Titulo) ObterPeriodo(
+            DateTime dataReferencia,
+            string visualizacao)
+        {
+            var cultura = CultureInfo.GetCultureInfo("pt-BR");
+            if (visualizacao == VisualizacaoMes)
+            {
+                var primeiroDiaDoMes = new DateTime(dataReferencia.Year, dataReferencia.Month, 1);
+                var diasAntes = ((int)primeiroDiaDoMes.DayOfWeek + 6) % 7;
+                var inicio = primeiroDiaDoMes.AddDays(-diasAntes);
+                var totalDias = diasAntes + DateTime.DaysInMonth(dataReferencia.Year, dataReferencia.Month);
+                var totalCelulas = ((totalDias + 6) / 7) * 7;
+                return (
+                    inicio,
+                    inicio.AddDays(totalCelulas),
+                    dataReferencia.ToString("MMMM yyyy", cultura));
+            }
+
+            if (visualizacao == VisualizacaoSemana)
+            {
+                var diasDesdeSegunda = ((int)dataReferencia.DayOfWeek + 6) % 7;
+                var inicio = dataReferencia.AddDays(-diasDesdeSegunda);
+                var fim = inicio.AddDays(7);
+                return (
+                    inicio,
+                    fim,
+                    $"{inicio.ToString("dd MMM", cultura)} – {fim.AddDays(-1).ToString("dd MMM yyyy", cultura)}");
+            }
+
+            return (
+                dataReferencia,
+                dataReferencia.AddDays(1),
+                dataReferencia.ToString("dddd, dd MMMM yyyy", cultura));
+        }
+
+        private static DateTime AvancarPeriodo(DateTime dataReferencia, string visualizacao, int quantidade)
+        {
+            return visualizacao switch
+            {
+                VisualizacaoMes => new DateTime(
+                    dataReferencia.Year,
+                    dataReferencia.Month,
+                    1).AddMonths(quantidade),
+                VisualizacaoSemana => dataReferencia.AddDays(7 * quantidade),
+                _ => dataReferencia.AddDays(quantidade)
+            };
         }
 
         private static string NormalizarTelefone(string telefone)

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace BemMeCareWeb.Models
@@ -30,6 +30,9 @@ namespace BemMeCareWeb.Models
         [Display(Name = "Telefone do cliente")]
         [Required(ErrorMessage = "O telefone do cliente é obrigatório.")]
         public string TelefoneCliente { get; set; } = string.Empty;
+
+        [BindNever]
+        public IEnumerable<ServicoProfissionalOpcaoViewModel> OpcoesServicoProfissional { get; set; } = [];
 
         [Display(Name = "Nome do profissional")]
         public string? NomeProfissional { get; set; }
@@ -66,5 +69,6 @@ namespace BemMeCareWeb.Models
 
         [BindNever]
         public DateTime DataHoraFimAtendimento { get; set; }
+
     }
 }
