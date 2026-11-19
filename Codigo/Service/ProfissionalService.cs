@@ -125,7 +125,6 @@ namespace Service
                 .AsNoTracking();
         }
 
-        // Manter Anamnese (UC13)
         public IEnumerable<Servicoprofissional> GetServicoProfissional(uint idProfissional, uint idEstabelecimento)
         {
             return context.Servicoprofissionals

@@ -67,7 +67,6 @@ public class ProfissionalServiceTests
             new Servico { Id = 2, Nome = "Botox", IdCategoria = 1, IdEstabelecimento = 1 },
             new Servico { Id = 3, Nome = "Corte", IdCategoria = 1, IdEstabelecimento = 2 });
 
-        // O profissional 1 atua nos estabelecimentos 1 e 2
         contexto.Servicoprofissionals.AddRange(
             new Servicoprofissional
             {
@@ -327,7 +326,7 @@ public class ProfissionalServiceTests
     [TestMethod]
     public void GetServicoProfissional_QuandoEstabelecimentoNaoCorresponde_DeveRetornarNulo()
     {
-        // Act (o serviço 1 existe, mas só no estabelecimento 1)
+        // Act 
         var servico = servicoProfissional.GetServicoProfissional(1, 1, 2);
 
         // Assert
@@ -337,7 +336,7 @@ public class ProfissionalServiceTests
     [TestMethod]
     public void EditServicoProfissional_QuandoMarcaComLink_DeveAlterarSoOsCamposDaAnamnese()
     {
-        // Arrange (o serviço 2 custa 70 e dura 60; o mapper entrega Preco e Duracao zerados)
+        // Arrange 
         var alteracao = new Servicoprofissional
         {
             IdProfissional = 1,
@@ -364,7 +363,7 @@ public class ProfissionalServiceTests
     [TestMethod]
     public void EditServicoProfissional_QuandoExigeAnamneseSemLink_NaoDeveAlterarOServico()
     {
-        // Arrange (a regra: exigir anamnese só vale com o link preenchido)
+        // Arrange 
         var alteracao = new Servicoprofissional
         {
             IdProfissional = 1,
@@ -387,7 +386,6 @@ public class ProfissionalServiceTests
     [TestMethod]
     public void EditServicoProfissional_QuandoRemoveAAnamnese_DeveLimparOLinkEDesligarAFlag()
     {
-        // Arrange (é o que o Delete do controller envia)
         var alteracao = new Servicoprofissional
         {
             IdProfissional = 1,
@@ -412,7 +410,6 @@ public class ProfissionalServiceTests
     [TestMethod]
     public void EditServicoProfissional_QuandoEstabelecimentoNaoCorresponde_NaoDeveAlterarNada()
     {
-        // Arrange (o serviço 1 só existe no estabelecimento 1)
         var alteracao = new Servicoprofissional
         {
             IdProfissional = 1,
