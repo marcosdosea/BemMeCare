@@ -200581,7 +200581,7 @@
 											"top": 432,
 											"width": 543.7529296875,
 											"height": 13,
-											"text": "+Create(horario: Horario): Boolean",
+											"text": "+Create(horario: Horario): Integer",
 											"horizontalAlignment": 0
 										},
 										{
@@ -200615,7 +200615,7 @@
 											"top": 462,
 											"width": 543.7529296875,
 											"height": 13,
-											"text": "+Delete(id: Integer)",
+											"text": "+Delete(id: Integer, idEstabelecimento: Integer): void",
 											"horizontalAlignment": 0
 										},
 										{
@@ -200632,7 +200632,7 @@
 											"top": 477,
 											"width": 543.7529296875,
 											"height": 13,
-											"text": "+Edit(horario: Horario): Boolean",
+											"text": "+Edit(horario: Horario): Void",
 											"horizontalAlignment": 0
 										},
 										{
@@ -200651,13 +200651,47 @@
 											"height": 13,
 											"text": "+GetByProfissional(idProfissional: Integer, idEstabelecimento: Integer): IEnumerable<Horario>",
 											"horizontalAlignment": 0
+										},
+										{
+											"_type": "UMLOperationView",
+											"_id": "AAAAAAGh9TaLwpBSZ94=",
+											"_parent": {
+												"$ref": "AAAAAAGhaPo//LWk3nQ="
+											},
+											"model": {
+												"$ref": "AAAAAAGh9TaLuZBPx9g="
+											},
+											"font": "Arial;13;0",
+											"left": 37,
+											"top": 507,
+											"width": 543.7529296875,
+											"height": 13,
+											"text": "+Get(id: Integer, idEstabelecimento: Integer): Horario",
+											"horizontalAlignment": 0
+										},
+										{
+											"_type": "UMLOperationView",
+											"_id": "AAAAAAGh9TakHpFtjdg=",
+											"_parent": {
+												"$ref": "AAAAAAGhaPo//LWk3nQ="
+											},
+											"model": {
+												"$ref": "AAAAAAGh9TakF5FqdWY="
+											},
+											"font": "Arial;13;0",
+											"left": 37,
+											"top": 522,
+											"width": 543.7529296875,
+											"height": 13,
+											"text": "+GetAll(idEstabelecimento: Integer): IEnumerable<Horario>",
+											"horizontalAlignment": 0
 										}
 									],
 									"font": "Arial;13;0",
 									"left": 32,
 									"top": 427,
 									"width": 553.7529296875,
-									"height": 83
+									"height": 113
 								},
 								{
 									"_type": "UMLReceptionCompartmentView",
@@ -200697,7 +200731,7 @@
 							"left": 32,
 							"top": 392,
 							"width": 553.7529296875,
-							"height": 146,
+							"height": 148,
 							"nameCompartment": {
 								"$ref": "AAAAAAGhaPo//LWeHHo="
 							},
@@ -201101,7 +201135,7 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 533,
+									"left": 534,
 									"top": 310,
 									"height": 13,
 									"alpha": 1.5707963267948966,
@@ -201122,7 +201156,7 @@
 									},
 									"visible": null,
 									"font": "Arial;13;0",
-									"left": 526,
+									"left": 527,
 									"top": 297,
 									"height": 13,
 									"alpha": 1.5707963267948966,
@@ -201143,7 +201177,7 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 548,
+									"left": 549,
 									"top": 337,
 									"height": 13,
 									"alpha": -1.5707963267948966,
@@ -201162,7 +201196,7 @@
 								"$ref": "AAAAAAGhaPo//LWdsCI="
 							},
 							"lineStyle": 1,
-							"points": "435:391;647:270",
+							"points": "437:391;647:270",
 							"showVisibility": true,
 							"nameLabel": {
 								"$ref": "AAAAAAGhaPo//bXccdA="
@@ -202002,7 +202036,7 @@
 											"font": "Arial;13;1",
 											"left": 285,
 											"top": 662,
-											"width": 344.31591796875,
+											"width": 543.7529296875,
 											"height": 13,
 											"text": "IHorarioService"
 										},
@@ -202037,7 +202071,7 @@
 									"font": "Arial;13;0",
 									"left": 280,
 									"top": 655,
-									"width": 354.31591796875,
+									"width": 553.7529296875,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGhaSRmPVEEVgs="
@@ -202090,7 +202124,7 @@
 											"font": "Arial;13;0",
 											"left": 285,
 											"top": 685,
-											"width": 344.31591796875,
+											"width": 543.7529296875,
 											"height": 13,
 											"text": "+Create(horario: Horario): Integer",
 											"horizontalAlignment": 0
@@ -202107,7 +202141,7 @@
 											"font": "Arial;13;0",
 											"left": 285,
 											"top": 700,
-											"width": 344.31591796875,
+											"width": 543.7529296875,
 											"height": 13,
 											"text": "+Get(id: Integer)",
 											"horizontalAlignment": 0
@@ -202124,7 +202158,7 @@
 											"font": "Arial;13;0",
 											"left": 285,
 											"top": 715,
-											"width": 344.31591796875,
+											"width": 543.7529296875,
 											"height": 13,
 											"text": "+Delete(id: Integer, idEstabelecimento: Integer): void",
 											"horizontalAlignment": 0
@@ -202141,9 +202175,26 @@
 											"font": "Arial;13;0",
 											"left": 285,
 											"top": 730,
-											"width": 344.31591796875,
+											"width": 543.7529296875,
 											"height": 13,
 											"text": "+Edit(horario: Horario): Void",
+											"horizontalAlignment": 0
+										},
+										{
+											"_type": "UMLOperationView",
+											"_id": "AAAAAAGh9TcMPZLI1Aw=",
+											"_parent": {
+												"$ref": "AAAAAAGhaSRmPVEJDl8="
+											},
+											"model": {
+												"$ref": "AAAAAAGh9TcMNpK/yGM="
+											},
+											"font": "Arial;13;0",
+											"left": 285,
+											"top": 745,
+											"width": 543.7529296875,
+											"height": 13,
+											"text": "+GetByProfissional(idProfissional: Integer, idEstabelecimento: Integer): IEnumerable<Horario>",
 											"horizontalAlignment": 0
 										},
 										{
@@ -202157,8 +202208,8 @@
 											},
 											"font": "Arial;13;0",
 											"left": 285,
-											"top": 745,
-											"width": 344.31591796875,
+											"top": 760,
+											"width": 543.7529296875,
 											"height": 13,
 											"text": "+Get(id: Integer, idEstabelecimento: Integer): Horario",
 											"horizontalAlignment": 0
@@ -202174,8 +202225,8 @@
 											},
 											"font": "Arial;13;0",
 											"left": 285,
-											"top": 760,
-											"width": 344.31591796875,
+											"top": 775,
+											"width": 543.7529296875,
 											"height": 13,
 											"text": "+GetAll(idEstabelecimento: Integer): IEnumerable<Horario>",
 											"horizontalAlignment": 0
@@ -202184,8 +202235,8 @@
 									"font": "Arial;13;0",
 									"left": 280,
 									"top": 680,
-									"width": 354.31591796875,
-									"height": 98
+									"width": 553.7529296875,
+									"height": 113
 								},
 								{
 									"_type": "UMLReceptionCompartmentView",
@@ -202224,8 +202275,8 @@
 							"containerChangeable": true,
 							"left": 280,
 							"top": 632,
-							"width": 354.31591796875,
-							"height": 147,
+							"width": 553.7529296875,
+							"height": 162,
 							"stereotypeDisplay": "icon",
 							"nameCompartment": {
 								"$ref": "AAAAAAGhaSRmPVEDCmM="
@@ -202767,8 +202818,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 410,
-									"top": 572,
+									"left": 470,
+									"top": 571,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 15,
@@ -202788,8 +202839,8 @@
 									},
 									"visible": null,
 									"font": "Arial;13;0",
-									"left": 421,
-									"top": 562,
+									"left": 478,
+									"top": 558,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 30,
@@ -202809,8 +202860,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 387,
-									"top": 593,
+									"left": 455,
+									"top": 596,
 									"height": 13,
 									"alpha": -1.5707963267948966,
 									"distance": 15,
@@ -202828,7 +202879,7 @@
 								"$ref": "AAAAAAGhaPo//LWdsCI="
 							},
 							"lineStyle": 1,
-							"points": "353:538;445.157958984375:640.1087890625",
+							"points": "383:540;544.87646484375:641.3520688657408",
 							"showVisibility": true,
 							"nameLabel": {
 								"$ref": "AAAAAAGhah8tZkUVccg="
@@ -230843,6 +230894,43 @@
 								},
 								{
 									"_type": "UMLOperation",
+									"_id": "AAAAAAGh9TcMNpK/yGM=",
+									"_parent": {
+										"$ref": "AAAAAAGhaSRTdVDiKPc="
+									},
+									"name": "GetByProfissional",
+									"parameters": [
+										{
+											"_type": "UMLParameter",
+											"_id": "AAAAAAGh9TcTuJL8HpM=",
+											"_parent": {
+												"$ref": "AAAAAAGh9TcMNpK/yGM="
+											},
+											"name": "idProfissional",
+											"type": "Integer"
+										},
+										{
+											"_type": "UMLParameter",
+											"_id": "AAAAAAGh9TcTvZL96Dc=",
+											"_parent": {
+												"$ref": "AAAAAAGh9TcMNpK/yGM="
+											},
+											"name": "idEstabelecimento",
+											"type": "Integer"
+										},
+										{
+											"_type": "UMLParameter",
+											"_id": "AAAAAAGh9TcTwZL+KZY=",
+											"_parent": {
+												"$ref": "AAAAAAGh9TcMNpK/yGM="
+											},
+											"type": "IEnumerable<Horario>",
+											"direction": "return"
+										}
+									]
+								},
+								{
+									"_type": "UMLOperation",
 									"_id": "AAAAAAGhev7IskwuCgM=",
 									"_parent": {
 										"$ref": "AAAAAAGhaSRTdVDiKPc="
@@ -233335,7 +233423,7 @@
 											"_parent": {
 												"$ref": "AAAAAAGhaPpACLurBio="
 											},
-											"type": "Boolean",
+											"type": "Integer",
 											"direction": "return"
 										}
 									]
@@ -233375,6 +233463,24 @@
 											},
 											"name": "id",
 											"type": "Integer"
+										},
+										{
+											"_type": "UMLParameter",
+											"_id": "AAAAAAGh9TXzHo5XGRE=",
+											"_parent": {
+												"$ref": "AAAAAAGhaPpACLuuSBc="
+											},
+											"name": "idEstabelecimento",
+											"type": "Integer"
+										},
+										{
+											"_type": "UMLParameter",
+											"_id": "AAAAAAGh9TXzIo5YQIY=",
+											"_parent": {
+												"$ref": "AAAAAAGhaPpACLuuSBc="
+											},
+											"type": "void",
+											"direction": "return"
 										}
 									]
 								},
@@ -233403,7 +233509,7 @@
 											"_parent": {
 												"$ref": "AAAAAAGhaPpACLuvf3I="
 											},
-											"type": "Boolean",
+											"type": "Void",
 											"direction": "return"
 										}
 									]
@@ -233439,6 +233545,73 @@
 											"_id": "AAAAAAGh9S4AiYlM3bk=",
 											"_parent": {
 												"$ref": "AAAAAAGhaPpACLuwNB0="
+											},
+											"type": "IEnumerable<Horario>",
+											"direction": "return"
+										}
+									]
+								},
+								{
+									"_type": "UMLOperation",
+									"_id": "AAAAAAGh9TaLuZBPx9g=",
+									"_parent": {
+										"$ref": "AAAAAAGhaPpACLumcnY="
+									},
+									"name": "Get",
+									"parameters": [
+										{
+											"_type": "UMLParameter",
+											"_id": "AAAAAAGh9TaRQ5CMrOA=",
+											"_parent": {
+												"$ref": "AAAAAAGh9TaLuZBPx9g="
+											},
+											"name": "id",
+											"type": "Integer"
+										},
+										{
+											"_type": "UMLParameter",
+											"_id": "AAAAAAGh9TaRSJCNltM=",
+											"_parent": {
+												"$ref": "AAAAAAGh9TaLuZBPx9g="
+											},
+											"name": "idEstabelecimento",
+											"type": "Integer"
+										},
+										{
+											"_type": "UMLParameter",
+											"_id": "AAAAAAGh9TaRTJCOD+Y=",
+											"_parent": {
+												"$ref": "AAAAAAGh9TaLuZBPx9g="
+											},
+											"type": {
+												"$ref": "AAAAAAGfeqreEJQsihM="
+											},
+											"direction": "return"
+										}
+									]
+								},
+								{
+									"_type": "UMLOperation",
+									"_id": "AAAAAAGh9TakF5FqdWY=",
+									"_parent": {
+										"$ref": "AAAAAAGhaPpACLumcnY="
+									},
+									"name": "GetAll",
+									"parameters": [
+										{
+											"_type": "UMLParameter",
+											"_id": "AAAAAAGh9TapHJGnOvA=",
+											"_parent": {
+												"$ref": "AAAAAAGh9TakF5FqdWY="
+											},
+											"name": "idEstabelecimento",
+											"type": "Integer"
+										},
+										{
+											"_type": "UMLParameter",
+											"_id": "AAAAAAGh9TapIJGoeKg=",
+											"_parent": {
+												"$ref": "AAAAAAGh9TakF5FqdWY="
 											},
 											"type": "IEnumerable<Horario>",
 											"direction": "return"
