@@ -77,7 +77,7 @@ namespace Service
                     existente.Servicoprofissionals.Remove(sp);
                 }
 
-               
+
                 var idsExistentes = existente.Servicoprofissionals.Select(sp => sp.IdServico).ToHashSet();
                 foreach (var idServ in idsServicos)
                 {
@@ -156,6 +156,9 @@ namespace Service
                     sp.IdServico == servico.IdServico);
 
                 if (existente == null)
+                    continue;
+
+                if (servico.ExigeAnamnese == 1 && string.IsNullOrWhiteSpace(servico.FormAnamnese))
                     continue;
 
                 existente.ExigeAnamnese = servico.ExigeAnamnese;
