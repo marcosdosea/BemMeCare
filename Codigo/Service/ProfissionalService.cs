@@ -1,4 +1,5 @@
 ﻿using Core;
+using Core.DTO;
 using Core.Service;
 using Microsoft.EntityFrameworkCore;
 
@@ -166,6 +167,36 @@ namespace Service
             }
 
             context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Obtém informações dos profissionais de um estabelecimento e seus respectivos serviços.
+        /// </summary>
+        /// <param name="idEstabelecimento">id do estabelecimento</param>
+        /// <returns>Coleção com informações dos profissionais e seus serviços.</returns>
+        public IEnumerable<ProfissionalServicosDTO> GetServicosProfissionais(uint idEstabelecimento)
+        {
+            return context.Profissionals
+                .AsNoTracking()
+                .Where(p => p.EstaAtivo == 1
+                        && p.IdEstabelecimento == idEstabelecimento
+                        && p.Servicoprofissionals.Any(sp => sp.IdEstabelecimento == idEstabelecimento))
+                .Select(p => new ProfissionalServicosDTO
+                {
+                    Id = p.IdPessoa,
+                    Nome = p.IdPessoaNavigation.Nome,
+                    Servicos = p.Servicoprofissionals
+                        .Where(sp => sp.IdEstabelecimento == idEstabelecimento)
+                        .Select(sp => new ServicoProfissionalDTO
+                        {
+                            Id = sp.IdServico,
+                            Nome = sp.IdServicoNavigation.Nome,
+                            DuracaoEmMinutos = sp.Duracao,
+                            Preco = sp.Preco
+                        }).ToList()
+                })
+                .OrderBy(p => p.Nome)
+                .ToList();
         }
     }
 }

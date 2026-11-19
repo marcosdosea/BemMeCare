@@ -1,4 +1,5 @@
 ﻿using Core;
+using Core.DTO;
 
 namespace Core.Service
 {
@@ -12,5 +13,6 @@ namespace Core.Service
         IEnumerable<Servicoprofissional> GetServicoProfissional(uint idProfissional, uint idEstabelecimento);
         Servicoprofissional? GetServicoProfissional(uint idProfissional, uint idServico, uint idEstabelecimento);
         void EditServicoProfissional(uint idProfissional, IEnumerable<Servicoprofissional> servicos);
+        IEnumerable<ProfissionalServicosDTO> GetServicosProfissionais(uint idEstabelecimento);
     }
 }
