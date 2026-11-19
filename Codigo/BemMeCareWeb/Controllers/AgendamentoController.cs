@@ -12,11 +12,15 @@ namespace BemMeCareWeb.Controllers
         private const uint idEstabelecimentoProvisorio = 1;
         private readonly IProfissionalService profissionalService;
         private readonly IAgendamentoService agendamentoService;
+        private readonly IHorarioService horarioService;
+        private readonly IPessoaService pessoaService;
 
-        public AgendamentoController(IProfissionalService profissionalService, IAgendamentoService agendamentoService)
+        public AgendamentoController(IProfissionalService profissionalService, IAgendamentoService agendamentoService, IHorarioService horarioService, IPessoaService pessoaService)
         {
             this.profissionalService = profissionalService;
             this.agendamentoService = agendamentoService;
+            this.horarioService = horarioService;
+            this.pessoaService = pessoaService;
         }
 
         // GET: Agendamento/Servico
@@ -28,6 +32,61 @@ namespace BemMeCareWeb.Controllers
             agendamentoServicosViewModel.Selecao = selecao;
 
             return View(agendamentoServicosViewModel);
+        }
+
+        // GET: Agendamento/Horario
+        public ActionResult Horario(SelecaoAgendamentoViewModel selecao)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Erro"] = "Os dados informados são inválidos. Escolha os serviços novamente.";
+                return RedirectToAction(nameof(Servico));
+            }
+
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+
+            var hoje = DateOnly.FromDateTime(DateTime.Now);
+            if (selecao.DataDoAgendamento is null || selecao.DataDoAgendamento < hoje)
+            {
+                selecao.DataDoAgendamento = hoje;
+            }
+            selecao.HorarioAgendamento = null;
+
+            var selecaoDTO = selecao.ToEntity();
+
+            if (!agendamentoService.ValidateProfissionalServicosAgendamento(selecaoDTO, idEstabelecimento))
+            {
+                TempData["Erro"] = "A seleção de serviços não é válida. Escolha novamente.";
+                return RedirectToAction(nameof(Servico));
+            }
+
+            var viewModel = new AgendamentoHorarioViewModel
+            {
+                Selecao = selecao,
+                NomeProfissional = pessoaService.GetNome(selecao.IdProfissional),
+                DataLimiteInferior = hoje
+            };
+
+            var horariosProfissional = horarioService.GetByProfissionalNaData(selecao.IdProfissional, selecao.DataDoAgendamento.Value, idEstabelecimento);
+
+            if (!horariosProfissional.Any())
+            {
+                viewModel.Mensagem = "O profissional não atende nesta data.";
+                return View(viewModel);
+            }
+
+            var horariosDisponiveis = agendamentoService.GetHorariosDisponiveisProfissionalAgendamento(
+                selecaoDTO, horariosProfissional, idEstabelecimento);
+
+            viewModel.Horarios = horariosDisponiveis;
+
+            if (!horariosDisponiveis.Any())
+            {
+                viewModel.Mensagem = "Não há horários disponíveis nesta data.";
+            }
+
+            return View(viewModel);
+
         }
 
         // GET: AgendamentoController
