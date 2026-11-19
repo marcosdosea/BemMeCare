@@ -89,6 +89,52 @@ namespace BemMeCareWeb.Controllers
 
         }
 
+        // GET: Agendamento/Resumo
+        public ActionResult Resumo(SelecaoAgendamentoViewModel selecao)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Erro"] = "Os dados informados são inválidos. Escolha os serviços novamente.";
+                return RedirectToAction(nameof(Servico));
+            }
+
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+            var selecaoDTO = selecao.ToEntity();
+
+            if (!agendamentoService.ValidateProfissionalServicosAgendamento(selecaoDTO, idEstabelecimento))
+            {
+                TempData["Erro"] = "A seleção de serviços não é válida. Escolha novamente.";
+                return RedirectToAction(nameof(Servico));
+            }
+
+            if (selecao.DataDoAgendamento is null || selecao.HorarioAgendamento is null)
+            {
+                TempData["Erro"] = "Escolha a data e o horário do atendimento.";
+                selecao.HorarioAgendamento = null;
+                return RedirectToAction(nameof(Horario), selecao);
+            }
+
+            var horariosProfissional = horarioService.GetByProfissionalNaData(selecao.IdProfissional, selecao.DataDoAgendamento.Value, idEstabelecimento);
+
+            var horarioDisponivel = horariosProfissional.Any()
+                && agendamentoService
+                    .GetHorariosDisponiveisProfissionalAgendamento(selecaoDTO, horariosProfissional, idEstabelecimento)
+                    .Contains(selecao.HorarioAgendamento.Value);
+
+            if (!horarioDisponivel)
+            {
+                TempData["Erro"] = "O horário escolhido não está mais disponível. Escolha outro.";
+                selecao.HorarioAgendamento = null;
+                return RedirectToAction(nameof(Horario), selecao);
+            }
+
+            var resumo = agendamentoService.GetResumoAgendamento(selecaoDTO, idEstabelecimento);
+            var viewModel = resumo.ToViewModel();
+            viewModel.Selecao = selecao;
+
+            return View(viewModel);
+        }
+
         // GET: AgendamentoController
         public ActionResult Index()
         {
