@@ -6,13 +6,13 @@ namespace BemMeCareWeb.Mappers;
 
 public static class AgendamentoResumoMapper
 {
-    public static AgendamentoResumoDTO ToEntity(this AgendamentoHorarioViewModel viewModel)
+    public static AgendamentoResumoDTO ToEntity(this AgendamentoResumoViewModel viewModel)
     {
         return viewModel.Adapt<AgendamentoResumoDTO>();
     }
 
-    public static AgendamentoHorarioViewModel ToViewModel(this AgendamentoResumoDTO selecao)
+    public static AgendamentoResumoViewModel ToViewModel(this AgendamentoResumoDTO selecao)
     {
-        return selecao.Adapt<AgendamentoHorarioViewModel>();
+        return selecao.Adapt<AgendamentoResumoViewModel>();
     }
 }
