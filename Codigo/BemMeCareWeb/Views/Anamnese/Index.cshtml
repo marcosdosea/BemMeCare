@@ -1,49 +1,62 @@
-﻿@model IEnumerable<BemMeCareWeb.Models.AnamneseViewModel>
+﻿@model IEnumerable<BemMeCareWeb.Models.ProfissionalServicoViewModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Serviços vinculados";
+    var idProfissional = (uint)ViewBag.IdProfissional;
+    var nomesServicos = (Dictionary<uint, string>)ViewBag.NomesServicos;
 }
 
-<h1>Anamneses dos serviços</h1>
+<h1>Serviços vinculados</h1>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.IdServico)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExigeAnamnese)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FormAnamnese)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.IdServico)
-            </td>
-            <td>
-                <form asp-action="AlterarExigencia" method="post">
+@if (!Model.Any())
+{
+    <p class="mt-4">Este profissional ainda não possui serviços vinculados.</p>
+}
+
+@foreach (var item in Model)
+{
+    var nome = nomesServicos.TryGetValue(item.IdServico, out var nomeServico) ? nomeServico : $"Serviço {item.IdServico}";
+    var preco = item.Preco == 0
+        ? "A definir"
+        : item.Preco.ToString("C", new System.Globalization.CultureInfo("pt-BR"));
+    var exigeSinal = item.PercentualSinal == 0
+        ? "Nenhum atendimento"
+        : item.QuandoPagarSinal == "TODO_AGENDAMENTO" ? "Todos atendimentos" : "Primeiro atendimento";
+
+    <div class="border rounded p-3 mb-3 d-flex justify-content-between align-items-start gap-3">
+        <div>
+            <div><strong>Nome:</strong> @nome</div>
+            <div><strong>Preço:</strong> @preco</div>
+        </div>
+
+        <div class="d-flex flex-column gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <form asp-action="AlterarExigencia" method="post" class="mb-0">
                     <input type="hidden" name="IdProfissional" value="@item.IdProfissional" />
                     <input type="hidden" name="IdServico" value="@item.IdServico" />
                     <input type="hidden" name="ExigeAnamnese" value="@((!item.ExigeAnamnese).ToString().ToLower())" />
-                    <input type="checkbox" checked="@item.ExigeAnamnese" onchange="this.form.submit()" />
+                    <input class="form-check-input" type="checkbox" id="exige-@item.IdServico"
+                           checked="@item.ExigeAnamnese" onchange="this.form.submit()" />
+                    <label class="form-check-label" for="exige-@item.IdServico">Anamnese</label>
                 </form>
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.FormAnamnese)
-            </td>
-            <td>
-                <a asp-action="Create" asp-route-idProfissional="@item.IdProfissional" asp-route-idServico="@item.IdServico">Editar</a> |
-                <a asp-action="Details" asp-route-idProfissional="@item.IdProfissional" asp-route-idServico="@item.IdServico">Detalhes</a> |
-                <a asp-action="Delete" asp-route-idProfissional="@item.IdProfissional" asp-route-idServico="@item.IdServico">Remover</a>
-            </td>
-        </tr>
+                <a asp-action="Details" asp-route-idProfissional="@item.IdProfissional"
+                   asp-route-idServico="@item.IdServico" title="Ver anamnese">✎</a>
+            </div>
+
+            <div class="d-flex gap-2">
+                <div>
+                    <small>Exige sinal?</small>
+                    <input type="text" class="form-control form-control-sm" value="@exigeSinal" disabled />
+                </div>
+                <div>
+                    <small>% do sinal</small>
+                    <input type="text" class="form-control form-control-sm" value="@item.PercentualSinal.ToString("0.##")%" disabled />
+                </div>
+            </div>
+        </div>
+    </div>
 }
-    </tbody>
-</table>
+
+<div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+    <a asp-controller="Profissional" asp-action="Details" asp-route-id="@idProfissional" class="btn btn-bmc-medio">Voltar</a>
+</div>
