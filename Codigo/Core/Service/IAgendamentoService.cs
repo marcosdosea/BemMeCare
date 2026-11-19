@@ -4,7 +4,7 @@ namespace Core.Service;
 
 public interface IAgendamentoService
 {
-    uint Create(Agendamento agendamento);
+    uint Create(SelecaoAgendamentoDTO selecao, uint idEstabelecimento, uint idPessoa);
     void Edit(Agendamento agendamento);
     void Delete(uint id, uint idEstabelecimento);
     Agendamento? Get(uint id, uint idEstabelecimento);
