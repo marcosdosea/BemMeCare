@@ -8,4 +8,6 @@ public interface IPessoaService
     Pessoa? Get(uint id);
     IEnumerable<Pessoa> GetAll();
     IEnumerable<Pessoa> GetByNome(string nome);
+
+    string GetNome(uint id);
 }
