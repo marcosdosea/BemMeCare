@@ -1,0 +1,45 @@
+@model BemMeCareWeb.Models.AgendamentoDeClientesViewModel
+
+<h1>Horários disponíveis</h1>
+
+<p>
+    <strong>@Model.NomesServicos</strong> —
+    <strong>@Model.NomeProfissional</strong>
+</p>
+
+<p>Data: @Model.DataHoraAtendimento?.ToString("dd/MM/yyyy")</p>
+
+@if (!Model.HorariosDisponiveis.Any())
+{
+    <div class="alert alert-warning">Não há horários disponíveis nesta data.</div>
+    <a asp-action="Create" class="btn btn-secondary">Voltar</a>
+}
+else
+{
+    <form asp-action="Resumo" method="get">
+        <input type="hidden" name="idServico" value="@Model.IdsServicos.Single()" />
+        <input type="hidden" name="idProfissional" value="@Model.IdProfissional" />
+
+        <fieldset class="mb-3">
+            <legend>Selecione o horário</legend>
+            @foreach (var horario in Model.HorariosDisponiveis)
+            {
+                var horarioAtendimento = horario.Horario;
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="dataHoraAtendimento"
+                           id="horario-@horarioAtendimento.Ticks"
+                           value="@horarioAtendimento.ToString("yyyy-MM-ddTHH:mm:ss")"
+                           required />
+                    <label class="form-check-label" for="horario-@horarioAtendimento.Ticks">
+                        @horarioAtendimento.ToString("HH:mm")
+                    </label>
+                </div>
+            }
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary">Ver resumo</button>
+        <a asp-action="Create" class="btn btn-secondary">Voltar</a>
+    </form>
+}

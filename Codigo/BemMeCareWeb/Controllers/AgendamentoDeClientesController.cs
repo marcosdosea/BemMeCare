@@ -101,13 +101,98 @@ namespace BemMeCareWeb.Controllers
             return View(viewModel);
         }
 
+        [HttpGet]
+        public IActionResult Horarios(uint idProfissional, uint idServico, DateTime data)
+        {
+            if (idProfissional == 0 || idServico == 0 || data.Date < DateTime.Today)
+            {
+                TempData["ErrorMessage"] = "Escolha o serviço, o profissional e uma data válida.";
+                return RedirectToAction(nameof(Create));
+            }
+
+            try
+            {
+                var viewModel = new AgendamentoDeClientesViewModel
+                {
+                    IdProfissional = idProfissional,
+                    IdsServicos = [idServico],
+                    DataHoraAtendimento = data.Date,
+                    HorariosDisponiveis = agendamentoService.GetHorariosDisponiveis(
+                        idProfissional,
+                        idServico,
+                        data.Date,
+                        IdEstabelecimentoProvisorio)
+                };
+                PopularOpcoesCreate(viewModel);
+
+                var opcao = viewModel.OpcoesServicoProfissional.FirstOrDefault(item =>
+                    item.IdProfissional == idProfissional &&
+                    item.IdServico == idServico);
+                viewModel.NomeProfissional = opcao?.NomeProfissional;
+                viewModel.NomesServicos = opcao?.NomeServico;
+
+                return View(viewModel);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Create));
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Resumo(
+            uint idProfissional,
+            uint idServico,
+            DateTime dataHoraAtendimento)
+        {
+            if (idProfissional == 0 || idServico == 0 || dataHoraAtendimento == default)
+            {
+                TempData["ErrorMessage"] = "Selecione um horário válido.";
+                return RedirectToAction(nameof(Create));
+            }
+
+            try
+            {
+                var resumo = agendamentoService.CriarResumo(
+                    idProfissional,
+                    idServico,
+                    dataHoraAtendimento,
+                    IdEstabelecimentoProvisorio);
+                var viewModel = new AgendamentoDeClientesViewModel
+                {
+                    IdProfissional = idProfissional,
+                    IdsServicos = [idServico],
+                    DataHoraAtendimento = resumo.HorarioAtendimento,
+                    PrecoFinal = resumo.PrecoTotal,
+                    DuracaoMinutos = resumo.DuracaoTotalEmMinutos,
+                    NomeProfissional = resumo.NomeProfissional,
+                    NomesServicos = string.Join(", ", resumo.Servicos)
+                };
+
+                var opcoes = PopularOpcoesCreateRetornando(viewModel);
+                var opcao = opcoes.FirstOrDefault(item =>
+                    item.IdProfissional == idProfissional &&
+                    item.IdServico == idServico);
+                viewModel.NomeProfissional = opcao?.NomeProfissional;
+                viewModel.NomesServicos = opcao?.NomeServico;
+
+                return View(viewModel);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Create));
+            }
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(AgendamentoDeClientesViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
-                return RetornarCreate(viewModel);
+                return RetornarResumo(viewModel);
             }
 
             var pessoaCliente = pessoaService
@@ -124,7 +209,7 @@ namespace BemMeCareWeb.Controllers
                 ModelState.AddModelError(
                     nameof(viewModel.NomeCliente),
                     "Não encontramos uma pessoa com esse nome e telefone. Cadastre a pessoa antes de criar o agendamento.");
-                return RetornarCreate(viewModel);
+                return RetornarResumo(viewModel);
             }
 
             var agendamento = viewModel.ToEntity();
@@ -141,7 +226,7 @@ namespace BemMeCareWeb.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return RetornarCreate(viewModel);
+                return RetornarResumo(viewModel);
             }
         }
 
@@ -191,11 +276,53 @@ namespace BemMeCareWeb.Controllers
             return View(nameof(Create), viewModel);
         }
 
+        private IActionResult RetornarResumo(AgendamentoDeClientesViewModel viewModel)
+        {
+            var opcoes = PopularOpcoesCreateRetornando(viewModel);
+            var idServico = viewModel.IdsServicos.FirstOrDefault();
+            var opcao = opcoes.FirstOrDefault(item =>
+                item.IdProfissional == viewModel.IdProfissional &&
+                item.IdServico == idServico);
+            viewModel.NomeProfissional = opcao?.NomeProfissional;
+            viewModel.NomesServicos = opcao?.NomeServico;
+
+            if (viewModel.DataHoraAtendimento.HasValue &&
+                viewModel.IdProfissional > 0 &&
+                idServico > 0)
+            {
+                try
+                {
+                    var resumo = agendamentoService.CriarResumo(
+                        viewModel.IdProfissional,
+                        idServico,
+                        viewModel.DataHoraAtendimento.Value,
+                        IdEstabelecimentoProvisorio);
+                    if (resumo != null)
+                    {
+                        viewModel.PrecoFinal = resumo.PrecoTotal;
+                        viewModel.DuracaoMinutos = resumo.DuracaoTotalEmMinutos;
+                    }
+                }
+                catch (InvalidOperationException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+            }
+
+            return View(nameof(Resumo), viewModel);
+        }
+
         private void PopularOpcoesCreate(AgendamentoDeClientesViewModel viewModel)
+        {
+            viewModel.OpcoesServicoProfissional = PopularOpcoesCreateRetornando(viewModel);
+        }
+
+        private IEnumerable<ServicoProfissionalOpcaoViewModel> PopularOpcoesCreateRetornando(
+            AgendamentoDeClientesViewModel viewModel)
         {
             var nomesPessoas = pessoaService.GetAll()
                 .ToDictionary(pessoa => pessoa.Id, pessoa => pessoa.Nome);
-            viewModel.OpcoesServicoProfissional = profissionalService.GetAll()
+            var opcoes = profissionalService.GetAll()
                 .Where(profissional =>
                     profissional.IdEstabelecimento == IdEstabelecimentoProvisorio &&
                     profissional.EstaAtivo == 1)
@@ -214,6 +341,8 @@ namespace BemMeCareWeb.Controllers
                 .OrderBy(opcao => opcao.NomeServico)
                 .ThenBy(opcao => opcao.NomeProfissional)
                 .ToList();
+            viewModel.OpcoesServicoProfissional = opcoes;
+            return opcoes;
         }
 
         private IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>

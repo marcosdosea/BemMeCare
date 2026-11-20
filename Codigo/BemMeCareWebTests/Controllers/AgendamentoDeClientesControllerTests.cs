@@ -1,6 +1,7 @@
 ﻿using BemMeCareWeb.Controllers;
 using BemMeCareWeb.Models;
 using Core;
+using Core.DTO;
 using Core.Service;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -171,6 +172,65 @@ public class AgendamentoDeClientesControllerTests
         var resultado = controller.Details(999);
 
         Assert.IsInstanceOfType<NotFoundResult>(resultado);
+    }
+
+    [TestMethod]
+    public void Horarios_QuandoServicoProfissionalEDataSaoValidos_DeveExibirHorariosDisponiveis()
+    {
+        var data = DateTime.Today.AddDays(1);
+        var horarios = new[]
+        {
+            new HorarioDisponivelDTO { Horario = data.AddHours(10) },
+            new HorarioDisponivelDTO { Horario = data.AddHours(10).AddMinutes(30) }
+        };
+        agendamentoServiceMock
+            .Setup(service => service.GetHorariosDisponiveis(5, 10, data.Date, 1))
+            .Returns(horarios);
+        pessoaServiceMock.Setup(service => service.GetAll()).Returns([
+            new Pessoa { Id = 5, Nome = "Ana" }
+        ]);
+        profissionalServiceMock.Setup(service => service.GetAll()).Returns([
+            CriarProfissionalComServico(5, 1, 1)
+        ]);
+
+        var resultado = controller.Horarios(5, 10, data);
+
+        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesViewModel>(
+            Assert.IsInstanceOfType<ViewResult>(resultado).Model);
+        Assert.AreEqual(2, viewModel.HorariosDisponiveis.Count());
+        Assert.AreEqual("Ana", viewModel.NomeProfissional);
+        Assert.AreEqual("Corte", viewModel.NomesServicos);
+    }
+
+    [TestMethod]
+    public void Resumo_QuandoHorarioEstaDisponivel_DeveExibirResumoSemCadastrarCliente()
+    {
+        var dataHora = DateTime.Today.AddDays(1).AddHours(10);
+        var resumo = new AgendamentoDTO
+        {
+            NomeProfissional = "Ana",
+            Servicos = ["Corte"],
+            HorarioAtendimento = dataHora,
+            DuracaoTotalEmMinutos = 30,
+            PrecoTotal = 80m
+        };
+        agendamentoServiceMock
+            .Setup(service => service.CriarResumo(5, 10, dataHora, 1))
+            .Returns(resumo);
+        pessoaServiceMock.Setup(service => service.GetAll()).Returns([
+            new Pessoa { Id = 5, Nome = "Ana" }
+        ]);
+        profissionalServiceMock.Setup(service => service.GetAll()).Returns([
+            CriarProfissionalComServico(5, 1, 1)
+        ]);
+
+        var resultado = controller.Resumo(5, 10, dataHora);
+
+        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesViewModel>(
+            Assert.IsInstanceOfType<ViewResult>(resultado).Model);
+        Assert.AreEqual(30u, viewModel.DuracaoMinutos);
+        Assert.AreEqual(80m, viewModel.PrecoFinal);
+        Assert.IsTrue(string.IsNullOrEmpty(viewModel.NomeCliente));
     }
 
     [TestMethod]

@@ -47,7 +47,6 @@ public static class AgendamentoDeClientesMapper
         config.NewConfig<AgendamentoDeClientesViewModel, Agendamento>()
             .Ignore(destino => destino.Id)
             .Map(destino => destino.DataHoraAtendimento, origem => origem.DataHoraAtendimento!.Value)
-            .Map(destino => destino.Observacoes, origem => origem.Observacoes)
             .Map(destino => destino.IdProfissional, origem => origem.IdProfissional)
             .Ignore(destino => destino.PrecoFinal)
             .Ignore(destino => destino.DuracaoMinutos)

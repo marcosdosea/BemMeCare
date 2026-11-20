@@ -49,6 +49,24 @@ public class AgendamentoDeClientesServiceTests
     }
 
     [TestMethod]
+    public void GetHorariosDisponiveis_QuandoExisteExpediente_DeveRetornarSomenteHorariosLivres()
+    {
+        var data = new DateTime(2026, 12, 1);
+        var agendamentoExistente = CriarAgendamento(data.AddHours(10));
+        agendamentoExistente.DuracaoMinutos = 30;
+        agendamentoExistente.DataHoraFimAtendimento = data.AddHours(10).AddMinutes(30);
+        contexto.Agendamentos.Add(agendamentoExistente);
+        contexto.SaveChanges();
+
+        var horarios = agendamentoService
+            .GetHorariosDisponiveis(1, 10, data, 1)
+            .ToList();
+
+        Assert.IsFalse(horarios.Any(item => item.Horario == data.AddHours(10)));
+        Assert.IsTrue(horarios.Any(item => item.Horario == data.AddHours(10).AddMinutes(30)));
+    }
+
+    [TestMethod]
     public void Create_QuandoDadosSaoValidos_DeveCalcularPrecoFinal()
     {
         var dataHora = new DateTime(2026, 12, 1, 10, 0, 0);

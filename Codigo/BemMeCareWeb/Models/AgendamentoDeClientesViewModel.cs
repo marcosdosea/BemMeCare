@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Core.DTO;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace BemMeCareWeb.Models
@@ -11,9 +12,6 @@ namespace BemMeCareWeb.Models
         [Display(Name = "Data e horário")]
         [Required(ErrorMessage = "A data e o horário são obrigatórios.")]
         public DateTime? DataHoraAtendimento { get; set; }
-
-        [Display(Name = "Observações")]
-        public string? Observacoes { get; set; }
 
         [Display(Name = "Serviços")]
         [MinLength(1, ErrorMessage = "Selecione ao menos um serviço.")]
@@ -33,6 +31,9 @@ namespace BemMeCareWeb.Models
 
         [BindNever]
         public IEnumerable<ServicoProfissionalOpcaoViewModel> OpcoesServicoProfissional { get; set; } = [];
+
+        [BindNever]
+        public IEnumerable<HorarioDisponivelDTO> HorariosDisponiveis { get; set; } = [];
 
         [Display(Name = "Nome do profissional")]
         public string? NomeProfissional { get; set; }

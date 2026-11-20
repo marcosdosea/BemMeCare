@@ -1,4 +1,5 @@
 ﻿using Core;
+using Core.DTO;
 using Core.Service;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,127 @@ public class AgendamentoDeClientesService : IAgendamentoDeClientesService
     public AgendamentoDeClientesService(BemMeCareContext context)
     {
         this.context = context;
+    }
+
+    public IEnumerable<HorarioDisponivelDTO> GetHorariosDisponiveis(
+        uint idProfissional,
+        uint idServico,
+        DateTime data,
+        uint idEstabelecimento)
+    {
+        var profissional = context.Profissionals
+            .AsNoTracking()
+            .FirstOrDefault(item =>
+                item.IdPessoa == idProfissional &&
+                item.IdEstabelecimento == idEstabelecimento &&
+                item.EstaAtivo == 1);
+        if (profissional == null)
+        {
+            throw new InvalidOperationException("O profissional selecionado não está ativo neste estabelecimento.");
+        }
+
+        var servico = context.Servicoprofissionals
+            .AsNoTracking()
+            .FirstOrDefault(item =>
+                item.IdProfissional == idProfissional &&
+                item.IdEstabelecimento == idEstabelecimento &&
+                item.IdServico == idServico);
+        if (servico == null)
+        {
+            throw new InvalidOperationException("O serviço selecionado não está disponível para esse profissional.");
+        }
+        if (servico.Duracao == 0)
+        {
+            throw new InvalidOperationException("O serviço selecionado possui duração inválida.");
+        }
+
+        var diaSemana = ObterNomeDiaSemana(data.DayOfWeek);
+        var horarios = context.Horarios
+            .AsNoTracking()
+            .Where(item =>
+                item.IdProfissional == idProfissional &&
+                item.IdEstabelecimento == idEstabelecimento &&
+                item.DiaSemana == diaSemana &&
+                item.InicioVigencia.Date <= data.Date &&
+                (!item.FimVigencia.HasValue || item.FimVigencia.Value.Date >= data.Date))
+            .ToList();
+
+        var intervalo = profissional.DuracaoIntervaloTempo > 0
+            ? profissional.DuracaoIntervaloTempo
+            : 30u;
+        var resultado = new List<HorarioDisponivelDTO>();
+
+        foreach (var horario in horarios)
+        {
+            var inicio = data.Date.Add(horario.InicioTurno);
+            var fim = data.Date.Add(horario.FimTurno);
+
+            for (var candidato = inicio;
+                 candidato.AddMinutes(servico.Duracao) <= fim;
+                 candidato = candidato.AddMinutes(intervalo))
+            {
+                var fimCandidato = candidato.AddMinutes(servico.Duracao);
+                var existeConflito = context.Agendamentos.Any(agendamento =>
+                    agendamento.IdEstabelecimento == idEstabelecimento &&
+                    agendamento.IdProfissional == idProfissional &&
+                    agendamento.StatusAgendamento != StatusAgendamentoCancelado &&
+                    agendamento.DataHoraAtendimento < fimCandidato &&
+                    agendamento.DataHoraFimAtendimento > candidato);
+                if (!existeConflito)
+                {
+                    resultado.Add(new HorarioDisponivelDTO { Horario = candidato });
+                }
+            }
+        }
+
+        return resultado
+            .GroupBy(item => item.Horario)
+            .Select(grupo => grupo.First())
+            .OrderBy(item => item.Horario)
+            .ToList();
+    }
+
+    public AgendamentoDTO CriarResumo(
+        uint idProfissional,
+        uint idServico,
+        DateTime dataHoraAtendimento,
+        uint idEstabelecimento)
+    {
+        var ids = new[] { idServico };
+        if (!GetHorariosDisponiveis(
+                idProfissional,
+                idServico,
+                dataHoraAtendimento.Date,
+                idEstabelecimento)
+            .Any(item => item.Horario == dataHoraAtendimento))
+        {
+            throw new InvalidOperationException(
+                "O horário escolhido não está mais disponível para esse profissional.");
+        }
+
+        var servico = context.Servicoprofissionals
+            .AsNoTracking()
+            .Include(item => item.IdServicoNavigation)
+            .Single(item =>
+                item.IdProfissional == idProfissional &&
+                item.IdEstabelecimento == idEstabelecimento &&
+                item.IdServico == idServico);
+
+        var profissional = context.Profissionals
+            .AsNoTracking()
+            .Include(item => item.IdPessoaNavigation)
+            .Single(item =>
+                item.IdPessoa == idProfissional &&
+                item.IdEstabelecimento == idEstabelecimento);
+
+        return new AgendamentoDTO
+        {
+            NomeProfissional = profissional.IdPessoaNavigation.Nome,
+            Servicos = [servico.IdServicoNavigation.Nome],
+            PrecoTotal = servico.Preco,
+            DuracaoTotalEmMinutos = servico.Duracao,
+            HorarioAtendimento = dataHoraAtendimento
+        };
     }
 
     public IEnumerable<Agendamento> GetByData(
