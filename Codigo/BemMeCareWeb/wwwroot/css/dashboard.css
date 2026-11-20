@@ -1,0 +1,12 @@
+﻿.dashboard-pie-container {
+    max-width: 340px;
+    width: 100%;
+}
+
+.dashboard-chart-12meses {
+    height: 180px;
+}
+
+.dashboard-chart-filtrado {
+    height: 320px;
+}

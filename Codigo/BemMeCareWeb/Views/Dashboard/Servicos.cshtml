@@ -1,0 +1,168 @@
+﻿@model BemMeCareWeb.Models.DashboardServicosViewModel
+@using System.Globalization
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Dashboards de serviços";
+    var cultura = new CultureInfo("pt-BR");
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Dashboards de serviços</h1>
+    <div class="d-flex gap-2">
+        <a asp-action="Servicos" class="btn btn-bmc-medio">Serviços</a>
+        <a asp-action="Faturamento" class="btn btn-outline-secondary">Faturamento</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4 text-center">
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Serviço mais usado</p>
+                <h3 class="fw-bold my-2">@Model.Resumo.ServicoMaisUsadoNome</h3>
+                <span class="fs-5">@Model.Resumo.ServicoMaisUsadoQuantidade</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Categoria mais usada</p>
+                <h3 class="fw-bold my-2">@Model.Resumo.CategoriaMaisUsadaNome</h3>
+                <span class="fs-5">@Model.Resumo.CategoriaMaisUsadaQuantidade</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted mb-1">Serviço menos usado</p>
+                <h3 class="fw-bold my-2">@Model.Resumo.ServicoMenosUsadoNome</h3>
+                <span class="fs-5">@Model.Resumo.ServicoMenosUsadoQuantidade</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Servicos" method="post" class="card shadow-sm p-3 mb-4">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label asp-for="FiltroDemografico" class="control-label fw-semibold"></label>
+            <select asp-for="FiltroDemografico" class="form-control">
+                <option value="Genero">Gênero</option>
+                <option value="Sexualidade">Sexualidade</option>
+                <option value="Cor">Cor</option>
+            </select>
+            <span asp-validation-for="FiltroDemografico" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="TipoFiltroItem" class="control-label fw-semibold"></label>
+            <select asp-for="TipoFiltroItem" class="form-control" id="selectTipoFiltro">
+                <option value="Categoria">Categoria</option>
+                <option value="Servico">Serviços</option>
+            </select>
+            <span asp-validation-for="TipoFiltroItem" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="IdItemSelecionado" class="control-label fw-semibold"></label>
+            <select asp-for="IdItemSelecionado" class="form-control" id="selectItemFiltro">
+                @foreach (var cat in Model.CategoriasDisponiveis)
+                {
+                    <option value="@cat.Id"
+                            data-tipo="Categoria"
+                            selected="@(Model.TipoFiltroItem == "Categoria" && Model.IdItemSelecionado == cat.Id ? "selected" : null)">
+                        @cat.Nome
+                    </option>
+                }
+                @foreach (var serv in Model.ServicosDisponiveis)
+                {
+                    <option value="@serv.Id"
+                            data-tipo="Servico"
+                            selected="@(Model.TipoFiltroItem == "Servico" && Model.IdItemSelecionado == serv.Id ? "selected" : null)">
+                        @serv.Nome
+                    </option>
+                }
+            </select>
+            <span asp-validation-for="IdItemSelecionado" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-end mt-1">
+        <div class="col-md-4">
+            <label asp-for="DataInicio" class="control-label fw-semibold"></label>
+            <input asp-for="DataInicio" type="date" class="form-control" />
+            <span asp-validation-for="DataInicio" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="DataFim" class="control-label fw-semibold"></label>
+            <input asp-for="DataFim" type="date" class="form-control" />
+            <span asp-validation-for="DataFim" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4 d-grid">
+            <button type="submit" class="btn btn-bmc-medio">Gerar Dashboard</button>
+        </div>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.MensagemErro))
+{
+    <div class="alert alert-warning text-center shadow-sm" role="alert">
+        @Model.MensagemErro
+    </div>
+}
+
+@if (Model.PesquisaRealizada && Model.ItensGrafico.Any())
+{
+    <div class="card shadow-sm p-4 mb-2">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <h5 class="fw-bold mx-auto text-center mb-0">@Model.TituloGrafico</h5>
+            <small class="text-muted">
+                @Model.DataInicio.ToString("dd/MM/yyyy") - @Model.DataFim.ToString("dd/MM/yyyy")
+            </small>
+        </div>
+
+        <div class="row align-items-center">
+            <div class="col-md-7 d-flex justify-content-center">
+                <div class="dashboard-pie-container">
+                    <canvas id="graficoServicosPie"
+                            data-labels="@JsonSerializer.Serialize(Model.ItensGrafico.Select(i => i.Label))"
+                            data-valores="@JsonSerializer.Serialize(Model.ItensGrafico.Select(i => i.Percentual))"></canvas>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <ul class="list-group list-group-flush">
+                    @foreach (var item in Model.ItensGrafico)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@item.Label</span>
+                            <span class="fw-bold">
+                                @item.Percentual.ToString("0.##", cultura)% (@item.Quantidade)
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="fw-bold mt-2">Total: @Model.TotalAtendimentos</h4>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}
