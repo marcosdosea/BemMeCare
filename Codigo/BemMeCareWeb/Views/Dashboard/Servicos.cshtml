@@ -77,13 +77,17 @@
             <select asp-for="IdItemSelecionado" class="form-control" id="selectItemFiltro">
                 @foreach (var cat in Model.CategoriasDisponiveis)
                 {
-                    <option value="@cat.Id" data-tipo="Categoria" selected="@(Model.TipoFiltroItem == "Categoria" && Model.IdItemSelecionado == cat.Id)">
+                    <option value="@cat.Id"
+                            data-tipo="Categoria"
+                            selected="@(Model.TipoFiltroItem == "Categoria" && Model.IdItemSelecionado == cat.Id ? "selected" : null)">
                         @cat.Nome
                     </option>
                 }
                 @foreach (var serv in Model.ServicosDisponiveis)
                 {
-                    <option value="@serv.Id" data-tipo="Servico" selected="@(Model.TipoFiltroItem == "Servico" && Model.IdItemSelecionado == serv.Id)">
+                    <option value="@serv.Id"
+                            data-tipo="Servico"
+                            selected="@(Model.TipoFiltroItem == "Servico" && Model.IdItemSelecionado == serv.Id ? "selected" : null)">
                         @serv.Nome
                     </option>
                 }
