@@ -1,0 +1,112 @@
+@model IEnumerable<BemMeCareWeb.Models.HorarioViewModel>
+
+@{
+    ViewData["Title"] = "Expediente";
+
+    var diasSemana = new[]
+    {
+        "Segunda-feira",
+        "Terça-feira",
+        "Quarta-feira",
+        "Quinta-feira",
+        "Sexta-feira",
+        "Sábado",
+        "Domingo"
+    };
+
+    var abreviacoes = new Dictionary<string, string>
+    {
+        { "Segunda-feira", "Seg" },
+        { "Terça-feira",   "Ter" },
+        { "Quarta-feira",  "Qua" },
+        { "Quinta-feira",  "Qui" },
+        { "Sexta-feira",   "Sex" },
+        { "Sábado",        "Sáb" },
+        { "Domingo",       "Dom" }
+    };
+
+    var idProfissional = Context.Request.Query["idProfissional"].FirstOrDefault() ?? string.Empty;
+    var diaSemanaAtual = Context.Request.Query["diaSemana"].FirstOrDefault() ?? string.Empty;
+    var nomeProfissional = Model.FirstOrDefault()?.NomeProfissional ?? string.Empty;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/listagem.css" asp-append-version="true" />
+}
+
+<h1>Expediente@(nomeProfissional != string.Empty ? " de " + nomeProfissional : string.Empty)</h1>
+
+<div style="width: 75%; margin: auto;">
+    <p class="text-end">
+        <a asp-action="Create"
+           asp-route-idProfissional="@idProfissional"
+           asp-route-diaSemana="@diaSemanaAtual"
+           class="btn rounded-pill shadow-sm px-4 py-2 btn-bmc-grande">
+            Adicionar expediente
+        </a>
+    </p>
+
+    <div class="mb-4">
+        <ul class="nav nav-pills justify-content-center gap-2">
+            @foreach (var dia in diasSemana)
+            {
+                var selecionado = dia == diaSemanaAtual;
+                <li class="nav-item">
+                    <a asp-action="Index"
+                       asp-route-idProfissional="@idProfissional"
+                       asp-route-diaSemana="@dia"
+                       class="btn btn-bmc-medio rounded-pill px-3 py-1 @(selecionado ? "fw-bold shadow-sm" : "")"
+                       style="@(selecionado ? "background-color: #6B1025; color: #F5D7D1;" : "")">
+                        @abreviacoes[dia]
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div class="mb-3">
+        <h5 class="text-center" style="color: #6B1025; font-weight: 600;">
+            Turnos de @(diaSemanaAtual != string.Empty ? diaSemanaAtual : "Todos os dias")
+        </h5>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <p class="text-center text-muted my-4">Nenhum turno cadastrado para este dia.</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => m.InicioTurno)</th>
+                    <th>@Html.DisplayNameFor(m => m.FimTurno)</th>
+                    <th>@Html.DisplayNameFor(m => m.InicioVigencia)</th>
+                    <th>@Html.DisplayNameFor(m => m.FimVigencia)</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.InicioTurno.ToString(@"hh\:mm")</td>
+                        <td>@item.FimTurno.ToString(@"hh\:mm")</td>
+                        <td>@item.InicioVigencia.ToString("dd/MM/yyyy")</td>
+                        <td>@(item.FimVigencia.HasValue ? item.FimVigencia.Value.ToString("dd/MM/yyyy") : "Indefinido")</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <div class="form-group position-fixed end-0 p-3 d-flex gap-2" style="bottom: 60px;">
+        <a asp-controller="Profissional" asp-action="Index" class="btn btn-bmc-medio">Voltar</a>
+    </div>
+</div>
+

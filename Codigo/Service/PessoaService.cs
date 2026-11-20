@@ -72,5 +72,18 @@ namespace Service
         {
             return context.Pessoas.Where(p => p.Nome.StartsWith(nome)).AsNoTracking();
         }
+
+        /// <summary>
+        /// Obtém o nome da pessoa pelo ID.
+        /// </summary>
+        /// <param name="id">id da pessoa</param>
+        /// <returns>Nome da pessoa.</returns>
+        public string GetNome(uint id)
+        {
+            return context.Pessoas
+                .Where(p => p.Id == id)
+                .Select(p => p.Nome)
+                .FirstOrDefault() ?? string.Empty;
+        }
     }
 }

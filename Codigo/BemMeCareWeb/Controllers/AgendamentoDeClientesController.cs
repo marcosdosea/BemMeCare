@@ -4,6 +4,7 @@ using BemMeCareWeb.Models;
 using Core;
 using Core.Service;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BemMeCareWeb.Controllers
 {
@@ -417,6 +418,40 @@ namespace BemMeCareWeb.Controllers
                 VisualizacaoSemana => dataReferencia.AddDays(7 * quantidade),
                 _ => dataReferencia.AddDays(quantidade)
             };
+        }
+
+        private IActionResult RetornarCreate(AgendamentoDeClientesViewModel viewModel)
+        {
+            PopularOpcoesCreate(viewModel);
+            return View(nameof(Create), viewModel);
+        }
+
+        private void PopularOpcoesCreate(AgendamentoDeClientesViewModel viewModel)
+        {
+            var pessoasPorId = pessoaService.GetAll()
+                .ToDictionary(pessoa => pessoa.Id, pessoa => pessoa.Nome);
+            viewModel.ProfissionaisDisponiveis = profissionalService.GetAll()
+                .Where(profissional =>
+                    profissional.IdEstabelecimento == IdEstabelecimentoProvisorio &&
+                    profissional.EstaAtivo == 1)
+                .Select(profissional => new SelectListItem
+                {
+                    Value = profissional.IdPessoa.ToString(),
+                    Text = pessoasPorId.TryGetValue(profissional.IdPessoa, out var nome)
+                        ? nome
+                        : $"Profissional {profissional.IdPessoa}",
+                    Selected = profissional.IdPessoa == viewModel.IdProfissional
+                })
+                .ToList();
+
+            viewModel.ServicosDisponiveis = servicoService.GetAll(IdEstabelecimentoProvisorio)
+                .Select(servico => new SelectListItem
+                {
+                    Value = servico.Id.ToString(),
+                    Text = servico.Nome,
+                    Selected = viewModel.IdsServicos.Contains(servico.Id)
+                })
+                .ToList();
         }
 
         private static string NormalizarTelefone(string telefone)

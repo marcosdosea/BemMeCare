@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Core.DTO;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BemMeCareWeb.Models
 {
@@ -23,6 +24,7 @@ namespace BemMeCareWeb.Models
 
         [Display(Name = "Nome do cliente")]
         [Required(ErrorMessage = "O nome do cliente é obrigatório.")]
+        [StringLength(45, ErrorMessage = "O nome do cliente deve ter no máximo 45 caracteres.")]
         public string NomeCliente { get; set; } = string.Empty;
 
         [Display(Name = "Telefone do cliente")]

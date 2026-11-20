@@ -62,6 +62,49 @@ public class ProfissionalServiceTests
                 EAtendente = 1
             });
 
+        contexto.Servicos.AddRange(
+            new Servico { Id = 1, Nome = "Escova", IdCategoria = 1, IdEstabelecimento = 1 },
+            new Servico { Id = 2, Nome = "Botox", IdCategoria = 1, IdEstabelecimento = 1 },
+            new Servico { Id = 3, Nome = "Corte", IdCategoria = 1, IdEstabelecimento = 2 });
+
+        contexto.Servicoprofissionals.AddRange(
+            new Servicoprofissional
+            {
+                IdProfissional = 1,
+                IdEstabelecimento = 1,
+                IdServico = 1,
+                ExigeAnamnese = 1,
+                FormAnamnese = "https://forms.gle/abc123",
+                Preco = 35m,
+                PercentualSinal = 40f,
+                QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO",
+                Duracao = 45
+            },
+            new Servicoprofissional
+            {
+                IdProfissional = 1,
+                IdEstabelecimento = 1,
+                IdServico = 2,
+                ExigeAnamnese = 0,
+                FormAnamnese = string.Empty,
+                Preco = 70m,
+                PercentualSinal = 50f,
+                QuandoPagarSinal = "TODO_AGENDAMENTO",
+                Duracao = 60
+            },
+            new Servicoprofissional
+            {
+                IdProfissional = 1,
+                IdEstabelecimento = 2,
+                IdServico = 3,
+                ExigeAnamnese = 0,
+                FormAnamnese = string.Empty,
+                Preco = 50m,
+                PercentualSinal = 0f,
+                QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO",
+                Duracao = 30
+            });
+
         contexto.SaveChanges();
 
         servicoProfissional = new ProfissionalService(contexto);
@@ -238,6 +281,182 @@ public class ProfissionalServiceTests
         // Assert
         Assert.IsNotNull(profissionais);
         Assert.AreEqual(0, profissionais.Count);
+    }
+
+    [TestMethod]
+    public void GetServicoProfissional_QuandoProfissionalAtuaEmDoisEstabelecimentos_DeveRetornarSoOsDoEstabelecimentoInformado()
+    {
+        // Act
+        var servicos = servicoProfissional.GetServicoProfissional(1, 1).ToList();
+
+        // Assert
+        Assert.AreEqual(2, servicos.Count);
+        CollectionAssert.AreEquivalent(
+            new uint[] { 1, 2 },
+            servicos.Select(s => s.IdServico).ToList());
+        Assert.IsTrue(servicos.All(s => s.IdEstabelecimento == 1));
+        Assert.AreEqual("Escova", servicos.Single(s => s.IdServico == 1).IdServicoNavigation.Nome);
+    }
+
+    [TestMethod]
+    public void GetServicoProfissional_QuandoProfissionalNaoPossuiServicos_DeveRetornarColecaoVazia()
+    {
+        // Act
+        var servicos = servicoProfissional.GetServicoProfissional(2, 1).ToList();
+
+        // Assert
+        Assert.AreEqual(0, servicos.Count);
+    }
+
+    [TestMethod]
+    public void GetServicoProfissional_QuandoServicoExiste_DeveRetornarOServicoComAnamnese()
+    {
+        // Act
+        var servico = servicoProfissional.GetServicoProfissional(1, 1, 1);
+
+        // Assert
+        Assert.IsNotNull(servico);
+        Assert.AreEqual(1u, servico.IdProfissional);
+        Assert.AreEqual(1u, servico.IdServico);
+        Assert.AreEqual(1u, servico.IdEstabelecimento);
+        Assert.AreEqual((sbyte)1, servico.ExigeAnamnese);
+        Assert.AreEqual("https://forms.gle/abc123", servico.FormAnamnese);
+    }
+
+    [TestMethod]
+    public void GetServicoProfissional_QuandoEstabelecimentoNaoCorresponde_DeveRetornarNulo()
+    {
+        // Act 
+        var servico = servicoProfissional.GetServicoProfissional(1, 1, 2);
+
+        // Assert
+        Assert.IsNull(servico);
+    }
+
+    [TestMethod]
+    public void EditServicoProfissional_QuandoMarcaComLink_DeveAlterarSoOsCamposDaAnamnese()
+    {
+        // Arrange 
+        var alteracao = new Servicoprofissional
+        {
+            IdProfissional = 1,
+            IdEstabelecimento = 1,
+            IdServico = 2,
+            ExigeAnamnese = 1,
+            FormAnamnese = "https://forms.gle/novo"
+        };
+
+        // Act
+        servicoProfissional.EditServicoProfissional(1, [alteracao]);
+
+        // Assert
+        var salvo = ObterServicoSalvo(idServico: 2);
+
+        Assert.AreEqual((sbyte)1, salvo.ExigeAnamnese);
+        Assert.AreEqual("https://forms.gle/novo", salvo.FormAnamnese);
+        Assert.AreEqual(70m, salvo.Preco);
+        Assert.AreEqual(60u, salvo.Duracao);
+        Assert.AreEqual(50f, salvo.PercentualSinal);
+        Assert.AreEqual("TODO_AGENDAMENTO", salvo.QuandoPagarSinal);
+    }
+
+    [TestMethod]
+    public void EditServicoProfissional_QuandoExigeAnamneseSemLink_NaoDeveAlterarOServico()
+    {
+        // Arrange 
+        var alteracao = new Servicoprofissional
+        {
+            IdProfissional = 1,
+            IdEstabelecimento = 1,
+            IdServico = 2,
+            ExigeAnamnese = 1,
+            FormAnamnese = "  "
+        };
+
+        // Act
+        servicoProfissional.EditServicoProfissional(1, [alteracao]);
+
+        // Assert
+        var salvo = ObterServicoSalvo(idServico: 2);
+
+        Assert.AreEqual((sbyte)0, salvo.ExigeAnamnese);
+        Assert.AreEqual(string.Empty, salvo.FormAnamnese);
+    }
+
+    [TestMethod]
+    public void EditServicoProfissional_QuandoRemoveAAnamnese_DeveLimparOLinkEDesligarAFlag()
+    {
+        var alteracao = new Servicoprofissional
+        {
+            IdProfissional = 1,
+            IdEstabelecimento = 1,
+            IdServico = 1,
+            ExigeAnamnese = 0,
+            FormAnamnese = string.Empty
+        };
+
+        // Act
+        servicoProfissional.EditServicoProfissional(1, [alteracao]);
+
+        // Assert
+        var salvo = ObterServicoSalvo(idServico: 1);
+
+        Assert.AreEqual((sbyte)0, salvo.ExigeAnamnese);
+        Assert.AreEqual(string.Empty, salvo.FormAnamnese);
+        Assert.AreEqual(35m, salvo.Preco);
+        Assert.AreEqual(45u, salvo.Duracao);
+    }
+
+    [TestMethod]
+    public void EditServicoProfissional_QuandoEstabelecimentoNaoCorresponde_NaoDeveAlterarNada()
+    {
+        var alteracao = new Servicoprofissional
+        {
+            IdProfissional = 1,
+            IdEstabelecimento = 2,
+            IdServico = 1,
+            ExigeAnamnese = 1,
+            FormAnamnese = "https://forms.gle/invasor"
+        };
+
+        // Act
+        servicoProfissional.EditServicoProfissional(1, [alteracao]);
+
+        // Assert
+        var original = ObterServicoSalvo(idServico: 1);
+
+        Assert.AreEqual("https://forms.gle/abc123", original.FormAnamnese);
+        Assert.IsFalse(contexto.Servicoprofissionals.Any(sp =>
+            sp.IdEstabelecimento == 2 && sp.IdServico == 1));
+    }
+
+    [TestMethod]
+    public void EditServicoProfissional_QuandoServicoNaoExiste_NaoDeveCriarRegistro()
+    {
+        // Arrange
+        var alteracao = new Servicoprofissional
+        {
+            IdProfissional = 1,
+            IdEstabelecimento = 1,
+            IdServico = 999,
+            ExigeAnamnese = 1,
+            FormAnamnese = "https://forms.gle/novo"
+        };
+
+        // Act
+        servicoProfissional.EditServicoProfissional(1, [alteracao]);
+
+        // Assert
+        Assert.AreEqual(3, contexto.Servicoprofissionals.Count());
+        Assert.IsFalse(contexto.Servicoprofissionals.Any(sp => sp.IdServico == 999));
+    }
+
+    private Servicoprofissional ObterServicoSalvo(uint idServico, uint idEstabelecimento = 1)
+    {
+        return contexto.Servicoprofissionals.Single(sp =>
+            sp.IdProfissional == 1 &&
+            sp.IdEstabelecimento == idEstabelecimento &&
+            sp.IdServico == idServico);
     }
 
     private static Profissional CriarNovoProfissional()
