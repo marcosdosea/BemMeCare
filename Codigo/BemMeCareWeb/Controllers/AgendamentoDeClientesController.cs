@@ -271,12 +271,6 @@ namespace BemMeCareWeb.Controllers
             return RedirectToAction(nameof(Index), new { data, visualizacao, idProfissional });
         }
 
-        private IActionResult RetornarCreate(AgendamentoDeClientesViewModel viewModel)
-        {
-            PopularOpcoesCreate(viewModel);
-            return View(nameof(Create), viewModel);
-        }
-
         private IActionResult RetornarResumo(AgendamentoDeClientesViewModel viewModel)
         {
             var opcoes = PopularOpcoesCreateRetornando(viewModel);
