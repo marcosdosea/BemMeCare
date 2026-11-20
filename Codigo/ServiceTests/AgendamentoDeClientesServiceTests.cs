@@ -49,6 +49,24 @@ public class AgendamentoDeClientesServiceTests
     }
 
     [TestMethod]
+    public void GetHorariosDisponiveis_QuandoExisteExpediente_DeveRetornarSomenteHorariosLivres()
+    {
+        var data = new DateTime(2026, 12, 1);
+        var agendamentoExistente = CriarAgendamento(data.AddHours(10));
+        agendamentoExistente.DuracaoMinutos = 30;
+        agendamentoExistente.DataHoraFimAtendimento = data.AddHours(10).AddMinutes(30);
+        contexto.Agendamentos.Add(agendamentoExistente);
+        contexto.SaveChanges();
+
+        var horarios = agendamentoService
+            .GetHorariosDisponiveis(1, 10, data, 1)
+            .ToList();
+
+        Assert.IsFalse(horarios.Any(item => item.Horario == data.AddHours(10)));
+        Assert.IsTrue(horarios.Any(item => item.Horario == data.AddHours(10).AddMinutes(30)));
+    }
+
+    [TestMethod]
     public void Create_QuandoDadosSaoValidos_DeveCalcularPrecoFinal()
     {
         var dataHora = new DateTime(2026, 12, 1, 10, 0, 0);
@@ -213,6 +231,41 @@ public class AgendamentoDeClientesServiceTests
         var resultado = agendamentoService.GetByData(data, 1, 1).ToList();
 
         CollectionAssert.AreEqual(new[] { doDia.Id }, resultado.Select(item => item.Id).ToArray());
+    }
+
+    [TestMethod]
+    public void GetByPeriodo_DeveIncluirDataInicialEExcluirDataFinal()
+    {
+        var inicio = new DateTime(2026, 12, 1);
+        var noInicio = CriarAgendamento(inicio);
+        noInicio.IdPessoaCliente = 20;
+        var antesDoFim = CriarAgendamento(new DateTime(2026, 12, 2, 23, 59, 0));
+        antesDoFim.IdPessoaCliente = 21;
+        var noFim = CriarAgendamento(new DateTime(2026, 12, 3));
+        noFim.IdPessoaCliente = 5;
+        var deOutroEstabelecimento = CriarAgendamento(new DateTime(2026, 12, 2, 10, 0, 0));
+        deOutroEstabelecimento.IdEstabelecimento = 2;
+        deOutroEstabelecimento.IdPessoaCliente = 1;
+        contexto.Agendamentos.AddRange(noInicio, antesDoFim, noFim, deOutroEstabelecimento);
+        contexto.SaveChanges();
+
+        var resultado = agendamentoService.GetByPeriodo(
+            inicio,
+            new DateTime(2026, 12, 3),
+            1);
+
+        CollectionAssert.AreEquivalent(
+            new[] { noInicio.Id, antesDoFim.Id },
+            resultado.Select(item => item.Id).ToArray());
+    }
+
+    [TestMethod]
+    public void GetByPeriodo_QuandoDataFinalNaoEhPosterior_DeveFalhar()
+    {
+        var data = new DateTime(2026, 12, 1);
+
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(
+            () => agendamentoService.GetByPeriodo(data, data, 1));
     }
 
     [TestMethod]

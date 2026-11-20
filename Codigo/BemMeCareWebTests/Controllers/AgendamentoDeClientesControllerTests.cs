@@ -1,6 +1,7 @@
 ﻿using BemMeCareWeb.Controllers;
 using BemMeCareWeb.Models;
 using Core;
+using Core.DTO;
 using Core.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -15,7 +16,6 @@ public class AgendamentoDeClientesControllerTests
 {
     private Mock<IAgendamentoDeClientesService> agendamentoServiceMock = null!;
     private Mock<IPessoaService> pessoaServiceMock = null!;
-    private Mock<IServicoService> servicoServiceMock = null!;
     private Mock<IProfissionalService> profissionalServiceMock = null!;
     private AgendamentoDeClientesController controller = null!;
 
@@ -24,15 +24,11 @@ public class AgendamentoDeClientesControllerTests
     {
         agendamentoServiceMock = new Mock<IAgendamentoDeClientesService>();
         pessoaServiceMock = new Mock<IPessoaService>();
-        servicoServiceMock = new Mock<IServicoService>();
         profissionalServiceMock = new Mock<IProfissionalService>();
-        pessoaServiceMock.Setup(service => service.GetAll()).Returns([]);
-        servicoServiceMock.Setup(service => service.GetAll(1)).Returns([]);
         profissionalServiceMock.Setup(service => service.GetAll()).Returns([]);
         controller = new AgendamentoDeClientesController(
             agendamentoServiceMock.Object,
             pessoaServiceMock.Object,
-            servicoServiceMock.Object,
             profissionalServiceMock.Object);
         controller.TempData = new TempDataDictionary(
             new DefaultHttpContext(),
@@ -40,11 +36,18 @@ public class AgendamentoDeClientesControllerTests
     }
 
     [TestMethod]
-    public void Index_QuandoSemFiltros_DeveBuscarDataAtualNoEstabelecimentoProvisorio()
+    public void Index_QuandoSemFiltros_DeveExibirMesAtual()
     {
+        var primeiroDiaDoMes = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        var diasAntes = ((int)primeiroDiaDoMes.DayOfWeek + 6) % 7;
+        var inicio = primeiroDiaDoMes.AddDays(-diasAntes);
+        var diasDoMes = DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month);
+        var quantidadeDeDias = ((diasAntes + diasDoMes + 6) / 7) * 7;
+        var fimExclusivo = inicio.AddDays(quantidadeDeDias);
         agendamentoServiceMock
-            .Setup(service => service.GetByData(
-                It.IsAny<DateTime>(),
+            .Setup(service => service.GetByPeriodo(
+                inicio,
+                fimExclusivo,
                 1,
                 null))
             .Returns([]);
@@ -52,11 +55,116 @@ public class AgendamentoDeClientesControllerTests
         var resultado = controller.Index();
 
         var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        Assert.IsInstanceOfType<IEnumerable<AgendamentoDeClientesViewModel>>(
-            viewResult.ViewData.Model);
+        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesAgendaViewModel>(viewResult.Model);
+        Assert.AreEqual("mes", viewModel.Visualizacao);
+        Assert.AreEqual(quantidadeDeDias / 7, viewModel.Semanas.Count);
         agendamentoServiceMock.Verify(
-            service => service.GetByData(DateTime.Today, 1, null),
+            service => service.GetByPeriodo(inicio, fimExclusivo, 1, null),
             Times.Once);
+    }
+
+    [TestMethod]
+    public void Index_QuandoVisualizacaoSemana_DeveBuscarSemanaIniciadaNaSegunda()
+    {
+        var data = new DateTime(2026, 12, 2);
+        var inicio = new DateTime(2026, 11, 30);
+        var fimExclusivo = inicio.AddDays(7);
+        agendamentoServiceMock
+            .Setup(service => service.GetByPeriodo(inicio, fimExclusivo, 1, null))
+            .Returns([]);
+
+        var resultado = controller.Index(data, "semana");
+
+        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesAgendaViewModel>(
+            Assert.IsInstanceOfType<ViewResult>(resultado).Model);
+        Assert.AreEqual(data.AddDays(-7), viewModel.DataAnterior);
+        Assert.AreEqual(data.AddDays(7), viewModel.DataProxima);
+        Assert.AreEqual(7, viewModel.Semanas.Single().Count);
+        agendamentoServiceMock.Verify(
+            service => service.GetByPeriodo(inicio, fimExclusivo, 1, null),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void Index_QuandoVisualizacaoDia_DeveBuscarSomenteODiaSelecionado()
+    {
+        var data = new DateTime(2026, 12, 2);
+        agendamentoServiceMock
+            .Setup(service => service.GetByPeriodo(data, data.AddDays(1), 1, null))
+            .Returns([]);
+
+        var resultado = controller.Index(data, "dia");
+
+        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesAgendaViewModel>(
+            Assert.IsInstanceOfType<ViewResult>(resultado).Model);
+        Assert.AreEqual(1, viewModel.Semanas.Single().Count);
+        agendamentoServiceMock.Verify(
+            service => service.GetByPeriodo(data, data.AddDays(1), 1, null),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void Index_QuandoNavegaMes_DeveManterAReferenciaNoInicioDosMeses()
+    {
+        var data = new DateTime(2026, 1, 31);
+        agendamentoServiceMock
+            .Setup(service => service.GetByPeriodo(
+                It.IsAny<DateTime>(),
+                It.IsAny<DateTime>(),
+                1,
+                null))
+            .Returns([]);
+
+        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesAgendaViewModel>(
+            Assert.IsInstanceOfType<ViewResult>(controller.Index(data)).Model);
+
+        Assert.AreEqual(new DateTime(2025, 12, 1), viewModel.DataAnterior);
+        Assert.AreEqual(new DateTime(2026, 2, 1), viewModel.DataProxima);
+    }
+
+    [TestMethod]
+    public void Index_QuandoVisualizacaoInvalida_DeveRetornarBadRequest()
+    {
+        var resultado = controller.Index(visualizacao: "ano");
+
+        Assert.IsInstanceOfType<BadRequestResult>(resultado);
+        agendamentoServiceMock.Verify(
+            service => service.GetByPeriodo(
+                It.IsAny<DateTime>(),
+                It.IsAny<DateTime>(),
+                It.IsAny<uint>(),
+                It.IsAny<uint?>()),
+            Times.Never);
+    }
+
+    [TestMethod]
+    public void Create_Get_DeveListarCadaServicoComSeuProfissional()
+    {
+        pessoaServiceMock.Setup(service => service.GetAll()).Returns([
+            new Pessoa { Id = 5, Nome = "Ana" },
+            new Pessoa { Id = 6, Nome = "Bia" },
+            new Pessoa { Id = 7, Nome = "Caio" },
+            new Pessoa { Id = 8, Nome = "Inativo" },
+            new Pessoa { Id = 9, Nome = "Outro estabelecimento" }
+        ]);
+        profissionalServiceMock.Setup(service => service.GetAll()).Returns([
+            CriarProfissionalComServico(5, 1, 1),
+            CriarProfissionalComServico(6, 1, 1),
+            CriarProfissionalComServico(7, 1, 1),
+            CriarProfissionalComServico(8, 1, 0),
+            CriarProfissionalComServico(9, 2, 1)
+        ]);
+
+        var resultado = controller.Create();
+
+        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesViewModel>(
+            Assert.IsInstanceOfType<ViewResult>(resultado).Model);
+        var opcoes = viewModel.OpcoesServicoProfissional.ToList();
+        Assert.AreEqual(3, opcoes.Count);
+        CollectionAssert.AreEquivalent(
+            new[] { "Ana", "Bia", "Caio" },
+            opcoes.Select(opcao => opcao.NomeProfissional).ToArray());
+        Assert.IsTrue(opcoes.All(opcao => opcao.NomeServico == "Corte" && opcao.IdServico == 10));
     }
 
     [TestMethod]
@@ -72,50 +180,62 @@ public class AgendamentoDeClientesControllerTests
     }
 
     [TestMethod]
-    public void Details_QuandoAgendamentoExiste_DeveRetornarViewComViewModel()
+    public void Horarios_QuandoServicoProfissionalEDataSaoValidos_DeveExibirHorariosDisponiveis()
     {
-        var agendamento = new Agendamento
+        var data = DateTime.Today.AddDays(1);
+        var horarios = new[]
         {
-            Id = 12,
-            IdPessoaClienteNavigation = new Pessoa { Nome = "Cliente", Telefone = "11987654321" },
-            Profissional = new Profissional
-            {
-                IdPessoaNavigation = new Pessoa { Nome = "Profissional" }
-            },
-            Agendamentoservicos = []
+            new HorarioDisponivelDTO { Horario = data.AddHours(10) },
+            new HorarioDisponivelDTO { Horario = data.AddHours(10).AddMinutes(30) }
         };
-        agendamentoServiceMock.Setup(service => service.Get(12, 1)).Returns(agendamento);
+        agendamentoServiceMock
+            .Setup(service => service.GetHorariosDisponiveis(5, 10, data.Date, 1))
+            .Returns(horarios);
+        pessoaServiceMock.Setup(service => service.GetAll()).Returns([
+            new Pessoa { Id = 5, Nome = "Ana" }
+        ]);
+        profissionalServiceMock.Setup(service => service.GetAll()).Returns([
+            CriarProfissionalComServico(5, 1, 1)
+        ]);
 
-        var resultado = controller.Details(12);
+        var resultado = controller.Horarios(5, 10, data);
 
-        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesViewModel>(viewResult.Model);
-        Assert.AreEqual("Cliente", viewModel.NomeCliente);
+        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesViewModel>(
+            Assert.IsInstanceOfType<ViewResult>(resultado).Model);
+        Assert.AreEqual(2, viewModel.HorariosDisponiveis.Count());
+        Assert.AreEqual("Ana", viewModel.NomeProfissional);
+        Assert.AreEqual("Corte", viewModel.NomesServicos);
     }
 
     [TestMethod]
-    public void Create_Get_DeveCarregarProfissionaisEServicosDoEstabelecimento()
+    public void Resumo_QuandoHorarioEstaDisponivel_DeveExibirResumoSemCadastrarCliente()
     {
+        var dataHora = DateTime.Today.AddDays(1).AddHours(10);
+        var resumo = new AgendamentoDTO
+        {
+            NomeProfissional = "Ana",
+            Servicos = ["Corte"],
+            HorarioAtendimento = dataHora,
+            DuracaoTotalEmMinutos = 30,
+            PrecoTotal = 80m
+        };
+        agendamentoServiceMock
+            .Setup(service => service.CriarResumo(5, 10, dataHora, 1))
+            .Returns(resumo);
         pessoaServiceMock.Setup(service => service.GetAll()).Returns([
-            new Pessoa { Id = 5, Nome = "Profissional" }
+            new Pessoa { Id = 5, Nome = "Ana" }
         ]);
         profissionalServiceMock.Setup(service => service.GetAll()).Returns([
-            new Profissional { IdPessoa = 5, IdEstabelecimento = 1, EstaAtivo = 1 },
-            new Profissional { IdPessoa = 6, IdEstabelecimento = 2, EstaAtivo = 1 },
-            new Profissional { IdPessoa = 7, IdEstabelecimento = 1, EstaAtivo = 0 }
-        ]);
-        servicoServiceMock.Setup(service => service.GetAll(1)).Returns([
-            new Servico { Id = 10, Nome = "Corte", IdEstabelecimento = 1 }
+            CriarProfissionalComServico(5, 1, 1)
         ]);
 
-        var resultado = controller.Create();
+        var resultado = controller.Resumo(5, 10, dataHora);
 
-        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
-        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesViewModel>(viewResult.Model);
-        Assert.AreEqual("Profissional", viewModel.ProfissionaisDisponiveis.Single().Text);
-        Assert.AreEqual("Corte", viewModel.ServicosDisponiveis.Single().Text);
-        profissionalServiceMock.Verify(service => service.GetAll(), Times.Once);
-        servicoServiceMock.Verify(service => service.GetAll(1), Times.Once);
+        var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesViewModel>(
+            Assert.IsInstanceOfType<ViewResult>(resultado).Model);
+        Assert.AreEqual(30u, viewModel.DuracaoMinutos);
+        Assert.AreEqual(80m, viewModel.PrecoFinal);
+        Assert.IsTrue(string.IsNullOrEmpty(viewModel.NomeCliente));
     }
 
     [TestMethod]
@@ -176,10 +296,10 @@ public class AgendamentoDeClientesControllerTests
 
         var resultado = controller.Create(viewModel);
 
-        Assert.IsInstanceOfType<ViewResult>(resultado);
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        Assert.AreEqual(nameof(AgendamentoDeClientesController.Resumo), viewResult.ViewName);
         pessoaServiceMock.Verify(service => service.GetAll(), Times.Once);
         profissionalServiceMock.Verify(service => service.GetAll(), Times.Once);
-        servicoServiceMock.Verify(service => service.GetAll(1), Times.Once);
         pessoaServiceMock.Verify(
             service => service.GetByNome(It.IsAny<string>()),
             Times.Never);
@@ -211,8 +331,7 @@ public class AgendamentoDeClientesControllerTests
         Assert.IsTrue(controller.ModelState.ContainsKey(string.Empty));
         Assert.AreEqual("Horário indisponível.", controller.ModelState[string.Empty]!.Errors[0].ErrorMessage);
         var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesViewModel>(viewResult.Model);
-        Assert.IsNotNull(viewModel.ProfissionaisDisponiveis);
-        Assert.IsNotNull(viewModel.ServicosDisponiveis);
+        Assert.IsNotNull(viewModel.OpcoesServicoProfissional);
     }
 
     [TestMethod]
@@ -272,6 +391,29 @@ public class AgendamentoDeClientesControllerTests
             IdProfissional = 1,
             NomeCliente = "Cliente",
             TelefoneCliente = "(11) 98765-4321"
+        };
+    }
+
+    private static Profissional CriarProfissionalComServico(
+        uint idPessoa,
+        uint idEstabelecimento,
+        sbyte estaAtivo)
+    {
+        return new Profissional
+        {
+            IdPessoa = idPessoa,
+            IdEstabelecimento = idEstabelecimento,
+            EstaAtivo = estaAtivo,
+            Servicoprofissionals =
+            [
+                new Servicoprofissional
+                {
+                    IdProfissional = idPessoa,
+                    IdEstabelecimento = idEstabelecimento,
+                    IdServico = 10,
+                    IdServicoNavigation = new Servico { Id = 10, Nome = "Corte" }
+                }
+            ]
         };
     }
 }

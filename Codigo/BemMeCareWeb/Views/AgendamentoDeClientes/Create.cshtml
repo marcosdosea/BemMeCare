@@ -1,0 +1,57 @@
+@model BemMeCareWeb.Models.AgendamentoDeClientesViewModel
+
+<h1>Novo agendamento</h1>
+
+<form asp-action="Horarios" method="get">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label for="data" class="form-label">Data</label>
+        <input id="data" name="data" type="date" class="form-control"
+               value="@DateTime.Today.ToString("yyyy-MM-dd")" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+    </div>
+
+    <fieldset class="mb-3">
+        <legend>Serviço e profissional</legend>
+        @if (!Model.OpcoesServicoProfissional.Any())
+        {
+            <p class="text-danger">Não há serviços vinculados a profissionais ativos neste estabelecimento.</p>
+        }
+        else
+        {
+            @foreach (var opcao in Model.OpcoesServicoProfissional)
+            {
+                <div class="form-check">
+                    <input id="opcao-@opcao.IdServico-@opcao.IdProfissional"
+                           class="form-check-input"
+                           type="radio"
+                           name="idOpcao"
+                           value="@($"{opcao.IdServico}:{opcao.IdProfissional}")"
+                           required />
+                    <label class="form-check-label" for="opcao-@opcao.IdServico-@opcao.IdProfissional">
+                        @opcao.NomeServico — @opcao.NomeProfissional
+                    </label>
+                </div>
+            }
+        }
+    </fieldset>
+
+    <input id="idServico" name="idServico" type="hidden" value="" />
+    <input id="idProfissional" name="idProfissional" type="hidden" value="" />
+    <button type="submit" class="btn btn-primary">Buscar horários</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
+
+<partial name="_ValidationScriptsPartial" />
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('input[name="idOpcao"]').forEach(opcao => {
+            opcao.addEventListener("change", () => {
+                const partes = opcao.value.split(":");
+                document.getElementById("idServico").value = partes[0];
+                document.getElementById("idProfissional").value = partes[1];
+            });
+        });
+    </script>
+}

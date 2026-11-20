@@ -1,0 +1,40 @@
+@model BemMeCareWeb.Models.AgendamentoDeClientesViewModel
+
+<h1>Detalhes do agendamento</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Id)</dt>
+    <dd class="col-sm-9">@Model.Id</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DataHoraAtendimento)</dt>
+    <dd class="col-sm-9">@Model.DataHoraAtendimento?.ToString("dd/MM/yyyy HH:mm")</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NomeCliente)</dt>
+    <dd class="col-sm-9">@Model.NomeCliente</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TelefoneCliente)</dt>
+    <dd class="col-sm-9">@Model.TelefoneCliente</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NomeProfissional)</dt>
+    <dd class="col-sm-9">@Model.NomeProfissional</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NomesServicos)</dt>
+    <dd class="col-sm-9">@Model.NomesServicos</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PrecoFinal)</dt>
+    <dd class="col-sm-9">@Model.PrecoFinal.ToString("C")</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DuracaoMinutos)</dt>
+    <dd class="col-sm-9">@Model.DuracaoMinutos</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.StatusAgendamento)</dt>
+    <dd class="col-sm-9">@Model.StatusAgendamento</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.StatusPagamento)</dt>
+    <dd class="col-sm-9">@Model.StatusPagamento</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ValorPagoSinal)</dt>
+    <dd class="col-sm-9">@Model.ValorPagoSinal.ToString("C")</dd>
+</dl>
+
+<a asp-action="Index" class="btn btn-secondary">Voltar para agendamentos</a>

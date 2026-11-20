@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using Core.DTO;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -12,10 +13,6 @@ namespace BemMeCareWeb.Models
         [Display(Name = "Data e horário")]
         [Required(ErrorMessage = "A data e o horário são obrigatórios.")]
         public DateTime? DataHoraAtendimento { get; set; }
-
-        [Display(Name = "Observações")]
-        [StringLength(100, ErrorMessage = "As observações devem ter no máximo 100 caracteres.")]
-        public string? Observacoes { get; set; }
 
         [Display(Name = "Serviços")]
         [MinLength(1, ErrorMessage = "Selecione ao menos um serviço.")]
@@ -33,6 +30,12 @@ namespace BemMeCareWeb.Models
         [Display(Name = "Telefone do cliente")]
         [Required(ErrorMessage = "O telefone do cliente é obrigatório.")]
         public string TelefoneCliente { get; set; } = string.Empty;
+
+        [BindNever]
+        public IEnumerable<ServicoProfissionalOpcaoViewModel> OpcoesServicoProfissional { get; set; } = [];
+
+        [BindNever]
+        public IEnumerable<HorarioDisponivelDTO> HorariosDisponiveis { get; set; } = [];
 
         [Display(Name = "Nome do profissional")]
         public string? NomeProfissional { get; set; }
@@ -70,12 +73,5 @@ namespace BemMeCareWeb.Models
         [BindNever]
         public DateTime DataHoraFimAtendimento { get; set; }
 
-        [Display(Name = "Profissionais disponíveis")]
-        [BindNever]
-        public IEnumerable<SelectListItem> ProfissionaisDisponiveis { get; set; } = [];
-
-        [Display(Name = "Serviços disponíveis")]
-        [BindNever]
-        public IEnumerable<SelectListItem> ServicosDisponiveis { get; set; } = [];
     }
 }

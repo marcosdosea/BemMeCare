@@ -1,0 +1,127 @@
+@model BemMeCareWeb.Models.AgendamentoDeClientesAgendaViewModel
+
+@{
+    var diasDaSemana = new[] { "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo" };
+    var dataAnterior = Model.DataAnterior.ToString("yyyy-MM-dd");
+    var dataProxima = Model.DataProxima.ToString("yyyy-MM-dd");
+    var dataReferencia = Model.DataReferencia.ToString("yyyy-MM-dd");
+}
+
+<h1>Agendamentos</h1>
+
+@if (TempData["ErrorMessage"] is string mensagemErro)
+{
+    <div class="alert alert-danger" role="alert">@mensagemErro</div>
+}
+
+<form asp-action="Index" method="get" class="row g-3 align-items-end mb-3">
+    <div class="col-md-3">
+        <label for="visualizacao" class="form-label">Visualização</label>
+        <select id="visualizacao" name="visualizacao" class="form-select">
+            <option value="mes" selected="@(Model.Visualizacao == "mes")">Mês</option>
+            <option value="semana" selected="@(Model.Visualizacao == "semana")">Semana</option>
+            <option value="dia" selected="@(Model.Visualizacao == "dia")">Dia</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="data" class="form-label">Data de referência</label>
+        <input id="data" name="data" type="date" value="@dataReferencia" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label for="idProfissional" class="form-label">Profissional</label>
+        <select id="idProfissional" name="idProfissional" class="form-select">
+            <option value="">Todos</option>
+            @foreach (var profissional in Model.ProfissionaisDisponiveis)
+            {
+                <option value="@profissional.Value" selected="@profissional.Selected">@profissional.Text</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+        <a asp-action="Create" class="btn btn-success">Novo agendamento</a>
+    </div>
+</form>
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <a asp-action="Index"
+       asp-route-data="@dataAnterior"
+       asp-route-visualizacao="@Model.Visualizacao"
+       asp-route-idProfissional="@Model.IdProfissional"
+       class="btn btn-outline-secondary"
+       aria-label="Período anterior">← Anterior</a>
+    <h2 class="h4 mb-0">@Model.TituloPeriodo</h2>
+    <a asp-action="Index"
+       asp-route-data="@dataProxima"
+       asp-route-visualizacao="@Model.Visualizacao"
+       asp-route-idProfissional="@Model.IdProfissional"
+       class="btn btn-outline-secondary"
+       aria-label="Próximo período">Próximo →</a>
+</div>
+
+<table class="table table-bordered">
+    @if (Model.Visualizacao != "dia")
+    {
+        <thead>
+            <tr>
+                @foreach (var diaDaSemana in diasDaSemana)
+                {
+                    <th scope="col">@diaDaSemana</th>
+                }
+            </tr>
+        </thead>
+    }
+    <tbody>
+        @foreach (var semana in Model.Semanas)
+        {
+            <tr>
+                @foreach (var dia in semana)
+                {
+                    <td class="align-top @(Model.Visualizacao == "mes" && !dia.PertenceAoMesAtual ? "text-muted" : string.Empty)">
+                        <div class="fw-bold">@dia.Data.ToString("dd/MM")</div>
+                        @if (dia.Agendamentos.Count == 0)
+                        {
+                            <span class="text-muted">Sem agendamentos</span>
+                        }
+                        @foreach (var agendamento in dia.Agendamentos)
+                        {
+                            <article class="card mb-2">
+                                <div class="card-body p-2">
+                                    <a asp-action="Details" asp-route-id="@agendamento.Id">
+                                        <strong>@agendamento.DataHoraAtendimento?.ToString("HH:mm")</strong>
+                                        @agendamento.NomeCliente
+                                    </a>
+                                    <div>@agendamento.NomeProfissional</div>
+                                    <div>@agendamento.NomesServicos</div>
+                                    <div>Status: @agendamento.StatusAgendamento</div>
+                                    <div>Valor: @agendamento.PrecoFinal.ToString("C")</div>
+
+                                    @if (agendamento.StatusAgendamento is not "CA" and not "CO")
+                                    {
+                                        <form asp-action="Cancel" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@agendamento.Id" />
+                                            <input type="hidden" name="data" value="@dataReferencia" />
+                                            <input type="hidden" name="visualizacao" value="@Model.Visualizacao" />
+                                            <input type="hidden" name="idProfissional" value="@Model.IdProfissional" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
+                                        </form>
+                                    }
+                                    @if (agendamento.StatusPagamento == "MA" && agendamento.ValorPagoSinal == 0)
+                                    {
+                                        <form asp-action="ConfirmarSinal" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@agendamento.Id" />
+                                            <input type="hidden" name="data" value="@dataReferencia" />
+                                            <input type="hidden" name="visualizacao" value="@Model.Visualizacao" />
+                                            <input type="hidden" name="idProfissional" value="@Model.IdProfissional" />
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">Confirmar sinal</button>
+                                        </form>
+                                    }
+                                </div>
+                            </article>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
