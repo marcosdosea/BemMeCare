@@ -1,4 +1,5 @@
 ﻿using Core;
+using Core.DTO;
 using Core.Service;
 using Microsoft.EntityFrameworkCore;
 
@@ -77,7 +78,7 @@ namespace Service
                     existente.Servicoprofissionals.Remove(sp);
                 }
 
-               
+
                 var idsExistentes = existente.Servicoprofissionals.Select(sp => sp.IdServico).ToHashSet();
                 foreach (var idServ in idsServicos)
                 {
@@ -123,6 +124,79 @@ namespace Service
                 .Include(p => p.Servicoprofissionals)
                     .ThenInclude(sp => sp.IdServicoNavigation)
                 .AsNoTracking();
+        }
+
+        public IEnumerable<Servicoprofissional> GetServicoProfissional(uint idProfissional, uint idEstabelecimento)
+        {
+            return context.Servicoprofissionals
+                .Include(sp => sp.IdServicoNavigation)
+                .Where(sp => sp.IdProfissional == idProfissional &&
+                             sp.IdEstabelecimento == idEstabelecimento)
+                .AsNoTracking()
+                .ToList();
+        }
+
+        public Servicoprofissional? GetServicoProfissional(uint idProfissional, uint idServico, uint idEstabelecimento)
+        {
+            return context.Servicoprofissionals
+                .Include(sp => sp.IdServicoNavigation)
+                .AsNoTracking()
+                .FirstOrDefault(sp =>
+                    sp.IdProfissional == idProfissional &&
+                    sp.IdServico == idServico &&
+                    sp.IdEstabelecimento == idEstabelecimento);
+        }
+
+        public void EditServicoProfissional(uint idProfissional, IEnumerable<Servicoprofissional> servicos)
+        {
+            foreach (var servico in servicos)
+            {
+                var existente = context.Servicoprofissionals.FirstOrDefault(sp =>
+                    sp.IdProfissional == idProfissional &&
+                    sp.IdEstabelecimento == servico.IdEstabelecimento &&
+                    sp.IdServico == servico.IdServico);
+
+                if (existente == null)
+                    continue;
+
+                if (servico.ExigeAnamnese == 1 && string.IsNullOrWhiteSpace(servico.FormAnamnese))
+                    continue;
+
+                existente.ExigeAnamnese = servico.ExigeAnamnese;
+                existente.FormAnamnese = servico.FormAnamnese ?? string.Empty;
+            }
+
+            context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Obtém informações dos profissionais de um estabelecimento e seus respectivos serviços.
+        /// </summary>
+        /// <param name="idEstabelecimento">id do estabelecimento</param>
+        /// <returns>Coleção com informações dos profissionais e seus serviços.</returns>
+        public IEnumerable<ProfissionalServicosDTO> GetServicosProfissionais(uint idEstabelecimento)
+        {
+            return context.Profissionals
+                .AsNoTracking()
+                .Where(p => p.EstaAtivo == 1
+                        && p.IdEstabelecimento == idEstabelecimento
+                        && p.Servicoprofissionals.Any(sp => sp.IdEstabelecimento == idEstabelecimento))
+                .Select(p => new ProfissionalServicosDTO
+                {
+                    Id = p.IdPessoa,
+                    Nome = p.IdPessoaNavigation.Nome,
+                    Servicos = p.Servicoprofissionals
+                        .Where(sp => sp.IdEstabelecimento == idEstabelecimento)
+                        .Select(sp => new ServicoProfissionalDTO
+                        {
+                            Id = sp.IdServico,
+                            Nome = sp.IdServicoNavigation.Nome,
+                            DuracaoEmMinutos = sp.Duracao,
+                            Preco = sp.Preco
+                        }).ToList()
+                })
+                .OrderBy(p => p.Nome)
+                .ToList();
         }
     }
 }

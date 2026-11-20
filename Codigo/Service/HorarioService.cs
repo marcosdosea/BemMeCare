@@ -15,12 +15,15 @@ namespace Service
 
         /// <summary>
         /// Cria um novo horário no banco de dados e retorna o id do horário criado.
+        /// Lança ArgumentException se os horários do turno ou o período de vigência forem inválidos.
         /// Lança InvalidOperationException caso haja sobreposição de horários para o mesmo profissional.
         /// </summary>
         /// <param name="horario"> O horário a ser criado. </param>
         /// <returns> O id do horário criado. </returns>
         public uint Create(Horario horario)
         {
+            ValidarConsistenciaHorario(horario);
+
             if (TemSobreposicao(horario))
             {
                 throw new InvalidOperationException("Já existe um horário conflitante para este profissional no mesmo dia da semana.");
@@ -52,6 +55,7 @@ namespace Service
         /// <summary>
         /// Atualiza as informações de um horário existente no banco de dados.
         /// Se o horário não for encontrado no estabelecimento indicado pelo próprio modelo, nenhuma ação será realizada.
+        /// Lança ArgumentException se os horários do turno ou o período de vigência forem inválidos.
         /// Lança InvalidOperationException se a atualização causar choque de horários.
         /// </summary>
         /// <param name="horario"> O horário a ser atualizado, contendo o id do estabelecimento. </param>
@@ -62,6 +66,8 @@ namespace Service
 
             if (horarioExistente != null)
             {
+                ValidarConsistenciaHorario(horario);
+
                 if (TemSobreposicao(horario, horario.Id))
                 {
                     throw new InvalidOperationException("Já existe um horário conflitante para este profissional no mesmo dia da semana.");
@@ -131,6 +137,32 @@ namespace Service
         }
 
         /// <summary>
+        /// Obtém os turnos do profissional para um dia específico.
+        /// </summary>
+        /// <param name="idProfissional">id do profissional</param>
+        /// <param name="data">data selecionada para o agendamento</param>
+        /// <param name="idEstabelecimento">id do estabelecimento</param>
+        /// <returns>Coleção com os turnos do profissional no dia especificado.</returns>
+        public IEnumerable<Horario> GetByProfissionalNaData(uint idProfissional, DateOnly data, uint idEstabelecimento)
+        {
+            var diaSemana = ObterDiaSemana(data.DayOfWeek);
+
+            var inicioDoDia = data.ToDateTime(TimeOnly.MinValue);
+            var inicioDiaSeguinte = inicioDoDia.AddDays(1);
+
+            return context.Horarios
+                .AsNoTracking()
+                .Where(h => h.IdProfissional == idProfissional
+                         && h.IdEstabelecimento == idEstabelecimento
+                         && h.DiaSemana == diaSemana
+                         && h.InicioVigencia < inicioDiaSeguinte
+                         && (h.FimVigencia == null
+                             || inicioDoDia < h.FimVigencia.Value.Date.AddDays(1)))
+                .OrderBy(h => h.InicioTurno)
+                .ToList();
+        }
+
+        /// <summary>
         /// Verifica se há sobreposição/choque de turno e vigência para o profissional no mesmo dia da semana,
         /// independentemente de ser no mesmo ou em outro estabelecimento.
         /// </summary>
@@ -184,6 +216,51 @@ namespace Service
 
             return novoHorario.InicioVigencia <= existenteFim &&
                    novoFim >= horarioExistente.InicioVigencia;
+        }
+
+        /// <summary>
+        /// Valida a consistência temporal das horas do turno e das datas do período de vigência.
+        /// </summary>
+        /// <param name="horario">O horário a ser validado.</param>
+        private static void ValidarConsistenciaHorario(Horario horario)
+        {
+            if (horario.FimTurno <= horario.InicioTurno)
+            {
+                throw new ArgumentException("O fim do turno deve ser posterior ao início do turno.");
+            }
+
+            if (horario.FimVigencia.HasValue && horario.FimVigencia.Value.Date <= horario.InicioVigencia.Date)
+            {
+                throw new ArgumentException("A data de fim da vigência deve ser posterior à data de início.");
+            }
+        }
+
+        /// <summary>
+        /// Determina o dia da semana na aplicação a partir do dia da semana da data no C#.
+        /// </summary>
+        /// <param name="dia">Dia da semana no C#.</param>
+        /// <returns>O dia da semana na aplicação.</returns>
+        private static string ObterDiaSemana(DayOfWeek dia)
+        {
+            switch (dia)
+            {
+                case DayOfWeek.Monday:
+                    return "Segunda-feira";
+                case DayOfWeek.Tuesday:
+                    return "Terça-feira";
+                case DayOfWeek.Wednesday:
+                    return "Quarta-feira";
+                case DayOfWeek.Thursday:
+                    return "Quinta-feira";
+                case DayOfWeek.Friday:
+                    return "Sexta-feira";
+                case DayOfWeek.Saturday:
+                    return "Sábado";
+                case DayOfWeek.Sunday:
+                    return "Domingo";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dia));
+            }
         }
     }
 }
