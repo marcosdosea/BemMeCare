@@ -23,6 +23,7 @@ namespace BemMeCareWeb
             builder.Services.AddTransient<IPessoaService, PessoaService>();
             builder.Services.AddTransient<IServicoService, ServicoService>();
             builder.Services.AddTransient<IHorarioService, HorarioService>();
+            builder.Services.AddTransient<IAgendamentoDeClientesService, AgendamentoDeClientesService>();
             builder.Services.AddTransient<IDashboardService, DashboardService>();
             
             
