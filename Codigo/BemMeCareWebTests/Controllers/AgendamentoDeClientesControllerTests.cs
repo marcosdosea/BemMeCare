@@ -30,6 +30,9 @@ public class AgendamentoDeClientesControllerTests
             agendamentoServiceMock.Object,
             pessoaServiceMock.Object,
             profissionalServiceMock.Object);
+        controller.TempData = new TempDataDictionary(
+            new DefaultHttpContext(),
+            Mock.Of<ITempDataProvider>());
     }
 
     [TestMethod]
@@ -293,10 +296,10 @@ public class AgendamentoDeClientesControllerTests
 
         var resultado = controller.Create(viewModel);
 
-        Assert.IsInstanceOfType<ViewResult>(resultado);
+        var viewResult = Assert.IsInstanceOfType<ViewResult>(resultado);
+        Assert.AreEqual(nameof(AgendamentoDeClientesController.Resumo), viewResult.ViewName);
         pessoaServiceMock.Verify(service => service.GetAll(), Times.Once);
         profissionalServiceMock.Verify(service => service.GetAll(), Times.Once);
-        servicoServiceMock.Verify(service => service.GetAll(1), Times.Once);
         pessoaServiceMock.Verify(
             service => service.GetByNome(It.IsAny<string>()),
             Times.Never);
@@ -328,8 +331,7 @@ public class AgendamentoDeClientesControllerTests
         Assert.IsTrue(controller.ModelState.ContainsKey(string.Empty));
         Assert.AreEqual("Horário indisponível.", controller.ModelState[string.Empty]!.Errors[0].ErrorMessage);
         var viewModel = Assert.IsInstanceOfType<AgendamentoDeClientesViewModel>(viewResult.Model);
-        Assert.IsNotNull(viewModel.ProfissionaisDisponiveis);
-        Assert.IsNotNull(viewModel.ServicosDisponiveis);
+        Assert.IsNotNull(viewModel.OpcoesServicoProfissional);
     }
 
     [TestMethod]
