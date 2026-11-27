@@ -119,5 +119,85 @@ namespace BemMeCareWeb.Controllers
             }
             return RedirectToAction(nameof(Index), new { idProfissional = profissionalServicoViewModel.IdProfissional });
         }
+
+        // POST: AnamneseController/AdicionarServico
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AdicionarServico(uint idProfissional, uint idServico)
+        {
+            if (idServico > 0)
+            {
+                var novoVinculo = new Servicoprofissional
+                {
+                    IdProfissional = idProfissional,
+                    IdServico = idServico,
+                    IdEstabelecimento = idEstabelecimentoProvisorio,
+                    ExigeAnamnese = 0,
+                    FormAnamnese = string.Empty,
+                    Preco = 0m,
+                    PercentualSinal = 0f,
+                    QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO",
+                    Duracao = 30
+                };
+                profissionalService.CreateServicoProfissional(novoVinculo);
+            }
+            return RedirectToAction(nameof(Index), new { idProfissional });
+        }
+
+        // POST: AnamneseController/EditarPreco
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditarPreco(uint idProfissional, uint idServico, decimal preco, uint duracao = 30)
+        {
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+            var profissionalServico = profissionalService.GetServicoProfissional(idProfissional, idServico, idEstabelecimento);
+
+            if (profissionalServico != null && preco >= 0)
+            {
+                profissionalServico.Preco = preco;
+                if (duracao > 0)
+                {
+                    profissionalServico.Duracao = duracao;
+                }
+                profissionalService.UpdateDadosServicoProfissional(profissionalServico);
+            }
+            return RedirectToAction(nameof(Index), new { idProfissional });
+        }
+
+        // POST: AnamneseController/EditarSinal
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditarSinal(uint idProfissional, uint idServico, string quandoPagarSinal, float percentualSinal)
+        {
+            var idEstabelecimento = idEstabelecimentoProvisorio;
+            var profissionalServico = profissionalService.GetServicoProfissional(idProfissional, idServico, idEstabelecimento);
+
+            if (profissionalServico != null)
+            {
+                if (quandoPagarSinal == "NENHUM" || percentualSinal <= 0)
+                {
+                    profissionalServico.PercentualSinal = 0f;
+                    profissionalServico.QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO";
+                }
+                else
+                {
+                    profissionalServico.PercentualSinal = Math.Clamp(percentualSinal, 0f, 100f);
+                    profissionalServico.QuandoPagarSinal = quandoPagarSinal == "TODO_AGENDAMENTO"
+                        ? "TODO_AGENDAMENTO"
+                        : "PRIMEIRO_AGENDAMENTO";
+                }
+                profissionalService.UpdateDadosServicoProfissional(profissionalServico);
+            }
+            return RedirectToAction(nameof(Index), new { idProfissional });
+        }
+
+        // POST: AnamneseController/RemoverServico
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult RemoverServico(uint idProfissional, uint idServico)
+        {
+            profissionalService.DeleteServicoProfissional(idProfissional, idServico, idEstabelecimentoProvisorio);
+            return RedirectToAction(nameof(Index), new { idProfissional });
+        }
     }
 }

@@ -472,6 +472,162 @@ public class AnamneseControllerTests
             Times.Never);
     }
 
+    [TestMethod]
+    public void AdicionarServico_QuandoServicoValido_DeveCriarVinculoPadraoERedirecionarParaIndex()
+    {
+        // Arrange
+        Servicoprofissional? vinculoCriado = null;
+        profissionalServiceMock
+            .Setup(service => service.CreateServicoProfissional(It.IsAny<Servicoprofissional>()))
+            .Callback<Servicoprofissional>(s => vinculoCriado = s);
+
+        // Act
+        var resultado = controller.AdicionarServico(idProfissional, 5);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        Assert.IsNotNull(vinculoCriado);
+        Assert.AreEqual(idProfissional, vinculoCriado.IdProfissional);
+        Assert.AreEqual(5u, vinculoCriado.IdServico);
+        Assert.AreEqual(idEstabelecimentoEsperado, vinculoCriado.IdEstabelecimento);
+        Assert.AreEqual(0m, vinculoCriado.Preco);
+        Assert.AreEqual(0f, vinculoCriado.PercentualSinal);
+        Assert.AreEqual("PRIMEIRO_AGENDAMENTO", vinculoCriado.QuandoPagarSinal);
+
+        profissionalServiceMock.Verify(
+            service => service.CreateServicoProfissional(It.IsAny<Servicoprofissional>()),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void AdicionarServico_QuandoIdServicoZero_NaoDeveCriarVinculo()
+    {
+        // Act
+        var resultado = controller.AdicionarServico(idProfissional, 0);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        profissionalServiceMock.Verify(
+            service => service.CreateServicoProfissional(It.IsAny<Servicoprofissional>()),
+            Times.Never);
+    }
+
+    [TestMethod]
+    public void EditarPreco_QuandoServicoExiste_DeveAtualizarPrecoEDuracaoERedirecionarParaIndex()
+    {
+        // Arrange
+        Servicoprofissional? servicoAtualizado = null;
+        profissionalServiceMock
+            .Setup(service => service.UpdateDadosServicoProfissional(It.IsAny<Servicoprofissional>()))
+            .Callback<Servicoprofissional>(s => servicoAtualizado = s);
+
+        // Act
+        var resultado = controller.EditarPreco(idProfissional, 3, 120.50m, 45);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        Assert.IsNotNull(servicoAtualizado);
+        Assert.AreEqual(120.50m, servicoAtualizado.Preco);
+        Assert.AreEqual(45u, servicoAtualizado.Duracao);
+
+        profissionalServiceMock.Verify(
+            service => service.UpdateDadosServicoProfissional(It.IsAny<Servicoprofissional>()),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void EditarPreco_QuandoServicoNaoExiste_NaoDeveChamarUpdate()
+    {
+        // Act
+        var resultado = controller.EditarPreco(idProfissional, 999, 100m, 30);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        profissionalServiceMock.Verify(
+            service => service.UpdateDadosServicoProfissional(It.IsAny<Servicoprofissional>()),
+            Times.Never);
+    }
+
+    [TestMethod]
+    public void EditarSinal_QuandoExigeEmTodoAgendamento_DeveAtualizarSinalERedirecionarParaIndex()
+    {
+        // Arrange
+        Servicoprofissional? servicoAtualizado = null;
+        profissionalServiceMock
+            .Setup(service => service.UpdateDadosServicoProfissional(It.IsAny<Servicoprofissional>()))
+            .Callback<Servicoprofissional>(s => servicoAtualizado = s);
+
+        // Act
+        var resultado = controller.EditarSinal(idProfissional, 4, "TODO_AGENDAMENTO", 30f);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        Assert.IsNotNull(servicoAtualizado);
+        Assert.AreEqual("TODO_AGENDAMENTO", servicoAtualizado.QuandoPagarSinal);
+        Assert.AreEqual(30f, servicoAtualizado.PercentualSinal);
+
+        profissionalServiceMock.Verify(
+            service => service.UpdateDadosServicoProfissional(It.IsAny<Servicoprofissional>()),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void EditarSinal_QuandoNenhumAtendimento_DeveZerarPercentualEManterEnumValido()
+    {
+        // Arrange
+        Servicoprofissional? servicoAtualizado = null;
+        profissionalServiceMock
+            .Setup(service => service.UpdateDadosServicoProfissional(It.IsAny<Servicoprofissional>()))
+            .Callback<Servicoprofissional>(s => servicoAtualizado = s);
+
+        // Act
+        var resultado = controller.EditarSinal(idProfissional, 3, "NENHUM", 50f);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        Assert.IsNotNull(servicoAtualizado);
+        Assert.AreEqual(0f, servicoAtualizado.PercentualSinal);
+        Assert.AreEqual("PRIMEIRO_AGENDAMENTO", servicoAtualizado.QuandoPagarSinal);
+
+        profissionalServiceMock.Verify(
+            service => service.UpdateDadosServicoProfissional(It.IsAny<Servicoprofissional>()),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void EditarSinal_QuandoServicoNaoExiste_NaoDeveChamarUpdate()
+    {
+        // Act
+        var resultado = controller.EditarSinal(idProfissional, 999, "PRIMEIRO_AGENDAMENTO", 25f);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        profissionalServiceMock.Verify(
+            service => service.UpdateDadosServicoProfissional(It.IsAny<Servicoprofissional>()),
+            Times.Never);
+    }
+
+    [TestMethod]
+    public void RemoverServico_QuandoChamado_DeveChamarDeleteServicoProfissionalERedirecionarParaIndex()
+    {
+        // Act
+        var resultado = controller.RemoverServico(idProfissional, 3);
+
+        // Assert
+        VerificarRedirecionamentoParaIndex(resultado, idProfissional);
+
+        profissionalServiceMock.Verify(
+            service => service.DeleteServicoProfissional(idProfissional, 3, idEstabelecimentoEsperado),
+            Times.Once);
+    }
+
     private static void VerificarRedirecionamentoParaIndex(
         ActionResult resultado, uint idProfissionalEsperado)
     {
