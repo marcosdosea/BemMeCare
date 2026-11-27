@@ -4,9 +4,31 @@
     ViewData["Title"] = "Serviços vinculados";
     var idProfissional = (uint)ViewBag.IdProfissional;
     var nomesServicos = (Dictionary<uint, string>)ViewBag.NomesServicos;
+    var idsVinculados = Model.Select(m => m.IdServico).ToHashSet();
+    var servicosDisponiveis = nomesServicos
+        .Where(s => !idsVinculados.Contains(s.Key))
+        .ToList();
 }
 
 <h1>Serviços vinculados</h1>
+
+<form asp-action="AdicionarServico" method="post" class="d-flex align-items-center justify-content-between gap-3 my-3">
+    <input type="hidden" name="idProfissional" value="@idProfissional" />
+    <select name="idServico" class="form-select" style="max-width: 450px;" @(servicosDisponiveis.Any() ? "" : "disabled")>
+        @if (!servicosDisponiveis.Any())
+        {
+            <option value="0">Todos os serviços já estão vinculados</option>
+        }
+        else
+        {
+            @foreach (var servico in servicosDisponiveis)
+            {
+                <option value="@servico.Key">@servico.Value</option>
+            }
+        }
+    </select>
+    <button type="submit" class="btn btn-bmc-medio" @(servicosDisponiveis.Any() ? "" : "disabled")>Adicionar</button>
+</form>
 
 @if (!Model.Any())
 {
@@ -19,41 +41,76 @@
     var preco = item.Preco == 0
         ? "A definir"
         : item.Preco.ToString("C", new System.Globalization.CultureInfo("pt-BR"));
-    var exigeSinal = item.PercentualSinal == 0
-        ? "Nenhum atendimento"
-        : item.QuandoPagarSinal == "TODO_AGENDAMENTO" ? "Todos atendimentos" : "Primeiro atendimento";
+    var opcaoSinalAtual = item.PercentualSinal <= 0
+        ? "NENHUM"
+        : (item.QuandoPagarSinal == "TODO_AGENDAMENTO" ? "TODO_AGENDAMENTO" : "PRIMEIRO_AGENDAMENTO");
+    var percentualPadraoQuandoLigar = item.PercentualSinal <= 0 ? 50 : item.PercentualSinal;
 
-    <div class="border rounded p-3 mb-3 d-flex justify-content-between align-items-start gap-3">
-        <div>
-            <div><strong>Nome:</strong> @nome</div>
-            <div><strong>Preço:</strong> @preco</div>
-        </div>
-
-        <div class="d-flex flex-column gap-2">
-            <div class="d-flex align-items-center gap-2">
-                <form asp-action="AlterarExigencia" method="post" class="mb-0">
-                    <input type="hidden" name="IdProfissional" value="@item.IdProfissional" />
-                    <input type="hidden" name="IdServico" value="@item.IdServico" />
-                    <input type="hidden" name="ExigeAnamnese" value="@((!item.ExigeAnamnese).ToString().ToLower())" />
-                    <input class="form-check-input" type="checkbox" id="exige-@item.IdServico"
-                           checked="@item.ExigeAnamnese" onchange="this.form.submit()" />
-                    <label class="form-check-label" for="exige-@item.IdServico">Anamnese</label>
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="border rounded p-3 flex-grow-1 d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <div><strong>Nome:</strong> @nome</div>
+                <div class="d-flex align-items-center gap-2">
+                    <span><strong>Preço:</strong> @preco</span>
+                    <a href="javascript:void(0)" title="Editar preço"
+                       onclick="document.getElementById('form-preco-@item.IdServico').classList.toggle('d-none');">✎</a>
+                </div>
+                <form id="form-preco-@item.IdServico" asp-action="EditarPreco" method="post" class="d-none mt-2 d-flex align-items-center gap-2">
+                    <input type="hidden" name="idProfissional" value="@item.IdProfissional" />
+                    <input type="hidden" name="idServico" value="@item.IdServico" />
+                    <input type="hidden" name="duracao" value="@(item.Duracao > 0 ? item.Duracao : 30)" />
+                    <input type="number" name="preco" step="0.01" min="0"
+                           class="form-control form-control-sm" style="width: 120px;"
+                           value="@item.Preco.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" />
+                    <button type="submit" class="btn btn-sm btn-bmc-medio">Salvar</button>
                 </form>
-                <a asp-action="Details" asp-route-idProfissional="@item.IdProfissional"
-                   asp-route-idServico="@item.IdServico" title="Ver anamnese">✎</a>
             </div>
 
-            <div class="d-flex gap-2">
-                <div>
-                    <small>Exige sinal?</small>
-                    <input type="text" class="form-control form-control-sm" value="@exigeSinal" disabled />
+            <div class="d-flex flex-column gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <form asp-action="AlterarExigencia" method="post" class="mb-0">
+                        <input type="hidden" name="IdProfissional" value="@item.IdProfissional" />
+                        <input type="hidden" name="IdServico" value="@item.IdServico" />
+                        <input type="hidden" name="ExigeAnamnese" value="@((!item.ExigeAnamnese).ToString().ToLower())" />
+                        <input class="form-check-input" type="checkbox" id="exige-@item.IdServico"
+                               checked="@item.ExigeAnamnese" onchange="this.form.submit()" />
+                        <label class="form-check-label" for="exige-@item.IdServico">Anamnese</label>
+                    </form>
+                    <a asp-action="Details" asp-route-idProfissional="@item.IdProfissional"
+                       asp-route-idServico="@item.IdServico" title="Ver anamnese">✎</a>
                 </div>
-                <div>
-                    <small>% do sinal</small>
-                    <input type="text" class="form-control form-control-sm" value="@item.PercentualSinal.ToString("0.##")%" disabled />
-                </div>
+
+                <form asp-action="EditarSinal" method="post" class="d-flex gap-2 mb-0 align-items-end">
+                    <input type="hidden" name="idProfissional" value="@item.IdProfissional" />
+                    <input type="hidden" name="idServico" value="@item.IdServico" />
+                    <div>
+                        <small>Exige sinal?</small>
+                        <select name="quandoPagarSinal" class="form-select form-select-sm"
+                                onchange="if(this.value !== 'NENHUM' && this.form.percentualSinal.value <= 0) { this.form.percentualSinal.value = '@percentualPadraoQuandoLigar'; } this.form.submit();">
+                            <option value="PRIMEIRO_AGENDAMENTO" selected="@(opcaoSinalAtual == "PRIMEIRO_AGENDAMENTO")">Primeiro atendimento</option>
+                            <option value="TODO_AGENDAMENTO" selected="@(opcaoSinalAtual == "TODO_AGENDAMENTO")">Todos atendimentos</option>
+                            <option value="NENHUM" selected="@(opcaoSinalAtual == "NENHUM")">Nenhum atendimento</option>
+                        </select>
+                    </div>
+                    <div style="max-width: 110px;">
+                        <small>% do sinal</small>
+                        <div class="input-group input-group-sm">
+                            <input type="number" name="percentualSinal" step="1" min="0" max="100"
+                                   class="form-control form-control-sm"
+                                   value="@item.PercentualSinal.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)"
+                                   onchange="this.form.submit()" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
+
+        <form asp-action="RemoverServico" method="post" class="mb-0">
+            <input type="hidden" name="idProfissional" value="@item.IdProfissional" />
+            <input type="hidden" name="idServico" value="@item.IdServico" />
+            <button type="submit" class="btn btn-link p-1 text-decoration-none" title="Remover serviço vinculado">🗑️</button>
+        </form>
     </div>
 }
 
