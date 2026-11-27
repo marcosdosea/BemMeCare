@@ -451,6 +451,127 @@ public class ProfissionalServiceTests
         Assert.IsFalse(contexto.Servicoprofissionals.Any(sp => sp.IdServico == 999));
     }
 
+    [TestMethod]
+    public void CreateServicoProfissional_QuandoServicoNaoEstaVinculado_DeveCriarVinculo()
+    {
+        // Arrange
+        var novoVinculo = new Servicoprofissional
+        {
+            IdProfissional = 2,
+            IdEstabelecimento = 1,
+            IdServico = 1,
+            ExigeAnamnese = 0,
+            FormAnamnese = string.Empty,
+            Preco = 0m,
+            PercentualSinal = 0f,
+            QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO",
+            Duracao = 30
+        };
+
+        // Act
+        servicoProfissional.CreateServicoProfissional(novoVinculo);
+
+        // Assert
+        var salvo = servicoProfissional.GetServicoProfissional(2, 1, 1);
+        Assert.IsNotNull(salvo);
+        Assert.AreEqual(2u, salvo.IdProfissional);
+        Assert.AreEqual(1u, salvo.IdServico);
+        Assert.AreEqual(30u, salvo.Duracao);
+    }
+
+    [TestMethod]
+    public void CreateServicoProfissional_QuandoServicoJaEstaVinculado_NaoDeveDuplicarRegistro()
+    {
+        // Arrange
+        var vinculoDuplicado = new Servicoprofissional
+        {
+            IdProfissional = 1,
+            IdEstabelecimento = 1,
+            IdServico = 1,
+            Preco = 999m
+        };
+
+        // Act
+        servicoProfissional.CreateServicoProfissional(vinculoDuplicado);
+
+        // Assert
+        Assert.AreEqual(3, contexto.Servicoprofissionals.Count());
+        Assert.AreEqual(35m, ObterServicoSalvo(1).Preco);
+    }
+
+    [TestMethod]
+    public void UpdateDadosServicoProfissional_QuandoServicoExiste_DeveAtualizarPrecoESinal()
+    {
+        // Arrange
+        var atualizacao = new Servicoprofissional
+        {
+            IdProfissional = 1,
+            IdEstabelecimento = 1,
+            IdServico = 1,
+            Preco = 120m,
+            PercentualSinal = 25f,
+            QuandoPagarSinal = "TODO_AGENDAMENTO",
+            Duracao = 50
+        };
+
+        // Act
+        servicoProfissional.UpdateDadosServicoProfissional(atualizacao);
+
+        // Assert
+        var salvo = ObterServicoSalvo(idServico: 1);
+        Assert.AreEqual(120m, salvo.Preco);
+        Assert.AreEqual(25f, salvo.PercentualSinal);
+        Assert.AreEqual("TODO_AGENDAMENTO", salvo.QuandoPagarSinal);
+        Assert.AreEqual(50u, salvo.Duracao);
+        Assert.AreEqual((sbyte)1, salvo.ExigeAnamnese);
+        Assert.AreEqual("https://forms.gle/abc123", salvo.FormAnamnese);
+    }
+
+    [TestMethod]
+    public void UpdateDadosServicoProfissional_QuandoServicoNaoExiste_NaoDeveAlterarDados()
+    {
+        // Arrange
+        var atualizacao = new Servicoprofissional
+        {
+            IdProfissional = 1,
+            IdEstabelecimento = 1,
+            IdServico = 999,
+            Preco = 120m,
+            PercentualSinal = 25f,
+            QuandoPagarSinal = "TODO_AGENDAMENTO"
+        };
+
+        // Act
+        servicoProfissional.UpdateDadosServicoProfissional(atualizacao);
+
+        // Assert
+        Assert.AreEqual(3, contexto.Servicoprofissionals.Count());
+    }
+
+    [TestMethod]
+    public void DeleteServicoProfissional_QuandoServicoExiste_DeveRemoverVinculo()
+    {
+        // Act
+        servicoProfissional.DeleteServicoProfissional(1, 2, 1);
+
+        // Assert
+        var removido = servicoProfissional.GetServicoProfissional(1, 2, 1);
+        Assert.IsNull(removido);
+        Assert.AreEqual(2, contexto.Servicoprofissionals.Count());
+    }
+
+    [TestMethod]
+    public void DeleteServicoProfissional_QuandoEstabelecimentoNaoCorresponde_NaoDeveRemoverVinculo()
+    {
+        // Act
+        servicoProfissional.DeleteServicoProfissional(1, 1, 2);
+
+        // Assert
+        var existente = servicoProfissional.GetServicoProfissional(1, 1, 1);
+        Assert.IsNotNull(existente);
+        Assert.AreEqual(3, contexto.Servicoprofissionals.Count());
+    }
+
     private Servicoprofissional ObterServicoSalvo(uint idServico, uint idEstabelecimento = 1)
     {
         return contexto.Servicoprofissionals.Single(sp =>
