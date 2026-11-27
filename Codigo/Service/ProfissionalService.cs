@@ -14,6 +14,11 @@ namespace Service
             this.context = context;
         }
 
+        /// <summary>
+        /// Cadastra um novo profissional no estabelecimento vinculando suas categorias e serviços.
+        /// </summary>
+        /// <param name="profissional">Entidade do profissional a ser cadastrada.</param>
+        /// <returns>ID da pessoa associada ao profissional.</returns>
         public uint Create(Profissional profissional)
         {
             if (profissional.IdCategoria != null && profissional.IdCategoria.Any())
@@ -35,6 +40,10 @@ namespace Service
             return profissional.IdPessoa;
         }
 
+        /// <summary>
+        /// Remove o vínculo de um profissional pelo seu identificador.
+        /// </summary>
+        /// <param name="idProfissional">ID do profissional.</param>
         public void Delete(uint idProfissional)
         {
             var profissional = context.Profissionals.FirstOrDefault(p => p.IdPessoa == idProfissional);
@@ -45,6 +54,10 @@ namespace Service
             }
         }
 
+        /// <summary>
+        /// Atualiza os dados cadastrais, categorias e serviços vinculados a um profissional.
+        /// </summary>
+        /// <param name="profissional">Dados atualizados do profissional.</param>
         public void Edit(Profissional profissional)
         {
             var existente = context.Profissionals
@@ -54,13 +67,11 @@ namespace Service
 
             if (existente != null)
             {
-                // Copia os IDs antes de limpar caso seja o mesmo objeto rastreado (ex: nos testes)
                 var idsCategorias = profissional.IdCategoria?.Select(c => c.Id).ToList() ?? new List<uint>();
                 var idsServicos = profissional.Servicoprofissionals?.Select(sp => sp.IdServico).ToList() ?? new List<uint>();
 
                 context.Entry(existente).CurrentValues.SetValues(profissional);
 
-                // Atualiza categorias vinculadas
                 existente.IdCategoria.Clear();
                 foreach (var idCat in idsCategorias)
                 {
@@ -69,7 +80,6 @@ namespace Service
                         existente.IdCategoria.Add(catBanco);
                 }
 
-                // Remove apenas os serviços que foram desmarcados
                 var servicosParaRemover = existente.Servicoprofissionals
                     .Where(sp => !idsServicos.Contains(sp.IdServico))
                     .ToList();
@@ -77,7 +87,6 @@ namespace Service
                 {
                     existente.Servicoprofissionals.Remove(sp);
                 }
-
 
                 var idsExistentes = existente.Servicoprofissionals.Select(sp => sp.IdServico).ToHashSet();
                 foreach (var idServ in idsServicos)
@@ -108,6 +117,11 @@ namespace Service
             }
         }
 
+        /// <summary>
+        /// Obtém um profissional pelo seu identificador incluindo categorias e serviços.
+        /// </summary>
+        /// <param name="idProfissional">ID do profissional.</param>
+        /// <returns>O profissional encontrado ou nulo.</returns>
         public Profissional? Get(uint idProfissional)
         {
             return context.Profissionals
@@ -117,6 +131,10 @@ namespace Service
                 .FirstOrDefault(p => p.IdPessoa == idProfissional);
         }
 
+        /// <summary>
+        /// Obtém todos os profissionais cadastrados.
+        /// </summary>
+        /// <returns>Coleção de profissionais.</returns>
         public IEnumerable<Profissional> GetAll()
         {
             return context.Profissionals
@@ -126,6 +144,12 @@ namespace Service
                 .AsNoTracking();
         }
 
+        /// <summary>
+        /// Obtém todos os serviços vinculados a um profissional em um estabelecimento.
+        /// </summary>
+        /// <param name="idProfissional">ID do profissional.</param>
+        /// <param name="idEstabelecimento">ID do estabelecimento.</param>
+        /// <returns>Coleção de serviços vinculados ao profissional.</returns>
         public IEnumerable<Servicoprofissional> GetServicoProfissional(uint idProfissional, uint idEstabelecimento)
         {
             return context.Servicoprofissionals
@@ -136,6 +160,13 @@ namespace Service
                 .ToList();
         }
 
+        /// <summary>
+        /// Obtém um serviço específico vinculado a um profissional em um estabelecimento.
+        /// </summary>
+        /// <param name="idProfissional">ID do profissional.</param>
+        /// <param name="idServico">ID do serviço.</param>
+        /// <param name="idEstabelecimento">ID do estabelecimento.</param>
+        /// <returns>O vínculo do serviço encontrado ou nulo.</returns>
         public Servicoprofissional? GetServicoProfissional(uint idProfissional, uint idServico, uint idEstabelecimento)
         {
             return context.Servicoprofissionals
@@ -147,6 +178,11 @@ namespace Service
                     sp.IdEstabelecimento == idEstabelecimento);
         }
 
+        /// <summary>
+        /// Atualiza as configurações de anamnese dos serviços vinculados a um profissional.
+        /// </summary>
+        /// <param name="idProfissional">ID do profissional.</param>
+        /// <param name="servicos">Lista de serviços com dados de anamnese atualizados.</param>
         public void EditServicoProfissional(uint idProfissional, IEnumerable<Servicoprofissional> servicos)
         {
             foreach (var servico in servicos)
@@ -167,6 +203,88 @@ namespace Service
             }
 
             context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Vincula um novo serviço a um profissional no estabelecimento.
+        /// </summary>
+        /// <param name="servicoProfissional">Vínculo de serviço a ser adicionado.</param>
+        public void CreateServicoProfissional(Servicoprofissional servicoProfissional)
+        {
+            var jaExiste = context.Servicoprofissionals.Any(sp =>
+                sp.IdProfissional == servicoProfissional.IdProfissional &&
+                sp.IdEstabelecimento == servicoProfissional.IdEstabelecimento &&
+                sp.IdServico == servicoProfissional.IdServico);
+
+            if (jaExiste)
+                return;
+
+            servicoProfissional.FormAnamnese ??= string.Empty;
+            if (string.IsNullOrWhiteSpace(servicoProfissional.QuandoPagarSinal))
+            {
+                servicoProfissional.QuandoPagarSinal = "PRIMEIRO_AGENDAMENTO";
+            }
+
+            context.Servicoprofissionals.Add(servicoProfissional);
+            context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Atualiza os dados comerciais (preço, percentual de sinal, regra de pagamento do sinal e duração)
+        /// de um serviço vinculado ao profissional.
+        /// </summary>
+        /// <param name="servicoProfissional">Dados atualizados do serviço do profissional.</param>
+        public void UpdateDadosServicoProfissional(Servicoprofissional servicoProfissional)
+        {
+            var existente = context.Servicoprofissionals.FirstOrDefault(sp =>
+                sp.IdProfissional == servicoProfissional.IdProfissional &&
+                sp.IdEstabelecimento == servicoProfissional.IdEstabelecimento &&
+                sp.IdServico == servicoProfissional.IdServico);
+
+            if (existente == null)
+                return;
+
+            if (servicoProfissional.Preco >= 0)
+            {
+                existente.Preco = servicoProfissional.Preco;
+            }
+
+            if (servicoProfissional.PercentualSinal is >= 0 and <= 100)
+            {
+                existente.PercentualSinal = servicoProfissional.PercentualSinal;
+            }
+
+            if (!string.IsNullOrWhiteSpace(servicoProfissional.QuandoPagarSinal))
+            {
+                existente.QuandoPagarSinal = servicoProfissional.QuandoPagarSinal;
+            }
+
+            if (servicoProfissional.Duracao > 0)
+            {
+                existente.Duracao = servicoProfissional.Duracao;
+            }
+
+            context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Remove o vínculo de um serviço com o profissional no estabelecimento.
+        /// </summary>
+        /// <param name="idProfissional">ID do profissional.</param>
+        /// <param name="idServico">ID do serviço.</param>
+        /// <param name="idEstabelecimento">ID do estabelecimento.</param>
+        public void DeleteServicoProfissional(uint idProfissional, uint idServico, uint idEstabelecimento)
+        {
+            var existente = context.Servicoprofissionals.FirstOrDefault(sp =>
+                sp.IdProfissional == idProfissional &&
+                sp.IdServico == idServico &&
+                sp.IdEstabelecimento == idEstabelecimento);
+
+            if (existente != null)
+            {
+                context.Servicoprofissionals.Remove(existente);
+                context.SaveChanges();
+            }
         }
 
         /// <summary>
